@@ -38,6 +38,7 @@ open class Circle protected constructor(
         override val parent = Machine
         override val labelName:String = "Circle"
         override fun factory(key:String): Circle = Circle(key)
+        init { registerMe() }
     }
 
     override val label = Circle
@@ -55,7 +56,7 @@ open class Circle protected constructor(
 
     //    // TODO: implement if needed (or remove)
     override fun bump(pattern: Pattern<Event>) {
-        updateAllFieldsFrom(pattern.source)
+        updateAllFieldsFrom(pattern)
     }
 
     override fun render(program: Program) {

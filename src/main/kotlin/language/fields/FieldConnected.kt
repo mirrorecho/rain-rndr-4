@@ -31,7 +31,8 @@ open class FieldConnected<T:Any?>(
                 node.properties["$name:connectedField"] = value
             }
 
-        private var connectedAttached: Field<T?>.Attached? = null
+        // TODO: make private after debugging
+        var connectedAttached: Field<T?>.Attached? = null
 
         override fun resetValue() { connectedAttached?.resetValue() } // TODO: is this OK?
 
@@ -54,9 +55,18 @@ open class FieldConnected<T:Any?>(
 
         // null node disconnects
         fun connect(node:Node?=null, connectFieldName:String?=null) {
+            println(node?.key)
+            println(node?.attached<Field<T?>.Attached>(connectedNodeFieldName)?.value)
             pattern.clear()
             node?.let { pattern.extend(it) }
+            connectFieldName?.let { connectedNodeFieldName = it }
             connectedAttached = node?.attached(connectedNodeFieldName)
+            connectedAttached?.let {
+                it.retrieve()
+                println("Attached field name: ${it.field.name}")
+                println("Attached value: ${it.value}")
+                println("===")
+            }
             // similar to retrieve, if no connectedAttached (e.g. after disconnecting) and defaulting to self,
             // then calls super retrieve to set local value based on properties
             if (connectedAttached==null && this@FieldConnected.defaultToSelf) super.retrieve()

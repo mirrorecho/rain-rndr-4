@@ -31,12 +31,14 @@ abstract class Pattern<T:Node>(
     // deletes relationships and potentially intermediary nodes (and destination nodes if deleteNodes=true)
     open fun clear(deleteNodes: Boolean = false) = warningNotImplemented("clear")
 
-    // see Node.get(field:Field<T>) for more details
+    // see Node.get(fieldName:String) for more details
     // ... same as that, but with cascading values from previous
-    operator fun <T:Any?>get(field: Field<T>):T =
-        source[field] ?: previous?.source?.get(field) ?: field.default
+    operator fun <T:Any?>get(fieldName:String):T? =
+        source[fieldName] ?: previous?.source?.get(fieldName)
 
-    override var queryFrom: Query? = source?.queryMe
+    operator fun <T:Any?>get(field: Field<T>):T? = get(field.name)
+
+    override var queryFrom: Query? = source.queryMe
 
     // TODO: this works great... so make sure I understand EXACTLY what's going on
     //  ... ALSO, consider moving to Query to use on non-patterns?

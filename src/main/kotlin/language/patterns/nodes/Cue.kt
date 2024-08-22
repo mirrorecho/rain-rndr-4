@@ -17,8 +17,9 @@ open class Cue(
     }
 
     companion object : CueLabel<Cue>() {
-        override val labelName:String = "Thingy"
+        override val labelName:String = "Cue"
         override fun factory(key:String) = Cue(key)
+        init { registerMe() }
     }
 
     override val label: NodeLabel<out Thingy> = Thingy

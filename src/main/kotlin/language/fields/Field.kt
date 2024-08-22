@@ -4,6 +4,7 @@ import rain.language.*
 import kotlin.reflect.KProperty
 
 // TODO: able to implement Animatable seamlessly here?
+// TODO maybe: reference label containing field here?
 open class Field<T:Any?>(
     val name: String,
     val default: T,
@@ -33,7 +34,10 @@ open class Field<T:Any?>(
 
         open fun store() { node.properties[field.name] = this.value }
 
-        open fun retrieve() { this.value = node.properties[field.name] as T }
+        open fun retrieve() {
+            (node.properties[field.name] as T?)?.let { this.value = it }
+//            println("retrieving: ${field.name}")
+        }
 
     }
 

@@ -28,12 +28,13 @@ open class Event protected constructor(
         val simultaneous = field("simultaneous", false, false)
         val gate = field("gate", Gate.NONE, false)
         val bumps = fieldOfNode("bumps", BUMPS, Machine, null)
-        val bumping = field("bumping", true)
+        val bumping = field("bumping", true, false)
     }
 
     companion object : EventLabel<Event>() {
         override val labelName:String = "Event"
         override fun factory(key:String) = Event(key)
+        init { registerMe() }
     }
 
     override val label: NodeLabel<out Event> = Event
@@ -63,22 +64,61 @@ open class Event protected constructor(
 
     fun play() = EventPlayer(treePattern).play()
 
-
 }
 
-fun par(key:String = autoKey(), properties:Map<String, Any?>?=null, vararg children:Event):Event =
-    Event.create(
-        key,
-        mapOf<String, Any?>("simultaneous" to true)  + properties.orEmpty()
-    ).apply {
+// ------------------------------------------
+
+fun par(
+    key:String = autoKey(),
+    properties:Map<String, Any?>?=null,
+    vararg children:Event,
+    block:(Event.()->Unit)?=null,
+):Event =
+    Event.create(key, properties) {
+        simultaneous = true
+        block?.invoke(this)
         treePattern.extend(*children)
     }
 
-fun par(properties:Map<String, Any?>?=null, vararg children:Event):Event =
-    par(autoKey(), properties, *children)
+fun par(
+    properties:Map<String, Any?>?=null,
+    vararg children:Event,
+    block:(Event.()->Unit)?=null,
+):Event =
+    par(autoKey(), properties, *children) { block?.invoke(this) }
 
-fun par(vararg children:Event):Event =
-    par(autoKey(), null, *children)
+fun par(
+    vararg children:Event,
+    block:(Event.()->Unit)?=null
+):Event =
+    par(autoKey(), null, *children) { block?.invoke(this) }
+
+// ------------------------------------------
+
+fun seq(
+    key:String = autoKey(),
+    properties:Map<String, Any?>?=null,
+    vararg children:Event,
+    block:(Event.()->Unit)?=null,
+):Event =
+    Event.create(key, properties) {
+        simultaneous = false
+        block?.invoke(this)
+        treePattern.extend(*children)
+    }
+
+fun seq(
+    properties:Map<String, Any?>?=null,
+    vararg children:Event,
+    block:(Event.()->Unit)?=null,
+):Event =
+    seq(autoKey(), properties, *children) { block?.invoke(this) }
+
+fun seq(
+    vararg children:Event,
+    block:(Event.()->Unit)?=null
+):Event =
+    seq(autoKey(), null, *children) { block?.invoke(this) }
 
 
 

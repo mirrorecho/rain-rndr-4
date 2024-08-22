@@ -6,8 +6,8 @@ import rain.utils.autoKey
 class Relationship(
     key:String = autoKey(),
     override val label: RelationshipLabel,
-    var sourceKey: String,
-    var targetKey: String,
+    override val source: Node,
+    override val target: Node,
 ): GraphableRelationship, Item(key) {
 
     fun save() = context.graph.save(this)
@@ -20,22 +20,23 @@ class Relationship(
 
     override fun toString():String = "(${source.key} $labelName ${target.key} | $key) $properties"
 
-    // TODO: are these ever used?
-    override val source: Node by lazy { context.nodeFrom(sourceKey)!! }
-    override val target: Node by lazy { context.nodeFrom(targetKey)!! }
-
 }
 
-fun relate(
-    sourceKey: String,
-    rLabel:RelationshipLabel,
-    targetKey:String,
-    key:String = autoKey()
-):Relationship = rLabel.create(sourceKey, targetKey, key)
+// let's only use if needed...
+//fun relate(
+//    sourceKey: String,
+//    rLabel:RelationshipLabel,
+//    targetKey:String,
+//    key:String = autoKey()
+//):Relationship = rLabel.create(
+//    rLabel.context.nodeFrom(sourceKey)!!,
+//    rLabel.context.nodeFrom(targetKey)!!,
+//    key
+//)
 
 fun relate(
-    sourceNode: Node,
+    source: Node,
     rLabel:RelationshipLabel,
-    targetNode: Node,
+    target: Node,
     key:String = autoKey()
-):Relationship = rLabel.create(sourceNode.key, targetNode.key, key)
+):Relationship = rLabel.create(source, target, key)

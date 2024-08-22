@@ -14,10 +14,10 @@ abstract class NodeLabel<T: Node>(
     abstract fun factory(key:String): T
 
     private fun myAllNames(): Array<String> = arrayOf(labelName, *parent?.allNames.orEmpty())
-    final override val allNames = myAllNames()
+    final override val allNames by lazy { myAllNames() } // TODO: this by lazy is odd here, but static value not set correctly otherwise
 
     private fun myQueryMe():Query = Query(selectLabelName=labelName)
-    final override val queryMe = myQueryMe()
+    final override val queryMe by lazy { myQueryMe() } // TODO: this by lazy is odd here, but static value not set correctly otherwise
 
     operator fun get(vararg keys:String) = Query(selectKeys=keys)
 
@@ -41,17 +41,19 @@ abstract class NodeLabel<T: Node>(
 //        }
 //    }
 
-    fun <RL:NodeLabel<*>>sends(
-        receiving:RL,
-        key:String = autoKey(),
-        properties: Map<String, Any?>? = null, // TODO: keep this? (assume yes)
-        block:(RL.(T)->Unit)?=null,
-    ): T = create(key, properties).apply {
-        block?.let {
-            it.invoke(receiving, this)
-            save()
-        }
-    }
+    // TODO: why even bother?
+//    fun <RL:NodeLabel<*>>sends(
+//        receiving:RL,
+//        key:String = autoKey(),
+//        properties: Map<String, Any?>? = null, // TODO: keep this? (assume yes)
+//        block:(RL.(T)->Unit)?=null,
+//    ): T = create(key, properties).apply {
+//        block?.let {
+//            it.invoke(receiving, this)
+//            save()
+//        }
+//    }
+
 
     // TODO: is this OK? (factory returns instance of T, not the specific sub-type of
     //  T as would be applicable for the given T)
@@ -95,13 +97,13 @@ abstract class NodeLabel<T: Node>(
         }
 
 
-    private fun registerMe() {
+    fun registerMe() {
         context.nodeLabels[labelName] = this
     }
 
-    init {
-        registerMe()
-    }
+//    init {
+//        registerMe()
+//    }
 
 }
 

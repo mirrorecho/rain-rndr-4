@@ -5,7 +5,6 @@ import org.openrndr.animatable.Animatable
 import org.openrndr.animatable.easing.Easing
 import rain.language.*
 import rain.language.fields.field
-import rain.language.fields.fieldOfNode
 import rain.language.patterns.Pattern
 import rain.language.patterns.nodes.Event
 import rain.utils.autoKey
@@ -18,7 +17,7 @@ open class ValueAnimate(
     key:String = autoKey(),
 ): Value(key) {
     abstract class ValueAnimateLabel<T:ValueAnimate>: ValueLabel<T>() {
-        val initValue = field<Double?>("value", null)
+        val initValue = field<Double?>("initValue", null)
         val easing = field("easing", Easing.None)
         val animateDur = field<Double?>("animateDur", null)
 
@@ -31,52 +30,67 @@ open class ValueAnimate(
         override val parent = Value
         override val labelName:String = "ValueAnimate"
         override fun factory(key:String) = ValueAnimate(key)
+        init { registerMe() }
     }
 
     override val label: NodeLabel<out ValueAnimate>  = ValueAnimate
 
-    private class AnimationValue(
-        var value:Double = 0.0
+    private inner class AnimationValue(
+        var controlValue:Double = 0.0
     ): Animatable()
 
-    val initValue by attach(ValueAnimate.initValue)
-    val easing by attach(ValueAnimate.easing)
-    val animateDur by attach(ValueAnimate.animateDur)
+    // NOTE that base field "value" is used as the value to animate to
+    var initValue by attach(ValueAnimate.initValue)
+    var easing by attach(ValueAnimate.easing)
+    var animateDur by attach(ValueAnimate.animateDur)
 
-    private val animationValue = AnimationValue(this.value)
+    private val animationValue = AnimationValue()
 
 
     override fun bump(pattern: Pattern<Event>) {
+        // TODO: address this!
+
+        // needed for first time bump to start from correct default
+        animationValue.controlValue = value
+
+        updateFieldsFrom(pattern, ::value, ::initValue, ::easing, ::animateDur)
+
+        println("Animating from $initValue to: $value")
+
         val durMs: Long = ((pattern[Event.dur] ?: 0.0) * 1000).toLong()
         val animateDurMs: Long = ((animateDur ?: 0.0) * 1000).toLong().let {
             if (it == (0).toLong() || it.absoluteValue > durMs) durMs else it
         }
-        // NEED TO CALL THIS IN ORDER FOR ANIMATION TO WORK CORRECTLY IF NOT GATED????
-        if (!isRunning) animationValue.updateAnimation()
+        // NEED TO CALL THIS IN ORDER FOR ANIMATION TO WORK CORRECTLY
+        // TODO: WHY?????
+        animationValue.updateAnimation()
 
         if (animateDur != null) { // TODO: is this the best way to test for animation?
 
-            initValue?.let { animationValue.value = it }
+
+            initValue?.let { animationValue.controlValue = it }
 
             animationValue.apply {
                 if (animateDurMs >= 0) {
-                    ::value.animate(pattern[ValueAnimate.value], animateDurMs, easing)
-                    ::value.complete()
+                    println("ANIMATING for $animateDurMs ms")
+                    ::controlValue.animate(value, animateDurMs, easing)
+                    ::controlValue.complete()
                 } else {
                     // TODO, a better way to keep current value for the duration instead of "animating" it?
-                    ::value.animate(value, durMs + animateDurMs)
-                    ::value.complete()
-                    ::value.animate(pattern[ValueAnimate.value], animateDurMs.absoluteValue, easing)
-                    ::value.complete()
+                    ::controlValue.animate(controlValue, durMs + animateDurMs)
+                    ::controlValue.complete()
+                    ::controlValue.animate(value, animateDurMs.absoluteValue, easing)
+                    ::controlValue.complete()
                 }
             }
-        } else animationValue.value = pattern[ValueAnimate.value]
+        } else animationValue.controlValue = value
     }
 
 
     override fun render(program: Program) {
         animationValue.updateAnimation()
-        this.value = animationValue.value
+        value = animationValue.controlValue
     }
+
 
 }

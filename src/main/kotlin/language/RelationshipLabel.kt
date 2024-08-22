@@ -17,34 +17,34 @@ class RelationshipLabel(
 
     override fun toString() = labelName
 
-    fun factory(sourceKey:String, targetKey:String, key:String): Relationship {
-        return Relationship(key, this, sourceKey, targetKey)
+    fun factory(source:Node, target:Node, key:String): Relationship {
+        return Relationship(key, this, source, target)
     }
 
     fun from(gRelationship: GraphableRelationship):Relationship = gRelationship.run {
-        factory(source.key, target.key, key).also { it.updatePropertiesFrom(this) }
+        factory(context.nodeFrom(source)!!, context.nodeFrom(target)!!, key).also { it.updatePropertiesFrom(this) }
     }
 
     // TODO: is all this complexity necessary for relationships???
 
     fun merge(
-        sourceKey:String,
-        targetKey:String,
+        source:Node,
+        target:Node,
         key:String,
         properties:Map<String,Any?>?=null,
     ):Relationship =
-        factory(sourceKey, targetKey, key).apply {
+        factory(source, target, key).apply {
             properties?.let{ this.properties.putAll(it) };
             context.graph.merge(this);
         }
 
     fun create(
-        sourceKey:String,
-        targetKey:String,
+        source:Node,
+        target:Node,
         key:String = autoKey(),
         properties:Map<String,Any?>?=null,
     ):Relationship =
-        factory(sourceKey, targetKey, key).apply {
+        factory(source, target, key).apply {
             properties?.let{ this.properties.putAll(it) };
             context.graph.create(this);
         }

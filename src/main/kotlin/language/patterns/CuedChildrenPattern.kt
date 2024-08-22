@@ -35,12 +35,12 @@ open class CuedChildrenPattern<T: Node>(
         // if empty, then create the CuesFirst
         // note... empty check works even after creating the Contains relationships above
         // because the isEmpty logic checks for CUES_FIRST
-            CUES_FIRST.create(this.source.key, cues[0].key)
+            CUES_FIRST.create(this.source, cues[0])
         else {
             // otherwise create a CuesNext relationship from the existing CuesLast target node to the start of extension cue nodes
             // and remove the CuesLast
             this.source.getRelationships(CUES_LAST).first().also {
-                CUES_NEXT.create(it.targetKey, cues[0].key)
+                CUES_NEXT.create(it.target, cues[0])
                 it.delete()
             }
 
@@ -48,11 +48,11 @@ open class CuedChildrenPattern<T: Node>(
 
         // creates CuesNext relationships between all the Cue nodes
         cues.asIterable().zipWithNext { c, cNext ->
-            CUES_NEXT.create(c.key, cNext.key)
+            CUES_NEXT.create(c, cNext)
         }
 
         // adds CuesLast relationship at the end
-        CUES_LAST.create(this.source.key, cues.last().key)
+        CUES_LAST.create(this.source, cues.last())
     }
 
     // this is cool... HAH!

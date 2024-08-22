@@ -6,6 +6,7 @@ import org.openrndr.color.ColorHSVa
 import org.openrndr.color.ColorRGBa
 import rain.language.*
 import rain.language.fields.field
+import rain.language.patterns.nodes.Event
 import rain.language.patterns.nodes.Machine
 import rain.rndr.relationships.*
 
@@ -21,8 +22,10 @@ open class Color(
     }
 
     companion object : ColorLabel<Color>() {
+        override val parent = Machine
         override val labelName:String = "Color"
         override fun factory(key:String) = Color(key)
+        init { registerMe() }
 
         val WHITE = Color.create("COLOR_WHITE")
     }
