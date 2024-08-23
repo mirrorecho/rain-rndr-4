@@ -36,7 +36,7 @@ open class EventPlayer(
         // access the bumps machine only if necessary:
         val machine = if (event.bumping || gate.hasGate) pattern[Event.bumps] else null
 
-//        println("PLAYING: ${pattern.source}")
+        println("PLAYING: ${pattern.source} with machine $machine")
 
         machine?.let { m ->
             gate.startGate?.let { gateMachine(m, it) }
@@ -47,11 +47,13 @@ open class EventPlayer(
         event.dur.let { dur -> if (dur > 0.0) delay(dur.toDuration(DurationUnit.SECONDS))  }
         // TODO: adjust for delta in time delay
 
-        event.children.forEach { childPattern ->
+
+        event.children.forEach { childEventPattern ->
+            // TODO: this cast below is gross
             if (pattern.source.simultaneous)
-                threads.add(program.launch { playPattern(childPattern, program) })
+                threads.add(program.launch { playPattern(childEventPattern, program) })
             else
-                playPattern(childPattern, program)
+                playPattern(childEventPattern, program)
         }
 
         threads.joinAll()

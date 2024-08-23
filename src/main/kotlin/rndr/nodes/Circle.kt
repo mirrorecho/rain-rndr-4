@@ -6,6 +6,7 @@ import rain.utils.*
 
 import org.openrndr.Program
 import org.openrndr.color.ColorHSVa
+import rain.language.NodeLabel
 import rain.language.fields.field
 import rain.language.fields.fieldOfNode
 import rain.language.patterns.Pattern
@@ -41,7 +42,7 @@ open class Circle protected constructor(
         init { registerMe() }
     }
 
-    override val label = Circle
+    override val label: NodeLabel<out Circle> = Circle
 
     var radius by attach(Circle.radius)
     var position by attach(Circle.position)

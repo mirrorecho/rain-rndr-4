@@ -1,6 +1,7 @@
 package rain.language.patterns.nodes
 
 
+import language.patterns.ExtendHelper
 import rain.language.*
 import rain.language.fields.field
 import rain.language.fields.fieldOfNode
@@ -46,10 +47,11 @@ open class Event protected constructor(
     var bumping by attach(Event.bumping)
 
     // TODO: is this by lazy effective enough for "caching"?
-    val treePattern by lazy { CuedChildrenPattern(this) }
+    val treePattern: CuedChildrenPattern<Event> by lazy { CuedChildrenPattern(this) }
 
-    // TODO: implement caching
-    val children get() = treePattern.children
+    // TODO maybe: implement caching? Done?
+    // or TODO: even better, consider children a field on Event? (would need a new type of field)
+    open val children get() = treePattern.asPatterns { s,p -> CuedChildrenPattern(s as Event, p) }
 
 //    fun <R:Node, RL:NodeLabel<R>>bumps(
 //        receiverLabel:RL,
@@ -64,7 +66,40 @@ open class Event protected constructor(
 
     fun play() = EventPlayer(treePattern).play()
 
+    fun <NT:Event, LT:EventLabel<NT>>extend(label:LT, block:ExtendHelper<NT, LT>.()->Unit) {
+        val helper = ExtendHelper(this, label)
+        block.invoke(helper)
+        helper.extendEvent()
+    }
+
 }
+
+// ------------------------------------------
+
+fun <E:Event, L:Event.EventLabel<E>>L.par(
+    key:String = autoKey(),
+    properties:Map<String, Any?>?=null,
+    vararg children:Event,
+    block:(E.()->Unit)?=null,
+):E = this.create(key, properties) {
+    simultaneous = true
+    bumping = false
+    block?.invoke(this)
+    treePattern.extend(*children)
+}
+
+fun <E:Event, L:Event.EventLabel<E>>L.par(
+    properties:Map<String, Any?>?=null,
+    vararg children:Event,
+    block:(E.()->Unit)?=null,
+):E =
+    this.par(autoKey(), properties, *children) { block?.invoke(this) }
+
+fun <E:Event, L:Event.EventLabel<E>>L.par(
+    vararg children:Event,
+    block:(E.()->Unit)?=null,
+):E =
+    this.par(autoKey(), null, *children) { block?.invoke(this) }
 
 // ------------------------------------------
 
@@ -74,11 +109,7 @@ fun par(
     vararg children:Event,
     block:(Event.()->Unit)?=null,
 ):Event =
-    Event.create(key, properties) {
-        simultaneous = true
-        block?.invoke(this)
-        treePattern.extend(*children)
-    }
+    Event.par(key, properties, *children) { block?.invoke(this) }
 
 fun par(
     properties:Map<String, Any?>?=null,
@@ -93,6 +124,35 @@ fun par(
 ):Event =
     par(autoKey(), null, *children) { block?.invoke(this) }
 
+
+// ------------------------------------------
+// ------------------------------------------
+
+fun <E:Event, L:Event.EventLabel<E>>L.seq(
+    key:String = autoKey(),
+    properties:Map<String, Any?>?=null,
+    vararg children:Event,
+    block:(E.()->Unit)?=null,
+):E = this.create(key, properties) {
+    simultaneous = false
+    bumping = false
+    block?.invoke(this)
+    treePattern.extend(*children)
+}
+
+fun <E:Event, L:Event.EventLabel<E>>L.seq(
+    properties:Map<String, Any?>?=null,
+    vararg children:Event,
+    block:(E.()->Unit)?=null,
+):E =
+    this.seq(autoKey(), properties, *children) { block?.invoke(this) }
+
+fun <E:Event, L:Event.EventLabel<E>>L.seq(
+    vararg children:Event,
+    block:(E.()->Unit)?=null,
+):E =
+    this.seq(autoKey(), null, *children) { block?.invoke(this) }
+
 // ------------------------------------------
 
 fun seq(
@@ -101,11 +161,7 @@ fun seq(
     vararg children:Event,
     block:(Event.()->Unit)?=null,
 ):Event =
-    Event.create(key, properties) {
-        simultaneous = false
-        block?.invoke(this)
-        treePattern.extend(*children)
-    }
+    Event.seq(key, properties, *children) { block?.invoke(this) }
 
 fun seq(
     properties:Map<String, Any?>?=null,

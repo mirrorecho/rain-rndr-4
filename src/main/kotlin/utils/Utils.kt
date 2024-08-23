@@ -53,13 +53,29 @@ fun <T>MutableMap<String, Any?>.withDefault(default:T) = DefaultableMap(this, de
 
 //fun nullableMap<T>(val map: MutableMap<String,Any?>, val default:T?=null) = NullableMap
 
-
 // slick way to create infinite cycle:
 // https://stackoverflow.com/questions/48007311/how-do-i-infinitely-repeat-a-sequence-in-kotlin
-fun <T> Sequence<T>.cycle() = sequence { while (true) yieldAll(this@cycle) }
+// TODO: implement negative indexing
+class Cycle<T>(val values: List<T>) : Sequence<T> {
+    override fun iterator(): Iterator<T> = sequence<T> {
+        while (true) yieldAll(values.asSequence())
+    }.iterator()
 
-fun <T>cycleOf(vararg elements:T): Sequence<T> = elements.asSequence().cycle()
+    operator fun get(index: Int): T {
+        return values[index % values.size]
+    }
+}
+
+
+
+fun <T> Iterable<T>.cycle() = Cycle(this.toList())
+fun <T> Sequence<T>.cycle() = Cycle(this.toList())
+fun <T> Array<T>.cycle() = Cycle(this.toList())
+
+fun <T>cycleOf(vararg elements:T): Cycle<T> = elements.asIterable().cycle()
 
 // copies map1 into a new map, then puts all values from map2 into that map as well, and returns the result
 // TODO: used? Just able to use simple addition???!!
 fun mapCopy(map1: Map<String, Any?>, map2: Map<String, Any?>): Map<String, Any?> = map1.toMutableMap().apply { putAll(map2) }
+
+

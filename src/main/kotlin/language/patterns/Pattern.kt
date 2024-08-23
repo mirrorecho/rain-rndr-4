@@ -42,6 +42,7 @@ abstract class Pattern<T:Node>(
 
     // TODO: this works great... so make sure I understand EXACTLY what's going on
     //  ... ALSO, consider moving to Query to use on non-patterns?
+    // TODO: IMPORTANT: caching! (using Query TypedCache)
     open fun <P : Pattern<*>> asPatterns(
         factory: (source: Node, previous: Pattern<*>) -> P
     ): Sequence<P> = this().map { factory.invoke(it, this) }

@@ -1,5 +1,6 @@
 package rain.sandbox.solve
 
+import language.patterns.nodes.EventRandom
 import language.patterns.nodes.Printer
 import org.openrndr.animatable.easing.Easing
 import rain.graph.Graph
@@ -8,9 +9,10 @@ import rain.language.patterns.nodes.*
 import rain.rndr.nodes.Circle
 import rain.rndr.nodes.ValueAnimate
 import rain.rndr.relationships.RADIUS
+import rain.utils.cycleOf
 
 fun main()  {
-    solve2()
+    solve0()
 }
 
 // TODO: SOLVE THE FOLLOWING:
@@ -37,36 +39,56 @@ fun main()  {
 fun solve0() {
     // TODO: util function to easily create Event children with field values
     //  for a particular receiver
-//    seq {
-//        stream(Event)(
-//            ::dur, 2.0, 1.0)(
-//                ::dur,
-//            )
-//
-//    }
 
-
-    val eNone = Event.create {
-        dur = 2.0
-        this[Printer.renderMe] = true
+    val s1 = seq {
+        extend(Event) {
+            Event.dur(1.0, 2.0, 1.0)
+            Printer.msg("I am message A!", "I am messageB!", "I am messageC!")
+            Printer.renderMe.cycle(true)
+        }
+    }
+    val s2 = EventRandom.seq {
+        times = 4
+        extend(Event) {
+            Event.dur(0.5, 0.5, 0.5)
+            Printer.msg("AAA!", "BBB!", "CCC!")
+            Printer.renderMe.cycle(true)
+        }
     }
 
-    val eA = Event.create {
-        dur = 1.0
-        this[Printer.msg] = "I am message A!"
-        this[Printer.renderMe] = true
+    val er = EventRandom.seq(s1, s2) {
+        times = 4
     }
 
-    val eB = Event.create {
-        dur = 1.0
-        this[Printer.msg] = "I am message B!"
-        this[Printer.renderMe] = true
-    }
+//    println(e.treePattern)
 
-    val s = seq(eNone, eA, eNone, eB) {
-        bumps = Printer.create() { msg = "I am a starting message." }
+    seq(s1) {
+        bumps = Printer.create()
         gate = Gate.ON_OFF
     }.play()
+
+
+//    val eNone = Event.create {
+//        dur = 2.0
+//        this[Printer.renderMe] = true
+//    }
+//
+//    val eA = Event.create {
+//        dur = 1.0
+//        this[Printer.msg] = "I am message A!"
+//        this[Printer.renderMe] = true
+//    }
+//
+//    val eB = Event.create {
+//        dur = 1.0
+//        this[Printer.msg] = "I am message B!"
+//        this[Printer.renderMe] = true
+//    }
+
+//    val s = seq(eNone, eA, eNone, eB) {
+//        bumps = Printer.create() { msg = "I am a starting message." }
+//        gate = Gate.ON_OFF
+//    }.play()
 
 }
 
