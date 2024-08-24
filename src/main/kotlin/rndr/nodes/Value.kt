@@ -2,7 +2,6 @@ package rain.rndr.nodes
 
 import rain.language.*
 import rain.language.fields.field
-import rain.language.patterns.nodes.Event
 import rain.language.patterns.nodes.Machine
 import rain.utils.*
 
@@ -21,7 +20,7 @@ open class Value(
         init { registerMe() }
     }
 
-    override val label: NodeLabel<out Value> = Value
+    override val label: Label<out Value> = Value
 
     var value by attach(Value.value)
 

@@ -1,9 +1,7 @@
 package rain.language.patterns.nodes
 
 import rain.language.Node
-import rain.language.NodeLabel
-import rain.language.Thingy
-import rain.language.fields.field
+import rain.language.Label
 
 
 // TODO... long and nasty with all the class inheritance and companion objects ... REFACTOR!!!!
@@ -11,9 +9,9 @@ import rain.language.fields.field
 open class Cue(
     key:String = rain.utils.autoKey(),
 ): Node(key) {
-    abstract class CueLabel<T:Cue>: NodeLabel<T>() {
+    abstract class CueLabel<T:Cue>: Label<T>() {
         // add fields here:
-        val thing = field("thing", "One and Two")
+//        val thing = field("thing", "One and Two")
     }
 
     companion object : CueLabel<Cue>() {
@@ -22,10 +20,10 @@ open class Cue(
         init { registerMe() }
     }
 
-    override val label: NodeLabel<out Thingy> = Thingy
+    override val label: Label<out Cue> = Cue
 
     // attach fields here:
-    val thing = attach(Thingy.thing)
+//    val thing = attach(Thingy.thing)
 
 
 }

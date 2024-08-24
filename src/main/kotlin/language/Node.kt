@@ -6,40 +6,23 @@ import rain.language.fields.FieldConnected
 import rain.language.fields.field
 import rain.language.patterns.Pattern
 import rain.rndr.nodes.Circle
-import rain.rndr.nodes.ValueAnimate
 import rain.utils.autoKey
 import kotlin.reflect.KMutableProperty0
-import kotlin.reflect.KProperty0
-import kotlin.reflect.KProperty1
 
 // ===========================================================================================================
 
-abstract class Node protected constructor(
+open class Node protected constructor(
     key:String = autoKey(),
-): Queryable, GraphableNode, Item(key) {
-    //    companion object : NodeLabel<Node>(Node::class, null, { k->Node(k) })
-    abstract override val label: NodeLabel<out Node>
-
-    override val context get() = label.context
+): Item(key), Queryable {
+    companion object : Label<Node, Node>(
+        null, Node::class, { k-> Node(k) }
+    )
 
     override val queryMe get() = Query(selectKeys = arrayOf(this.key))
 
-    // TODO: are these needed at the node level? or only the machine level?
-    // (bump esp. might be useful globally)
-//    open fun bump(node: Node) { println("render not implemented for $this") }
-
-//    open fun gate(onOff:Boolean=true)  { println("gate not implemented for $this") }
-//
-//    open fun render(program: Program) { println("render not implemented for $this") }
-
-
-    fun save() { storeAllFields(); context.graph.save(this); }
-
-    fun read() { context.graph.read(this); retrieveAllFields() }
 
     fun delete() {
-        context.graph.deleteNode(this.key)
-        label.registry.remove(this.key)
+        Companion.delete(this)
     }
 
     fun relate(
@@ -142,6 +125,19 @@ abstract class Node protected constructor(
         attachedFields.forEach { it.updateFrom(pattern) }
     }
 
+    // TODO: are these needed at the node level? or only the machine level?
+    // (bump esp. might be useful globally)
+//    open fun bump(node: Node) { println("render not implemented for $this") }
+
+//    open fun gate(onOff:Boolean=true)  { println("gate not implemented for $this") }
+//
+//    open fun render(program: Program) { println("render not implemented for $this") }
+
+
+//    fun save() { storeAllFields(); context.graph.save(this); }
+
+//    fun read() { context.graph.read(this); retrieveAllFields() }
+
     // TODO: consider implementing
 //    open fun bump(vararg fromPatterns: Pattern) { println("invoke not implemented for $this") }
 
@@ -163,6 +159,7 @@ abstract class Node protected constructor(
     // TODO: maybe implement this...?
 //    fun invoke()
 
+
 }
 
 // ================================================================
@@ -171,7 +168,7 @@ abstract class Node protected constructor(
 open class Thingy protected constructor(
     key:String = autoKey(),
 ): Node(key) {
-    abstract class ThingyLabel<T: Thingy>: NodeLabel<T>() {
+    abstract class ThingyLabel<T: Thingy>: Label<T>() {
         // add fields here:
         val thing = field("thing", "One and Two")
     }
@@ -183,7 +180,7 @@ open class Thingy protected constructor(
     }
 
     // note that the NodeLabel<out T> type declaration here is needed so that inheritance works OK
-    override val label: NodeLabel<out Thingy> = Thingy
+    override val label: Label<out Thingy> = Thingy
 
     // attach fields here:
     val thing = attach(Thingy.thing)     // TODO: maybe... eventually use delegation here
@@ -209,7 +206,7 @@ open class SpecialThingy protected constructor(
     }
 
     // note that the NodeLabel<out T> type declaration here is needed so that inheritance works OK
-    override val label: NodeLabel<out SpecialThingy> = SpecialThingy
+    override val label: Label<out SpecialThingy> = SpecialThingy
 
     // attach fields here:
     val specialThing = attach(SpecialThingy.specialThing)

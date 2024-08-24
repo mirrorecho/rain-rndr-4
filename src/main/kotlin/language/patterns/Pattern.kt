@@ -1,7 +1,6 @@
 package rain.language.patterns
 
 import rain.graph.interfacing.GraphableNode
-import rain.graph.interfacing.QueryMethod
 import rain.language.*
 import rain.language.fields.Field
 
@@ -48,7 +47,7 @@ abstract class Pattern<T:Node>(
     ): Sequence<P> = this().map { factory.invoke(it, this) }
 
     open fun <CT : Node, P : Pattern<CT>> asPatterns(
-        label: NodeLabel<out CT>,
+        label: Label<out CT>,
         factory: (source: CT, previous: Pattern<*>) -> P,
     ): Sequence<P> = this(label).map { factory.invoke(it, this) }
 
@@ -61,7 +60,7 @@ abstract class Pattern<T:Node>(
         previous?.let { yield(it); yieldAll(it.history) }
     }
 
-    open fun stream(name: String, nodesLabel: NodeLabel<*>, vararg values: Any?) {
+    open fun stream(name: String, nodesLabel: Label<*>, vararg values: Any?) {
         val dimensionIterator = this().iterator()
         val valuesIterator = values.iterator()
         while (valuesIterator.hasNext()) {

@@ -24,7 +24,7 @@ open class Event protected constructor(
     key:String = autoKey(),
 ): Node(key) {
 
-    abstract class EventLabel<T:Event>: NodeLabel<T>() {
+    abstract class EventLabel<T:Event>: Label<T>() {
         val dur = field("dur", 0.0, false)
         val simultaneous = field("simultaneous", false, false)
         val gate = field("gate", Gate.NONE, false)
@@ -38,7 +38,7 @@ open class Event protected constructor(
         init { registerMe() }
     }
 
-    override val label: NodeLabel<out Event> = Event
+    override val label: Label<out Event> = Event
 
     var dur by attach(Event.dur)
     var simultaneous by attach(Event.simultaneous)

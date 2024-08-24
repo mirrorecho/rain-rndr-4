@@ -1,87 +1,90 @@
 package rain.language
-
-import rain.graph.Graph
-import rain.graph.interfacing.GraphInterface
-import rain.graph.interfacing.GraphableNode
-
-abstract class Context {
-    abstract val graph: GraphInterface
-
-    // TODO: interaction with nodeLabels should happen here
-    val nodeLabels:MutableMap<String, NodeLabel<*>> = mutableMapOf()
-
-    fun nodeFrom(node: GraphableNode): Node? =
-        nodeLabels[node.labelName]?.from(node)
-
-    fun nodeFrom(key:String): Node? =
-        nodeFrom(graph.getNode(key))
-
-//    fun queryNodes(query: Query<GraphableNode>): Sequence<GraphableNode> = sequence {  }
-
-//    fun <T : Node>queryNodes(query: Query, label: NodeLabel<T>): Sequence<T> = sequence {
-//        graph.selectGraphNodes(query).forEach {
-//            yield(label.from(it))
-//        }
-//    }
 //
-//    fun queryNodes(query: Query): Sequence<Node> = sequence {
-//        graph.selectGraphNodes(query).forEach {
-//            this@Context.nodeLabels[it.labelName]?.from(it)?.let { n -> yield(n) }
-//        }
-//    }
+//import rain.graph.Graph
+//import rain.graph.interfacing.GraphInterface
+//import rain.graph.interfacing.GraphableNode
 //
-//    // TODO: consider removing RelationshipLabelInterface
-//    fun queryRelationships(query: Query, label: RelationshipLabelInterface): Sequence<Relationship> = sequence {
-//        graph.selectGraphRelationships(query).forEach {
-//            yield(label.from(it))
-//        }
-//    }
+//abstract class Context {
+//    abstract val graph: GraphInterface
 //
-//    fun queryNodeKeys(query: Query): Sequence<String> = sequence {
-//        graph.selectGraphNodes(query).forEach {
-//            yield(it.key)
-//        }
-//    }
+//    // TODO: interaction with nodeLabels should happen here
+//    val nodeLabels:MutableMap<String, NodeLabel<*>> = mutableMapOf()
 //
-//    fun selectRelationshipKeys(query: Query): Sequence<String> = sequence {
-//        graph.selectGraphRelationships(query).forEach {
-//            yield(it.key)
-//        }
-//    }
-
-    // TODO maybe: consider tracking node labels with the context
-//    override val nodeLabels:MutableMap<String, NodeLabel<*>> = mutableMapOf()
+//    fun nodeFrom(node: GraphableNode): Node? =
+//        nodeLabels[node.labelName]?.from(node)
 //
-//    fun <T:Node>getNodeLabel(name:String):NodeLabel<T> {
-//        return nodeLabels[name] as NodeLabel<T>
-//    }
+//    fun nodeFrom(key:String): Node? =
+//        nodeFrom(graph.getNode(key))
 //
-//    inline fun <reified T:Node>getLabel():NodeLabel<T>? {
-//        return typeOf<T>()::class.simpleName?.let { getNodeLabel(it) }
-//    }
-
-
-    // ====================================================================
-    // KISS:
-
-//    // TODO: maybe these could move into the context of the label????
-//    private val fancyProperties: MutableMap<String, FancyProperty<*>> = mutableMapOf()
+////    fun queryNodes(query: Query<GraphableNode>): Sequence<GraphableNode> = sequence {  }
 //
-//    override fun setFancyProperty(fancyProperty: FancyProperty<*>) {
-//        fancyProperties[fancyProperty.universalName] = fancyProperty
-//    }
+////    fun <T : Node>queryNodes(query: Query, label: NodeLabel<T>): Sequence<T> = sequence {
+////        graph.selectGraphNodes(query).forEach {
+////            yield(label.from(it))
+////        }
+////    }
+////
+////    fun queryNodes(query: Query): Sequence<Node> = sequence {
+////        graph.selectGraphNodes(query).forEach {
+////            this@Context.nodeLabels[it.labelName]?.from(it)?.let { n -> yield(n) }
+////        }
+////    }
+////
+////    // TODO: consider removing RelationshipLabelInterface
+////    fun queryRelationships(query: Query, label: RelationshipLabelInterface): Sequence<Relationship> = sequence {
+////        graph.selectGraphRelationships(query).forEach {
+////            yield(label.from(it))
+////        }
+////    }
+////
+////    fun queryNodeKeys(query: Query): Sequence<String> = sequence {
+////        graph.selectGraphNodes(query).forEach {
+////            yield(it.key)
+////        }
+////    }
+////
+////    fun selectRelationshipKeys(query: Query): Sequence<String> = sequence {
+////        graph.selectGraphRelationships(query).forEach {
+////            yield(it.key)
+////        }
+////    }
 //
-//    override fun <T> getFancyProperty(universalName: String): FancyProperty<T> {
-//        return fancyProperties[universalName] as FancyProperty<T>
-//    }
+//    // TODO maybe: consider tracking node labels with the context
+////    override val nodeLabels:MutableMap<String, NodeLabel<*>> = mutableMapOf()
+////
+////    fun <T:Node>getNodeLabel(name:String):NodeLabel<T> {
+////        return nodeLabels[name] as NodeLabel<T>
+////    }
+////
+////    inline fun <reified T:Node>getLabel():NodeLabel<T>? {
+////        return typeOf<T>()::class.simpleName?.let { getNodeLabel(it) }
+////    }
+//
+//
+//    // ====================================================================
+//    // KISS:
+//
+////    // TODO: maybe these could move into the context of the label????
+////    private val fancyProperties: MutableMap<String, FancyProperty<*>> = mutableMapOf()
+////
+////    override fun setFancyProperty(fancyProperty: FancyProperty<*>) {
+////        fancyProperties[fancyProperty.universalName] = fancyProperty
+////    }
+////
+////    override fun <T> getFancyProperty(universalName: String): FancyProperty<T> {
+////        return fancyProperties[universalName] as FancyProperty<T>
+////    }
+//
+//
+//
+//}
+//
+//object LocalContext: Context() {
+//    override val graph: GraphInterface = Graph()
+//}
+//
+//
 
-
-
-}
-
-object LocalContext: Context() {
-    override val graph: GraphInterface = Graph()
-}
 
 // =================================================================================================
 // ARCHIVE:

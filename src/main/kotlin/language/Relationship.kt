@@ -8,7 +8,7 @@ class Relationship(
     override val label: RelationshipLabel,
     override val source: Node,
     override val target: Node,
-): GraphableRelationship, Item(key) {
+): Item(key) {
 
     fun save() = context.graph.save(this)
 

@@ -23,7 +23,7 @@ open class EventRandom protected constructor(
         }
     }
 
-    override val label: NodeLabel<out EventRandom> = EventRandom
+    override val label: Label<out EventRandom> = EventRandom
 
     var times by attach(EventRandom.times)
 

@@ -1,8 +1,175 @@
 package rain.language
 
-abstract class Label<T: Item> {
-    abstract val labelName:String
-    abstract val allNames: Array<String> // TODO: change to Array?
-    val isRelationship:Boolean = false
-    var context: Context = LocalContext // TODO: OK to default to LocalContext here? And should this be a val instead?
+import kotlin.reflect.KClass
+
+
+
+abstract class Label<PT:Item, T:PT>(
+    val parent: Label<*, PT>? = null,
+    val kClass: KClass<T>,
+    val factory: (String) -> T,
+) {
+    val name: String = kClass.simpleName ?: "Node"
+
+    val registry: MutableMap<String, T> = mutableMapOf()
+
+    val ancestorLabels: Array<Label<*,*>> =
+        if (parent==null) arrayOf()
+        else arrayOf(parent, *parent.ancestorLabels)
+
+    private fun register(item: T) {
+        registry[item.key] = item
+        parent?.register(item)
+    }
+
+    fun get(key: String): T? = registry[key]
+
+    // TODO: implement get queries
+
+    fun create(key:String):T = factory(key).also { register(it) }
+
+    fun from(node: PT): T? = registry[node.key]
+
+    fun delete(key:String) {
+        registry.remove(key)
+        parent?.delete(key)
+    }
+
+    fun delete(node:T) { delete(node.key) }
+
+    override fun toString() = "NodeLabel(name=$name)"
+
 }
+
+//    fun merge(
+//        key: String = autoKey(),
+//        properties: Map<String, Any?>? = null,
+//        block: (T.() -> Unit)? = null,
+//    ): T = nodeIndex.getOrPut(key) {
+//        factory(key).also { node ->
+//            properties?.let { node.updatePropertiesFrom(it) };
+//            node.retrieveAllFields()
+//        }
+//    }
+//
+//    fun create(
+//        key: String = autoKey(),
+//        properties: Map<String, Any?>? = null,
+//        block: (T.() -> Unit)? = null,
+//    ): T =
+//        factory(key).apply {
+//            properties?.let { this.updatePropertiesFrom(it) }
+//            retrieveAllFields()
+//            context.graph.create(this)
+//            registry[key] = this
+//            block?.let {
+//                it.invoke(this)
+//                save()
+//            }
+//        }
+
+
+//    private fun myAllNames(): Array<String> = arrayOf(labelName, *parent?.allNames.orEmpty())
+//    final override val allNames by lazy { myAllNames() } // TODO: this by lazy is odd here, but static value not set correctly otherwise
+//
+//    private fun myQueryMe(): Query = Query(selectLabelName = labelName)
+//    final override val queryMe by lazy { myQueryMe() } // TODO: this by lazy is odd here, but static value not set correctly otherwise
+
+//    operator fun get(vararg keys: String) = Query(selectKeys = keys)
+
+    // TODO : consider re-instituting this format to avoid double saves
+    //  (but for now, saving twice to KISS)
+//    fun <RL:NodeLabel<*>>sends(
+//        receiving:RL,
+//        key:String = autoKey(),
+//        preCreate:(RL.(Message<RL>)->Unit)?=null, // TODO: naming?
+//        postCreate:(RL.(T)->Unit)?=null,
+//    ): T {
+//        val message = LocalMessage(receiving)
+//        preCreate?.invoke(receiving, message)
+//        return this.create(key, message.properties).apply {
+//            postCreate?.invoke(receiving, this)
+//        }
+//    }
+
+    // TODO: why even bother?
+//    fun <RL:NodeLabel<*>>sends(
+//        receiving:RL,
+//        key:String = autoKey(),
+//        properties: Map<String, Any?>? = null, // TODO: keep this? (assume yes)
+//        block:(RL.(T)->Unit)?=null,
+//    ): T = create(key, properties).apply {
+//        block?.let {
+//            it.invoke(receiving, this)
+//            save()
+//        }
+//    }
+
+
+
+
+//    fun registerMe() {
+//        context.nodeLabels[labelName] = this
+//    }
+
+//    init {
+//        registerMe()
+//    }
+
+
+
+// TODO maybe: do above methods (sends, get, etc. ) need to be defined here globally instead?
+
+
+// TODO: naming?
+// TODO: bring back as needed based on solve implementation
+
+//fun <R: Node, RL:NodeLabel<R>>RL.receives(
+//    sender: Node,
+//    key:String=autoKey(),
+//    messageBlock: (RL.(Message<RL>)->Unit)?=null,
+//    receiverBlock: ((R)->Unit)?=null
+//) {
+//    val receiver = this.merge(key, messageBlock)
+//    sender.relate(TARGETS, receiver) // TODO: replace with BUMPS
+//    receiverBlock?.invoke(receiver)
+//}
+//
+//
+//fun <N:Node, R:Node, RL:NodeLabel<R>>N.relateMerge(
+//    field: Field<*>,
+//    relatedLabel: RL,
+//    key: String = autoKey(),
+//    messageBlock: (RL.(Message<RL>)->Unit)?=null,
+//    postCreate:(RL.(R)->Unit)? = null,
+//) {
+//    // TODO: complete this...
+//    val relatedNode = relatedLabel.merge(key, messageBlock)
+//    // TODO: add fieldName to the relationship
+//    this.relate(field.relationshipLabel!!, relatedNode) // TODO: guarantee that relationshipLabel not null
+//}
+//
+//// TODO maybe: define this in Node base class instead of here?
+//fun <N:Node>N.relate(field: Field<*>, targetKey: String) {
+//    if (!label.fields.contains(field.name))
+//        // prevents erroneous field-based relationships from being added
+//        throw Exception("Field '${field.name}' not found on '$label' label.")
+//    // TODO: guarantee that relationshipLabel not null
+//    relate(field.relationshipLabel!!, targetKey)
+//}
+//
+//fun <N:Node>N.relate(field: Field<*>, targetNode: Node) { relate(field, targetNode.key) }
+//
+//
+//fun <N:Node, FT:Node, RL:NodeLabel<FT>>N.fieldTo(
+//    field: Field<FT>,
+//    relatedLabel: RL,
+//    key: String = autoKey(),
+//    messageBlock: (RL.(Message<RL>)->Unit)?=null,
+//    postCreate:(RL.(FT)->Unit)?=null,
+//) {
+//    // TODO: complete this...
+//    val relatedNode = relatedLabel.merge(key, messageBlock)
+//    // TODO: add fieldName to the relationship
+//    this.relate(field.relationshipLabel!!, relatedNode) // TODO: guarantee that relationshipLabel not null
+//}

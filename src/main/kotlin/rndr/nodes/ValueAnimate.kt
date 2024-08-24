@@ -33,7 +33,7 @@ open class ValueAnimate(
         init { registerMe() }
     }
 
-    override val label: NodeLabel<out ValueAnimate>  = ValueAnimate
+    override val label: Label<out ValueAnimate>  = ValueAnimate
 
     private inner class AnimationValue(
         var controlValue:Double = 0.0

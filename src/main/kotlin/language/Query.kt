@@ -3,26 +3,41 @@ package rain.language
 import rain.graph.interfacing.*
 import rain.utils.Caching
 
+typealias Filter = (Node)->Boolean
 
+enum class QueryMethod(val directionIsRight: Boolean) {
+    SELECT(true), // selects by label and/or keys, with an optional filter
+    FILTER(true), // filters only
+    CONCAT(true), // concatenates two queries, with an optional filter
+    RELATED_RIGHT(true), // queries nodes connected as targets via relationships, optionally filtering the relationships
+    RELATED_LEFT(false), // queries nodes connected as sources via relationships, optionally filtering the relationships
+    GRAPHABLE(true); // selects by graphable interface (i.e. sub-queries must re-query by key)
+
+    companion object {
+        fun related(directionRight: Boolean=true) =
+            if (directionRight) RELATED_RIGHT else RELATED_LEFT
+    }
+
+}
 
 
 // TODO: consider re-making a QueryInterface
 open class Query(
-    override val method: QueryMethod = QueryMethod.SELECT,
-    override val selectLabelName: String? = null, // used only for SELECT or RELATED_ queries
-    override val selectKeys: Array<out String> = arrayOf(), // used only for SELECT queries
-    override val predicate: Filter? = null,
+    val method: QueryMethod = QueryMethod.SELECT,
+    val selectLabelName: String? = null, // used only for SELECT or RELATED_ queries
+    val selectKeys: Array<out String> = arrayOf(), // used only for SELECT queries
+    val predicate: Filter? = null,
 
-    override var queryFrom: Query? = null,
+    var queryFrom: Query? = null,
 
     // for SELECT queries, this is not defined
     // for CONCAT queries, this is the 2nd of the queries to concat
     // for all other queries, this is an extension of the query // TODO: implement
-    override val queryFrom2: Query? = null,
+    val queryFrom2: Query? = null,
 
-    override val context: Context = LocalContext,
+//    override val context: Context = LocalContext,
 
-    ): QueryInterface, Queryable {
+    ): Queryable {
 
     override fun toString():String = "QUERY:$method - selectLabelName:$selectLabelName, selectKeys:$selectKeys, predicate?:${predicate!=null}, queryFrom?:${queryFrom!=null}, "
 
@@ -31,7 +46,7 @@ open class Query(
     // NOTE: this should be the only point of access with the actual graph...
     override val graphableNodes: Sequence<GraphableNode> get() = context.graph.queryNodes(this)
 
-    open operator fun <T: Node>invoke(label: NodeLabel<out T>): Sequence<T> = graphableNodes.map { label.from(it) }
+    open operator fun <T: Node>invoke(label: Label<out T>): Sequence<T> = graphableNodes.map { label.from(it) }
 
     open operator fun invoke(): Sequence<Node> = graphableNodes.mapNotNull {
         context.nodeFrom(it)
@@ -45,7 +60,7 @@ open class Query(
 
     fun contains(key: String): Boolean = this.indexOfFirst(key) > -1
 
-    fun <T: Node>first(label: NodeLabel<T>): T? = this(label).firstOrNull()
+    fun <T: Node>first(label: Label<T>): T? = this(label).firstOrNull()
 
     val first: Node? get() = this().firstOrNull()
 
@@ -58,7 +73,7 @@ open class Query(
 
 
     open inner class TypedCached<T: Node>(
-        val label: NodeLabel<T>? = null
+        val label: Label<T>? = null
     ) {
         open fun getSequence(): Sequence<T> = invoke(label!!)
 

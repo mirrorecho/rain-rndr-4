@@ -1,24 +1,17 @@
 package rain.language
 
-import rain.graph.interfacing.GraphableItem
 
 
 // ===========================================================================================================
 
 // TODO: worth this extra abstract class?
 abstract class Item(
-    override val key:String,
-): GraphableItem {
+    val key:String,
+) {
 
-    abstract val label: Label<out Item>
+    val properties: MutableMap<String, Any?> = mutableMapOf()
 
-    final override val labels: Array<String> get() = label.allNames
-
-    final override val labelName: String get() = label.labelName
-
-    final override val properties: MutableMap<String, Any?> = mutableMapOf()
-
-    override fun toString():String = "$labelName($key) $properties"
+//    override fun toString():String = "$labelName($key) $properties"
 
     // =====================================================================
     // TODO: worth keeping the fancy properties?? KISS!!!

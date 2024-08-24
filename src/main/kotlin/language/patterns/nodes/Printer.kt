@@ -1,7 +1,7 @@
 package language.patterns.nodes
 
 import org.openrndr.Program
-import rain.language.NodeLabel
+import rain.language.Label
 import rain.language.fields.field
 import rain.language.patterns.Pattern
 import rain.language.patterns.nodes.Event
@@ -24,7 +24,7 @@ open class Printer(
         init { registerMe() }
     }
 
-    override val label: NodeLabel<out Printer> = Printer
+    override val label: Label<out Printer> = Printer
 
     var msg by attach(Printer.msg)
     var renderMe by attach(Printer.renderMe)

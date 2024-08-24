@@ -1,7 +1,7 @@
 package rain.language.fields
 
 import rain.language.Node
-import rain.language.NodeLabel
+import rain.language.Label
 import rain.language.RelationshipLabel
 import rain.language.patterns.Pattern
 import rain.language.patterns.RelatesPattern
@@ -10,7 +10,7 @@ import rain.language.patterns.RelatesPattern
 open class FieldOfNode<T:Node?>(
     name: String,
     val patternFactory: (source: Node)-> Pattern<*>,
-    val label: NodeLabel<T & Any>,
+    val label: Label<T & Any>,
     default: T,
     cascade: Boolean = true
 ): Field<T>(name, default, cascade) {
@@ -43,7 +43,7 @@ open class FieldOfNode<T:Node?>(
 fun <T: Node?> fieldOfNode(
     name: String,
     relationshipLabel: RelationshipLabel,
-    label: NodeLabel<T & Any>,
+    label: Label<T & Any>,
     default: T,
     cascade: Boolean = true,
 ) =

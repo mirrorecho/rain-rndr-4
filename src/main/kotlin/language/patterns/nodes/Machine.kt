@@ -2,14 +2,14 @@ package rain.language.patterns.nodes
 
 import org.openrndr.Program
 import rain.language.Node
-import rain.language.NodeLabel
+import rain.language.Label
 import rain.language.patterns.Pattern
 
 
 open class Machine protected constructor(
     key:String = rain.utils.autoKey(),
 ): Node(key) {
-    abstract class MachineLabel<T:Machine>: NodeLabel<T>() {
+    abstract class MachineLabel<T:Machine>: Label<T>() {
 
     }
 
@@ -19,7 +19,7 @@ open class Machine protected constructor(
         init { registerMe() }
     }
 
-    override val label: NodeLabel<out Machine> = Machine
+    override val label: Label<out Machine> = Machine
 
     open fun gate(onOff: Boolean) {
         isRunning = onOff;
