@@ -1,9 +1,9 @@
 package rain.language
 
+import graph.Item
 import rain.graph.interfacing.*
 import rain.language.fields.Field
 import rain.language.fields.FieldConnected
-import rain.language.fields.field
 import rain.language.patterns.Pattern
 import rain.rndr.nodes.Circle
 import rain.utils.autoKey
@@ -11,38 +11,60 @@ import kotlin.reflect.KMutableProperty0
 
 // ===========================================================================================================
 
+typealias RelationshipRegistry =  MutableMap<String, MutableSet<Relationship>>
+
 open class Node protected constructor(
-    key:String = autoKey(),
+    key:String,
 ): Item(key), Queryable {
-    companion object : Label<Node, Node>(
+    companion object : NodeLabel<Node, Node>(
         null, Node::class, { k-> Node(k) }
     )
+    override val label: Label<*, out Node> = Node
+
+    private val sourcesForRelationships:RelationshipRegistry  = mutableMapOf()
+    private val targetsForRelationships:RelationshipRegistry  = mutableMapOf()
+
+    // TODO maybe: consider allowing null direction to get labels on both directions
+    private fun getRelationshipRegistry(directionIsRight: Boolean): RelationshipRegistry =
+        if (directionIsRight) sourcesForRelationships else targetsForRelationships
+
+    fun registerRelationship(relationship:Relationship, directionIsRight: Boolean) {
+        getRelationshipRegistry(directionIsRight).getOrPut(relationship.label.labelName) { mutableSetOf() }.add(relationship)
+    }
+
+    fun unregisterRelationship(relationship: Relationship, directionIsRight: Boolean) {
+        getRelationshipRegistry(directionIsRight)[relationship.label.labelName]?.remove(relationship)
+    }
+
+    fun getRelationships(relationshipLabel: String, directionIsRight: Boolean): Set<Relationship> =
+        getRelationshipRegistry(directionIsRight)[relationshipLabel].orEmpty()
 
     override val queryMe get() = Query(selectKeys = arrayOf(this.key))
 
-
-    fun delete() {
-        Companion.delete(this)
+    override fun delete() {
+        label.unregisterFromLabel(this.key)
+        sourcesForRelationships.values.forEach { rs-> rs.forEach {
+            it.delete()
+        } }
+        targetsForRelationships.values.forEach { rs-> rs.forEach {
+            it.delete()
+        } }
     }
 
     fun relate(
-        rLabel: RelationshipLabel,
+        label: RelationshipLabel,
         targetKey:String,
         key:String = autoKey()
-    ): Relationship = rLabel.create(this, context.nodeFrom(targetKey)!!, key)
+    ): Relationship? = Node[targetKey]?.let {
+        label.create(this, it, key)
+    }
 
     fun relate(
-        rLabel: RelationshipLabel,
+        label: RelationshipLabel,
         target: Node,
         key:String = autoKey()
-    ): Relationship = rLabel.create(this, target, key)
+    ): Relationship = label.create(this, target, key)
 
-
-    // TODO: review, is this the best implementation of these? (assume yes)
-    fun getGraphableRelationships(relationshipLabelName:String, directionIsRight:Boolean=true) =
-        context.graph.getRelationships(this.key, relationshipLabelName, directionIsRight)
-    fun getRelationships(relationshipLabel:RelationshipLabel, directionIsRight:Boolean=true) =
-        getGraphableRelationships(relationshipLabel.labelName, directionIsRight).map { relationshipLabel.from(it) }
 
     // a managed map of attached ContectedField objects, for mass connecting them
     // TODO maybe: should this just be a list? do we ever need to look up by field name?
@@ -168,19 +190,10 @@ open class Node protected constructor(
 open class Thingy protected constructor(
     key:String = autoKey(),
 ): Node(key) {
-    abstract class ThingyLabel<T: Thingy>: Label<T>() {
-        // add fields here:
-        val thing = field("thing", "One and Two")
-    }
-
-    companion object : ThingyLabel<Thingy>() {
-        // override val parent = ThingyParent // only use if parent label exists
-        override val labelName:String = "Thingy"
-        override fun factory(key:String) = Thingy(key)
-    }
-
-    // note that the NodeLabel<out T> type declaration here is needed so that inheritance works OK
-    override val label: Label<out Thingy> = Thingy
+    companion object : NodeLabel<Node, Thingy>(
+        null, Thingy::class, { k-> Thingy(k) }
+    )
+    override val label: Label<out Node, out Thingy> = Thingy
 
     // attach fields here:
     val thing = attach(Thingy.thing)     // TODO: maybe... eventually use delegation here
@@ -193,20 +206,10 @@ open class Thingy protected constructor(
 open class SpecialThingy protected constructor(
     key:String = autoKey(),
 ): Thingy(key) {
-    abstract class SpecialThingyLabel<T: SpecialThingy>: ThingyLabel<T>() {
-        // add fields here:
-        val specialThing = field("specialThing", "Three")
-    }
-
-    companion object : SpecialThingyLabel<SpecialThingy>() {
-//         override val parent = ThingyParent // only use if parent label exists
-        override val labelName:String = "SpecialThingy"
-        override fun factory(key:String) = SpecialThingy(key)
-        init { registerMe() }
-    }
-
-    // note that the NodeLabel<out T> type declaration here is needed so that inheritance works OK
-    override val label: Label<out SpecialThingy> = SpecialThingy
+    companion object : NodeLabel<Thingy, SpecialThingy>(
+        null, SpecialThingy::class, { k-> SpecialThingy(k) }
+    )
+    override val label: Label<out Thingy, out SpecialThingy> = SpecialThingy
 
     // attach fields here:
     val specialThing = attach(SpecialThingy.specialThing)

@@ -1,15 +1,15 @@
 package rain.graph
 //
-//import rain.graph.interfacing.*
+//import rain._bak.graph.interfacing.*
 //import rain.language.Node
 //import rain.language.Query
 //import rain.language.QueryMethod
 //import rain.language.Relationship
 //import kotlin.Exception
 //
-//class Graph {
-//    // TODO: make private after debugging:
-//
+class Graph {
+    // TODO: make private after debugging:
+
 //    val nodeIndex: MutableMap<String, Node> = mutableMapOf()
 //    val nodeLabelIndex: MutableMap<String, MutableMap<String, Node>> = mutableMapOf()
 //
@@ -48,15 +48,15 @@ package rain.graph
 //
 //    // =================================================================================
 //
-////    override fun create(node: GraphableNode) {
-////        allNodes.putIfAbsent(node.key,
-////            GraphNode(node.key, node.labels, node.properties).also {
-////                node.labels.forEach { label -> addLabelIndex(label, it) }
-////            }
-////        )?.let {
-////            throw Exception("Node ${node.key} already exists in graph. So it can not be created.")
-////        }
-////    }
+//    override fun create(node: GraphableNode) {
+//        allNodes.putIfAbsent(node.key,
+//            GraphNode(node.key, node.labels, node.properties).also {
+//                node.labels.forEach { label -> addLabelIndex(label, it) }
+//            }
+//        )?.let {
+//            throw Exception("Node ${node.key} already exists in graph. So it can not be created.")
+//        }
+//    }
 //
 //    override fun create(relationship: GraphableRelationship) {
 //        nodeIndex[relationship.source.key]?.let { source ->
@@ -166,54 +166,54 @@ package rain.graph
 //
 //    val size get() = nodeSize + relationshipSize
 //
-//    // =================================================================================
-//    // =================================================================================
-//
-//    fun queryNodes(query: Query): Sequence<GraphNode> =
-//        when (query.method) {
-//            QueryMethod.SELECT -> sequence {
-//                (query.selectLabelName?.let { nodeLabelIndex[it].orEmpty() } ?: nodeIndex).let {
-//                    if (query.selectKeys.isEmpty()) yieldAll(it.values)
-//                    else yieldAll(query.selectKeys.mapNotNull { k-> it[k] })
-//                }
-//            }.filterBy(query)
-//
-//            QueryMethod.GRAPHABLE -> sequence {
-//                yieldAll(query.graphableNodes.mapNotNull { nodeIndex[it.key] })
-//            }.filterBy(query) // TODO: worth keeping this filterBy here? (probably yes, for consistency, but not used for Patterns)
-//
-//            QueryMethod.FILTER -> sequence {
-//                query.queryFrom?.let { q ->
-//                    yieldAll(queryNodes(q).filterBy(query))
-//                }
-//            }
-//
-//            QueryMethod.RELATED_RIGHT, QueryMethod.RELATED_LEFT -> sequence {
-//                query.queryFrom?.let { q ->
-//                    queryNodes(q).forEach { n ->
-//                        n.getLabelsToRelationships(query.method.directionIsRight).let { ltr ->
-//                            if (query.selectLabelName == null)
-//                                ltr.values.forEach { rs -> yieldAll(rs) }
-//                            else
-//                                ltr[query.selectLabelName]?.let { rs -> yieldAll(rs) }
-//                        }
-//                    }
-//                }
-//            }.filterBy(query).map { it.directedTarget(query.method.directionIsRight) }
-//
-//            QueryMethod.CONCAT -> sequence {
-//                query.queryFrom?.let { q -> yieldAll(queryNodes(q)) }
-//                query.queryFrom2?.let { q -> yieldAll(queryNodes(q)) }
-//            }.filterBy(query)
-//        }
-//
-//
-//    private fun <T:GraphableItem>Sequence<T>.filterBy(query: QueryInterface):Sequence<T> {
-//        query.predicate?.let { p-> return this.filter(p) }
-//        return this
-//    }
-//
-//}
+    // =================================================================================
+    // =================================================================================
+
+    fun queryNodes(query: Query): Sequence<GraphNode> =
+        when (query.method) {
+            QueryMethod.SELECT -> sequence {
+                (query.selectLabelName?.let { nodeLabelIndex[it].orEmpty() } ?: nodeIndex).let {
+                    if (query.selectKeys.isEmpty()) yieldAll(it.values)
+                    else yieldAll(query.selectKeys.mapNotNull { k-> it[k] })
+                }
+            }.filterBy(query)
+
+            QueryMethod.GRAPHABLE -> sequence {
+                yieldAll(query.graphableNodes.mapNotNull { nodeIndex[it.key] })
+            }.filterBy(query) // TODO: worth keeping this filterBy here? (probably yes, for consistency, but not used for Patterns)
+
+            QueryMethod.FILTER -> sequence {
+                query.queryFrom?.let { q ->
+                    yieldAll(queryNodes(q).filterBy(query))
+                }
+            }
+
+            QueryMethod.RELATED_RIGHT, QueryMethod.RELATED_LEFT -> sequence {
+                query.queryFrom?.let { q ->
+                    queryNodes(q).forEach { n ->
+                        n.getLabelsToRelationships(query.method.directionIsRight).let { ltr ->
+                            if (query.selectLabelName == null)
+                                ltr.values.forEach { rs -> yieldAll(rs) }
+                            else
+                                ltr[query.selectLabelName]?.let { rs -> yieldAll(rs) }
+                        }
+                    }
+                }
+            }.filterBy(query).map { it.directedTarget(query.method.directionIsRight) }
+
+            QueryMethod.CONCAT -> sequence {
+                query.queryFrom?.let { q -> yieldAll(queryNodes(q)) }
+                query.queryFrom2?.let { q -> yieldAll(queryNodes(q)) }
+            }.filterBy(query)
+        }
+
+
+    private fun <T:GraphableItem>Sequence<T>.filterBy(query: QueryInterface):Sequence<T> {
+        query.predicate?.let { p-> return this.filter(p) }
+        return this
+    }
+
+}
 //
 //
 //

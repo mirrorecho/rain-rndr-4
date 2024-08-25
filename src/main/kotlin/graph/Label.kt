@@ -1,45 +1,115 @@
 package rain.language
 
+import graph.Item
+import rain.utils.autoKey
 import kotlin.reflect.KClass
 
 
 
-abstract class Label<PT:Item, T:PT>(
+abstract class Label<PT: Item, T:PT>(
     val parent: Label<*, PT>? = null,
-    val kClass: KClass<T>,
-    val factory: (String) -> T,
+    val kClass: KClass<T>
 ) {
-    val name: String = kClass.simpleName ?: "Node"
 
-    val registry: MutableMap<String, T> = mutableMapOf()
+    open val labelName: String = kClass.simpleName ?: "Node"
+
+    internal val registry: MutableMap<String, T> = mutableMapOf()
 
     val ancestorLabels: Array<Label<*,*>> =
         if (parent==null) arrayOf()
         else arrayOf(parent, *parent.ancestorLabels)
 
-    private fun register(item: T) {
+//    // TODO maybe: consider whether implementing childLabels would be useful, for now, KISS
+//        would be needed if wanted a clear() method to clear the entire registry graph
+//    val childLabels: MutableMap<String, Label<*, *>> = mutableMapOf()
+//
+//    fun registerChildLabel(label:Label<*, *>) {
+//        childLabels[label.labelName] = label
+//    }
+
+    val size: Int get() = registry.size
+
+    operator fun contains(key: String): Boolean = key in registry
+
+    operator fun contains(item: Item): Boolean = item.key in registry
+
+    protected fun register(item: T) {
+        registry.putIfAbsent(item.key, item)?.let {
+            throw Exception("Can not register item with key '${item.key} as a $labelName because it already exists.")
+        }
         registry[item.key] = item
         parent?.register(item)
     }
 
-    fun get(key: String): T? = registry[key]
+    operator fun get(key: String): T? = registry[key]
 
     // TODO: implement get queries
 
-    fun create(key:String):T = factory(key).also { register(it) }
-
-    fun from(node: PT): T? = registry[node.key]
-
-    fun delete(key:String) {
-        registry.remove(key)
-        parent?.delete(key)
+    // note: only makes sense for nodes (since relationships don't have parent/child labels)
+    fun from(item: Item): T? {
+        registry[item.key]?.let { return it }
+        println("WARNING: cannot get node of type associated with label '$labelName', since node with key ${node.key} is not in the label registry. Returning null instead.")
+        return null
     }
 
-    fun delete(node:T) { delete(node.key) }
+    // warning, should only be called from the item delete() method
+    // to guarantee that item is deleted from most specific child label
+    internal abstract fun unregisterFromLabel(key:String): Unit
 
-    override fun toString() = "NodeLabel(name=$name)"
+    override fun toString() = "NodeLabel(name=$labelName)"
 
 }
+
+// ==========================================================================
+
+abstract class NodeLabel<PT:Node, T:PT>(
+    parent: Label<*, PT>? = null,
+    kClass: KClass<T>,
+    val factory: (String) -> T,
+): Label<PT, T>(parent, kClass) {
+
+    fun create(key:String = autoKey()):T = factory(key).also { register(it) }
+
+    // TODO maybe: implement merge()
+
+    override fun unregisterFromLabel(key: String) {
+        parent?.unregisterFromLabel(key)
+        registry.remove(key)
+    }
+
+}
+
+// ==========================================================================
+
+class RelationshipLabel(
+    override val labelName:String,
+): Label<Relationship, Relationship>(
+    null,
+    Relationship::class
+) {
+
+    override fun unregisterFromLabel(key:String) {
+        registry.remove(key)?.also {
+            // TODO: test to make sure registration removed
+            it.source.unregisterRelationship(it, true)
+            it.target.unregisterRelationship(it, false)
+        }
+    }
+
+
+    fun create(source:Node, target:Node, key:String= autoKey()):Relationship =
+        Relationship(this, source, target, key).also {
+            register(it)
+            source.registerRelationship(it, true)
+            target.registerRelationship(it, false)
+        }
+
+    // TODO maybe: implement merge()
+
+}
+
+
+
 
 //    fun merge(
 //        key: String = autoKey(),

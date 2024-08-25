@@ -1,9 +1,10 @@
 package rain.language
 
+import graph.Item
 import rain.graph.interfacing.*
 import rain.utils.Caching
 
-typealias Filter = (Node)->Boolean
+typealias Filter = (Item)->Boolean
 
 enum class QueryMethod(val directionIsRight: Boolean) {
     SELECT(true), // selects by label and/or keys, with an optional filter
@@ -20,11 +21,28 @@ enum class QueryMethod(val directionIsRight: Boolean) {
 
 }
 
+abstract class Query<T: Item> {
+    abstract val label: Label<*, T>
+
+    open operator fun <T: Item>invoke(label: Label<*, T>): Sequence<T>
+            = invoke().map { label.from(it)!! }
+
+    abstract operator fun invoke(): Sequence<T>
+
+
+class SelectQuery<T: Item>(
+    override val label: Label<*, T>,
+    vararg val keys: String,
+): Query<T>() {
+    abstract operator fun invoke(): Sequence<T>
+}
+
 
 // TODO: consider re-making a QueryInterface
-open class Query(
+// TODO: is this simply a sub-class of (or extensions to), sequences of items?
+open class QueryOld<T: Item>(
     val method: QueryMethod = QueryMethod.SELECT,
-    val selectLabelName: String? = null, // used only for SELECT or RELATED_ queries
+    val label: Label<*, T>,
     val selectKeys: Array<out String> = arrayOf(), // used only for SELECT queries
     val predicate: Filter? = null,
 
@@ -44,12 +62,50 @@ open class Query(
     override val queryMe get() = this
 
     // NOTE: this should be the only point of access with the actual graph...
-    override val graphableNodes: Sequence<GraphableNode> get() = context.graph.queryNodes(this)
 
-    open operator fun <T: Node>invoke(label: Label<out T>): Sequence<T> = graphableNodes.map { label.from(it) }
+    open operator fun <T: Item>invoke(label: Label<*, T>): Sequence<T>
+        = invoke().map { label.from(it)!! }
 
-    open operator fun invoke(): Sequence<Node> = graphableNodes.mapNotNull {
-        context.nodeFrom(it)
+    open operator fun invoke(): Sequence<T> =
+        when (method) {
+            QueryMethod.SELECT -> sequence {
+                    if (selectKeys.isEmpty()) yieldAll(label.registry.values)
+                    else yieldAll(selectKeys.mapNotNull { k-> label.registry[k] })
+            }.filterBy(this)
+
+            QueryMethod.GRAPHABLE -> sequence {
+                yieldAll(graphableNodes.mapNotNull { nodeIndex[it.key] })
+            }.filterBy(this) // TODO: worth keeping this filterBy here? (probably yes, for consistency, but not used for Patterns)
+
+            QueryMethod.FILTER -> sequence {
+                queryFrom?.let { q ->
+                    yieldAll(queryNodes(q).filterBy(this))
+                }
+            }
+
+            QueryMethod.RELATED_RIGHT, QueryMethod.RELATED_LEFT -> sequence {
+                queryFrom?.let { q ->
+                    queryNodes(q).forEach { n ->
+                        n.getLabelsToRelationships(query.method.directionIsRight).let { ltr ->
+                            if (query.selectLabelName == null)
+                                ltr.values.forEach { rs -> yieldAll(rs) }
+                            else
+                                ltr[selectLabelName]?.let { rs -> yieldAll(rs) }
+                        }
+                    }
+                }
+            }.filterBy(this).map { it.directedTarget(method.directionIsRight) }
+
+            QueryMethod.CONCAT -> sequence {
+                query.queryFrom?.let { q -> yieldAll(queryNodes(q)) }
+                query.queryFrom2?.let { q -> yieldAll(queryNodes(q)) }
+            }.filterBy(this)
+        }
+
+
+    private fun <T:Item>Sequence<T>.filterBy(query: Query<T>):Sequence<T> {
+        query.predicate?.let { p-> return this.filter(p) }
+        return this
     }
 
     inline fun forEach(block: (Node)->Unit) = invoke().forEach(block)

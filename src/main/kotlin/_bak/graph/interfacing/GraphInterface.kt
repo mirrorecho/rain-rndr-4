@@ -4,8 +4,6 @@ import rain.graph.Graph
 import rain.graph.GraphNode
 import rain.language.Query
 
-typealias LabelDirected = Pair<String, Boolean?>
-
 
 //interface GraphInterface {
 //
