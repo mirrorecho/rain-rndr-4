@@ -1,52 +1,117 @@
-package rain.language
+package graph.quieries
 
 import graph.Item
 import rain.graph.interfacing.*
+import rain.language.Label
+import rain.language.Node
+import rain.language.RelationshipLabel
 import rain.utils.Caching
 
-typealias Filter = (Item)->Boolean
+typealias FilterPredicate = (Item)->Boolean
 
-enum class QueryMethod(val directionIsRight: Boolean) {
-    SELECT(true), // selects by label and/or keys, with an optional filter
-    FILTER(true), // filters only
-    CONCAT(true), // concatenates two queries, with an optional filter
-    RELATED_RIGHT(true), // queries nodes connected as targets via relationships, optionally filtering the relationships
-    RELATED_LEFT(false), // queries nodes connected as sources via relationships, optionally filtering the relationships
-    GRAPHABLE(true); // selects by graphable interface (i.e. sub-queries must re-query by key)
 
-    companion object {
-        fun related(directionRight: Boolean=true) =
-            if (directionRight) RELATED_RIGHT else RELATED_LEFT
-    }
+interface Queryable<T: Item> {
+
+    operator fun <QT: Item>get(query: Query<T, QT>) = QueryExecution(this, query)
+
+    fun filter(predicate: FilterPredicate) = QueryExecution(this, Filter(predicate))
+
+    fun asSequence(): Sequence<T>
 
 }
 
-abstract class Query<T: Item> {
-    abstract val label: Label<*, T>
+// ========================================================================
 
-    open operator fun <T: Item>invoke(label: Label<*, T>): Sequence<T>
+open class Select<T: Item>(
+    private val selectSequence: Sequence<T>
+): Queryable<T> {
+    override fun asSequence(): Sequence<T> = selectSequence
+}
+
+// ========================================================================
+
+fun <T:Item>Sequence<T>.asQuery(): Select<T> = Select(this)
+
+fun <T:Item>Array<T>.asQuery(): Select<T> = Select(this.asSequence())
+
+fun <T:Item>Iterable<T>.asQuery(): Select<T> = Select(this.asSequence())
+
+// ========================================================================
+
+interface Query<FT: Item, T: Item> {
+
+    fun asSequence(queryFrom: Sequence<FT>): Sequence<T>
+
+    fun filter(predicate: FilterPredicate) = ConnectQuery(this, Filter(predicate))
+
+    operator fun <QT:Item> times(query2:Query<T, QT>) = ConnectQuery(this, query2)
+
+    operator fun plus(query2:Query<*, T>) = ConcatQuery(this, query2)
+
+}
+
+class QueryExecution<FT:Item, T:Item>(
+    val queryable: Queryable<FT>,
+    val query: Query<FT, T>,
+) {
+    operator fun invoke(): Sequence<T>
+            = query.asSequence(queryable.asSequence())
+
+    operator fun invoke(label: Label<*, T>): Sequence<T>
             = invoke().map { label.from(it)!! }
+}
 
-    abstract operator fun invoke(): Sequence<T>
+
+open class ConnectQuery<FT:Item, IT:Item,  T:Item>(
+    val query1: Query<FT, IT>,
+    val query2: Query<IT, T>,
+): Query<FT, T> {
+    override fun asSequence(queryFrom: Sequence<FT>): Sequence<T>
+        = query2.asSequence(query1.asSequence(queryFrom))
+}
+
+open class ConcatQuery<FT:Item, FT2:Item,  T:Item>(
+    val query1: Query<FT, T>,
+    val query2: Query<FT2, T>,
+): Query<FT, T> {
+    override fun asSequence(queryFrom: Sequence<FT>): Sequence<T>
+            = query1.asSequence(queryFrom) + query1.asSequence(queryFrom)
+}
+
+open class RelatedQuery(
+    val label: RelationshipLabel,
+    val directionIsRight: Boolean = true
+): Query<Node, Node> {
+    override fun asSequence(queryFrom: Sequence<Node>): Sequence<Node> =
+        sequence {
+            queryFrom.forEach {
+                it.getRelationships(label.labelName, directionIsRight).map { r->
+                    yield(r.directedTarget(directionIsRight))
+                }
+            }
+        }
+}
 
 
-class SelectQuery<T: Item>(
-    override val label: Label<*, T>,
-    vararg val keys: String,
-): Query<T>() {
-    abstract operator fun invoke(): Sequence<T>
+open class Filter<T: Item>(
+    val predicate: FilterPredicate,
+): Query<T, T> {
+
+//    fun asSequence(queryFrom: Queryable<*>): Sequence<T>
+    override fun asSequence(queryFrom: Sequence<T>): Sequence<T> =
+        queryFrom.filter(predicate)
 }
 
 
 // TODO: consider re-making a QueryInterface
 // TODO: is this simply a sub-class of (or extensions to), sequences of items?
-open class QueryOld<T: Item>(
-    val method: QueryMethod = QueryMethod.SELECT,
-    val label: Label<*, T>,
+//open class QueryOld<T: Item>(
+//    val method: QueryMethod = QueryMethod.SELECT,
+//    val label: Label<*, T>,
     val selectKeys: Array<out String> = arrayOf(), // used only for SELECT queries
-    val predicate: Filter? = null,
+    val predicate: FilterPredicate? = null,
 
-    var queryFrom: Query? = null,
+//    var queryFrom: Query? = null,
 
     // for SELECT queries, this is not defined
     // for CONCAT queries, this is the 2nd of the queries to concat

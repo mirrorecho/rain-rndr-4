@@ -1,9 +1,5 @@
 package rain.graph.interfacing
 
-import rain.graph.Graph
-import rain.graph.GraphNode
-import rain.language.Query
-
 
 //interface GraphInterface {
 //

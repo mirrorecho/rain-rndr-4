@@ -1,5 +1,6 @@
 package rain.language.patterns
 
+import graph.quieries.Query
 import rain.graph.interfacing.GraphableNode
 import rain.language.*
 import rain.language.patterns.nodes.Cue

@@ -1,6 +1,8 @@
 package rain.language
 
 import graph.Item
+import graph.quieries.Select
+import graph.quieries.asQuery
 import rain.utils.autoKey
 import kotlin.reflect.KClass
 
@@ -42,6 +44,9 @@ abstract class Label<PT: Item, T:PT>(
     }
 
     operator fun get(key: String): T? = registry[key]
+
+    fun select(vararg keys: String): Select<T> =
+        keys.asSequence().mapNotNull { registry[it] }.asQuery()
 
     // TODO: implement get queries
 

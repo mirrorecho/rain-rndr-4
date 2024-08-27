@@ -7,18 +7,18 @@ import rain.language.Label
 // (because Kotlin data classes don't allow inheritance, and inheritance
 // is important for this data modeling)
 
-abstract class Item(
-    val key:String,
-) {
+interface Item {
 
-    abstract fun delete()
+    val key:String
 
-    // TODO: consider making this private
-    val properties: MutableMap<String, Any?> = mutableMapOf()
+    fun delete()
 
-    open operator fun get(name:String) = this.properties[name]
+    // TODO: consider making this private or protected
+    val properties: MutableMap<String, Any?> // = mutableMapOf()
 
-    open operator fun set(name:String, value:Any?) { this.properties[name]=value }
+    open operator fun get(name:String) = properties[name]
+
+    open operator fun set(name:String, value:Any?) { properties[name]=value }
 
     abstract val label: Label<*, out Item>
 

@@ -1,6 +1,8 @@
 package rain.language
 
 import graph.Item
+import graph.quieries.Query
+import graph.quieries.Queryable
 import rain.graph.interfacing.*
 import rain.language.fields.Field
 import rain.language.fields.FieldConnected
