@@ -23,28 +23,23 @@ enum class Gate(val startGate: Boolean?, val endGate:Boolean?) {
 open class Event protected constructor(
     key:String = autoKey(),
 ): Node(key) {
+    companion object : NodeLabel<Node, Event>(
+        null, Event::class, { k-> Event(k) }
+    )
+    override val label: Label<out Node, out Event> = Event
 
-    abstract class EventLabel<T:Event>: Label<T>() {
-        val dur = field("dur", 0.0, false)
-        val simultaneous = field("simultaneous", false, false)
-        val gate = field("gate", Gate.NONE, false)
-        val bumps = fieldOfNode("bumps", BUMPS, Machine, null)
-        val bumping = field("bumping", true, false)
-    }
-
-    companion object : EventLabel<Event>() {
-        override val labelName:String = "Event"
-        override fun factory(key:String) = Event(key)
-        init { registerMe() }
-    }
-
-    override val label: Label<out Event> = Event
-
-    var dur by attach(Event.dur)
-    var simultaneous by attach(Event.simultaneous)
-    var gate by attach(Event.gate)
-    var bumps by attach(Event.bumps)
-    var bumping by attach(Event.bumping)
+//    abstract class EventLabel<T:Event>: Label<T>() {
+//        val dur = field("dur", 0.0, false)
+//        val simultaneous = field("simultaneous", false, false)
+//        val gate = field("gate", Gate.NONE, false)
+//        val bumps = fieldOfNode("bumps", BUMPS, Machine, null)
+//        val bumping = field("bumping", true, false)
+//    }
+//    var dur by attach(Event.dur)
+//    var simultaneous by attach(Event.simultaneous)
+//    var gate by attach(Event.gate)
+//    var bumps by attach(Event.bumps)
+//    var bumping by attach(Event.bumping)
 
     // TODO: is this by lazy effective enough for "caching"?
     val treePattern: CuedChildrenPattern<Event> by lazy { CuedChildrenPattern(this) }

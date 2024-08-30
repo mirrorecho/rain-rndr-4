@@ -11,34 +11,33 @@ import rain.rndr.relationships.*
 
 open class Color(
     key:String = autoKey(),
-): Machine(key) {
+) : Machine(key) {
+    companion object : NodeLabel<Machine, Color>(
+        Machine, Color::class, { k -> Color(k) }
+    )
 
-    abstract class ColorLabel<T:Color>: MachineLabel<T>() {
-        val h = field("h", H, 0.0)
-        val s = field("s", S, 0.9)
-        val v = field("v", V, 0.9)
-        val a = field("a", A, 0.9)
-    }
+//    abstract class ColorLabel<T:Color>: MachineLabel<T>() {
+//        val h = field("h", H, 0.0)
+//        val s = field("s", S, 0.9)
+//        val v = field("v", V, 0.9)
+//        val a = field("a", A, 0.9)
+//    }
 
-    companion object : ColorLabel<Color>() {
-        override val parent = Machine
-        override val labelName:String = "Color"
-        override fun factory(key:String) = Color(key)
-        init { registerMe() }
+//    companion object : ColorLabel<Color>() {
+//
+//        val WHITE = Color.create("COLOR_WHITE")
+//    }
 
-        val WHITE = Color.create("COLOR_WHITE")
-    }
 
-    override val label: Label<out Color> = Color
 
-    val h by attach(Color.h)
-    val s by attach(Color.s)
-    val v by attach(Color.v)
-    val a by attach(Color.a)
+//    val h by attach(Color.h)
+//    val s by attach(Color.s)
+//    val v by attach(Color.v)
+//    val a by attach(Color.a)
 
-    fun colorHSVa() = ColorHSVa(h, s, v, a)
-
-    fun colorRGBa(): ColorRGBa = colorHSVa().toRGBa()
+//    fun colorHSVa() = ColorHSVa(h, s, v, a)
+//
+//    fun colorRGBa(): ColorRGBa = colorHSVa().toRGBa()
 
 }
 

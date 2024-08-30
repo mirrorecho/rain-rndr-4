@@ -3,7 +3,7 @@ package rain.sandbox.solve
 //
 //
 //import rain.language.*
-//import rain.language.patterns.nodes.*
+//import rain.language.nodes.*
 //import rain.rndr.nodes.Circle
 //import rain.rndr.nodes.Position
 //import rain.rndr.nodes.Value

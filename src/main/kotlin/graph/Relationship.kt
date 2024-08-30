@@ -1,7 +1,7 @@
 package rain.language
 
 import graph.Item
-import rain.graph.GraphNode
+import graph.quieries.Queryable
 import rain.utils.*
 
 
@@ -10,8 +10,9 @@ open class Relationship internal constructor(
     val source: Node,
     val target: Node,
     key:String,
-    ): Item(key) {
+    ): Item(key), Queryable<Relationship> {
 
+    override fun asSequence(): Sequence<Relationship> = sequenceOf(this)
 
 //    override val label: RelationshipLabel<*, out Relationship> = Relationship
 
@@ -19,7 +20,7 @@ open class Relationship internal constructor(
         label.unregisterFromLabel(this.key)
     }
 
-    override fun toString():String = "(${source.key} ${Node.Companion.labelName} ${target.key} | $key) $properties"
+    override fun toString():String = "(${source.key} ${Node.labelName} ${target.key} | $key) $properties"
 
     fun directedTarget(directionIsRight:Boolean): Node =
         if (directionIsRight) target else source
@@ -44,7 +45,7 @@ fun relate(
 
 // =========================================================================
 
-// TODO: would these be useful?
+// TODO maybe: would these be useful?
 
 //typealias LabelDirected = Pair<String, Boolean?>
 

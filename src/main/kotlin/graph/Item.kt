@@ -3,18 +3,19 @@ package graph
 import rain.language.Label
 
 
-// NOTE: unlike in the python implementation, not using data classes for subsclasses of this
+// NOTE: unlike in the python implementation, not using data classes
 // (because Kotlin data classes don't allow inheritance, and inheritance
 // is important for this data modeling)
 
-interface Item {
-
+abstract class Item(
     val key:String
+) {
 
-    fun delete()
+
+    abstract fun delete()
 
     // TODO: consider making this private or protected
-    val properties: MutableMap<String, Any?> // = mutableMapOf()
+    val properties: MutableMap<String, Any?>  = mutableMapOf()
 
     open operator fun get(name:String) = properties[name]
 
@@ -22,11 +23,11 @@ interface Item {
 
     abstract val label: Label<*, out Item>
 
+    override fun toString():String = "${label.labelName}($key) $properties"
+
     // ================================================================================
 
-    // TODO: used?
-
-//    override fun toString():String = "$labelName($key) $properties"
+    // TODO maybe: used?
 
 //    fun anyPropertyMatches(matchProperties: Map<String, Any?>): Boolean {
 //        return matchProperties.asIterable().indexOfFirst {

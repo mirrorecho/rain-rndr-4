@@ -1,15 +1,13 @@
 package rain.sandbox.solve
 
-import language.patterns.nodes.EventRandom
-import language.patterns.nodes.Printer
+import language.nodes.EventRandom
+import language.nodes.Printer
 import org.openrndr.animatable.easing.Easing
-import rain.graph.Graph
-import rain.language.fields.FieldConnected
+import rain.language.Node
 import rain.language.patterns.nodes.*
+import rain.language.patterns.relationships.BUMPS
 import rain.rndr.nodes.Circle
 import rain.rndr.nodes.ValueAnimate
-import rain.rndr.relationships.RADIUS
-import rain.utils.cycleOf
 
 fun main()  {
     solve0()
@@ -40,32 +38,41 @@ fun solve0() {
     // TODO: util function to easily create Event children with field values
     //  for a particular receiver
 
-    val s1 = seq {
-        extend(Event) {
-            Event.dur(1.0, 2.0, 1.0)
-            Printer.msg("I am message A!", "I am messageB!", "I am messageC!")
-            Printer.renderMe.cycle(true)
-        }
-    }
-    val s2 = EventRandom.seq {
-        times = 4
-        extend(Event) {
-            Event.dur(0.5, 0.5, 0.5)
-            Printer.msg("AAA!", "BBB!", "CCC!")
-            Printer.renderMe.cycle(true)
-        }
-    }
+    val n1 = Node.create("N1")
+    val n2 = Node.create("N1")
 
-    val er = EventRandom.seq(s1, s2) {
-        times = 4
-    }
+    n1.relate(BUMPS, n2)
 
-//    println(e.treePattern)
+    val doubleNegativeBump = -BUMPS * -BUMPS * -BUMPS
 
-    seq(s1) {
-        bumps = Printer.create()
-        gate = Gate.ON_OFF
-    }.play()
+    val n2a = n1[ doubleNegativeBump ].filter { it.key=="YO" } [+BUMPS] .first
+
+//    val s1 = seq {
+//        extend(Event) {
+//            Event.dur(1.0, 2.0, 1.0)
+//            Printer.msg("I am message A!", "I am messageB!", "I am messageC!")
+//            Printer.renderMe.cycle(true)
+//        }
+//    }
+//    val s2 = EventRandom.seq {
+//        times = 4
+//        extend(Event) {
+//            Event.dur(0.5, 0.5, 0.5)
+//            Printer.msg("AAA!", "BBB!", "CCC!")
+//            Printer.renderMe.cycle(true)
+//        }
+//    }
+//
+//    val er = EventRandom.seq(s1, s2) {
+//        times = 4
+//    }
+//
+////    println(e.treePattern)
+//
+//    seq(s1) {
+//        bumps = Printer.create()
+//        gate = Gate.ON_OFF
+//    }.play()
 
 
 //    val eNone = Event.create {
@@ -92,46 +99,46 @@ fun solve0() {
 
 }
 
-// -------------------------------------------------
-
-fun solve1() {
-    Event.create {
-        gate = Gate.ON_OFF
-        dur = 4.0
-        bumps = Circle.create { h=40.0 }
-    }.play()
-}
-
-// -------------------------------------------------
-
-fun solve2() {
-    val radiusAnimated = ValueAnimate.create("RADIUS") {
-        value = 200.0
-        easing = Easing.CubicInOut
-    }
-
-    // TODO: simplify this!!!
-
-    val eRadius = Event.create("ER") {
-        gate = Gate.ON_OFF
-        dur = 2.0
-        this[ValueAnimate.initValue] = 22.0
-        this[ValueAnimate.animateDur] = 2.0
-        this[ValueAnimate.value] = 290.0
-        bumps = radiusAnimated
-    }
-    val eCircle = Event.create("EC") {
-        gate = Gate.ON_OFF
-        dur = 2.0
-        bumps = Circle.create("CIRCLE") {
-            ::radius.connect(radiusAnimated, "value")
-            h=240.0
-        }
-
-    }
-
-    val anim = par(eRadius, eCircle)
-
-    seq(anim, anim).play()
-
-}
+//// -------------------------------------------------
+//
+//fun solve1() {
+//    Event.create {
+//        gate = Gate.ON_OFF
+//        dur = 4.0
+//        bumps = Circle.create { h=40.0 }
+//    }.play()
+//}
+//
+//// -------------------------------------------------
+//
+//fun solve2() {
+//    val radiusAnimated = ValueAnimate.create("RADIUS") {
+//        value = 200.0
+//        easing = Easing.CubicInOut
+//    }
+//
+//    // TODO: simplify this!!!
+//
+//    val eRadius = Event.create("ER") {
+//        gate = Gate.ON_OFF
+//        dur = 2.0
+//        this[ValueAnimate.initValue] = 22.0
+//        this[ValueAnimate.animateDur] = 2.0
+//        this[ValueAnimate.value] = 290.0
+//        bumps = radiusAnimated
+//    }
+//    val eCircle = Event.create("EC") {
+//        gate = Gate.ON_OFF
+//        dur = 2.0
+//        bumps = Circle.create("CIRCLE") {
+//            ::radius.connect(radiusAnimated, "value")
+//            h=240.0
+//        }
+//
+//    }
+//
+//    val anim = par(eRadius, eCircle)
+//
+//    seq(anim, anim).play()
+//
+//}

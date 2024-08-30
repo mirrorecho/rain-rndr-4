@@ -19,7 +19,7 @@ class Lazyish<T>(val block: ()->T) {
 
 }
 
-
+// TODO: used?
 class Caching<T>(val block: ()->T) {
     fun reset() { myValue = null }
 

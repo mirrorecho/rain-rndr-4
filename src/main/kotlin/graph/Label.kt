@@ -1,8 +1,7 @@
 package rain.language
 
 import graph.Item
-import graph.quieries.Select
-import graph.quieries.asQuery
+import graph.quieries.*
 import rain.utils.autoKey
 import kotlin.reflect.KClass
 
@@ -11,7 +10,7 @@ import kotlin.reflect.KClass
 abstract class Label<PT: Item, T:PT>(
     val parent: Label<*, PT>? = null,
     val kClass: KClass<T>
-) {
+): QueryableMulti<T> {
 
     open val labelName: String = kClass.simpleName ?: "Node"
 
@@ -31,10 +30,6 @@ abstract class Label<PT: Item, T:PT>(
 
     val size: Int get() = registry.size
 
-    operator fun contains(key: String): Boolean = key in registry
-
-    operator fun contains(item: Item): Boolean = item.key in registry
-
     protected fun register(item: T) {
         registry.putIfAbsent(item.key, item)?.let {
             throw Exception("Can not register item with key '${item.key} as a $labelName because it already exists.")
@@ -45,15 +40,30 @@ abstract class Label<PT: Item, T:PT>(
 
     operator fun get(key: String): T? = registry[key]
 
-    fun select(vararg keys: String): Select<T> =
-        keys.asSequence().mapNotNull { registry[it] }.asQuery()
+    operator fun get(vararg keys: String): Select<T> =
+        keys.asSequence().mapNotNull { registry[it] }.asSelect()
 
-    // TODO: implement get queries
+    override fun asSequence(): Sequence<T> = registry.values.asSequence()
+
+    // =================================
+    // overriding these indexing-related methods to perform better by accessing base label's registry map directly
+
+    override fun asKeys(): Sequence<String> = registry.keys.asSequence()
+
+    override fun indexOf(item: T): Int = registry.values.indexOf(item)
+
+    override fun indexOf(key:String): Int = registry.keys.indexOf(key)
+
+    override operator fun contains(item: T) = registry.containsValue(item)
+
+    override operator fun contains(key: String) = registry.containsKey(key)
+
+    // =================================
 
     // note: only makes sense for nodes (since relationships don't have parent/child labels)
     fun from(item: Item): T? {
         registry[item.key]?.let { return it }
-        println("WARNING: cannot get node of type associated with label '$labelName', since node with key ${node.key} is not in the label registry. Returning null instead.")
+        println("WARNING: cannot get node of type associated with label '$labelName', since node with key ${item.key} is not in the label registry. Returning null instead.")
         return null
     }
 
@@ -92,6 +102,12 @@ class RelationshipLabel(
     null,
     Relationship::class
 ) {
+
+    private val myRightQuery = RelatedQuery(this)
+    operator fun unaryPlus() = myRightQuery
+
+    private val myLeftQuery = RelatedQuery(this)
+    operator fun unaryMinus() = myLeftQuery
 
     override fun unregisterFromLabel(key:String) {
         registry.remove(key)?.also {

@@ -1,4 +1,4 @@
-package language.patterns.nodes
+package language.nodes
 
 import rain.language.*
 import rain.language.fields.*
