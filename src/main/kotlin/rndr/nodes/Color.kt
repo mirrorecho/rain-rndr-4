@@ -1,43 +1,44 @@
 package rain.rndr.nodes
 
+import org.openrndr.Program
+import org.openrndr.animatable.Animatable
 import rain.utils.*
 
 import org.openrndr.color.ColorHSVa
 import org.openrndr.color.ColorRGBa
 import rain.language.*
 import rain.language.fields.field
+import rain.language.patterns.nodes.Colorable
 import rain.language.patterns.nodes.Machine
 import rain.rndr.relationships.*
 
 open class Color(
     key:String = autoKey(),
-) : Machine(key) {
+) : Colorable, Machine(key) {
     companion object : NodeLabel<Machine, Color>(
         Machine, Color::class, { k -> Color(k) }
     )
 
-//    abstract class ColorLabel<T:Color>: MachineLabel<T>() {
-//        val h = field("h", H, 0.0)
-//        val s = field("s", S, 0.9)
-//        val v = field("v", V, 0.9)
-//        val a = field("a", A, 0.9)
-//    }
+    override val label: Label<out Machine, out Color> = Color
 
-//    companion object : ColorLabel<Color>() {
-//
-//        val WHITE = Color.create("COLOR_WHITE")
-//    }
+    class ColorAnimation: Animatable() {
+        var h = 0.0
+        var s = 0.0
+        var v = 0.0
+        var a = 1.0
+    }
+
+    val colorAnimation = ColorAnimation()
+
+    override var h by LinkablePropertySlot(colorAnimation::h, +H)
+    override var s by LinkablePropertySlot(colorAnimation::s, +S)
+    override var v by LinkablePropertySlot(colorAnimation::v, +V)
+    override var a by LinkablePropertySlot(colorAnimation::a, +A)
 
 
-
-//    val h by attach(Color.h)
-//    val s by attach(Color.s)
-//    val v by attach(Color.v)
-//    val a by attach(Color.a)
-
-//    fun colorHSVa() = ColorHSVa(h, s, v, a)
-//
-//    fun colorRGBa(): ColorRGBa = colorHSVa().toRGBa()
+    override fun render(program: Program) {
+        colorAnimation.updateAnimation()
+    }
 
 }
 

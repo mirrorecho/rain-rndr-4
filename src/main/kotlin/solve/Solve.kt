@@ -33,6 +33,14 @@ fun main()  {
 
 // -------------------------------------------------------------------------------------
 
+fun yo() {
+
+    fun yo2(node:Node) {
+        node.
+    }
+
+}
+
 
 fun solve0() {
     // TODO: util function to easily create Event children with field values

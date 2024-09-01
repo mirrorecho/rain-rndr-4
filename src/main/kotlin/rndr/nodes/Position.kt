@@ -4,39 +4,40 @@ import rain.rndr.relationships.*
 import rain.utils.*
 
 import org.openrndr.Program
+import org.openrndr.animatable.Animatable
 import org.openrndr.math.Vector2
+import rain.language.Label
+import rain.language.NodeLabel
 import rain.language.fields.field
 import rain.language.patterns.nodes.Event
 import rain.language.patterns.nodes.Machine
+import rain.language.patterns.nodes.Positionable
 
 
 open class Position protected constructor(
     key:String = autoKey(),
-): Machine(key) {
-
-    abstract class PositionLabel<T:Position>: MachineLabel<T>() {
-        val x = field("x", X, 0.5)
-        val y = field("y", Y, 0.5)
-    }
-
-    companion object : PositionLabel<Position>() {
-        override val parent = Machine
-        override val labelName:String = "Position"
-        override fun factory(key:String) = Position(key)
-        init { registerMe() }
-
-        val CENTER: Position = Position.create("POSITION_CENTER")
-    }
-
-    override val label = Position
-
-    val x by attach(Position.x)
-    val y by attach(Position.y)
-
-    fun vector(program: Program): Vector2 = Vector2(
-        x * program.width,
-        y * program.height,
+) : Positionable, Machine(key) {
+    companion object : NodeLabel<Machine, Position>(
+        Machine, Position::class, { k -> Position(k) }
     )
+
+    override val label: Label<out Machine, out Position> = Position
+
+    class PositionAnimation: Animatable() {
+        var x = 0.5
+        var y = 0.5
+    }
+
+    val positionAnimation = PositionAnimation()
+
+    override var x by LinkablePropertySlot(positionAnimation::x, +X)
+    override var y by LinkablePropertySlot(positionAnimation::y, +Y)
+
+    override fun render(program: Program) {
+        positionAnimation.updateAnimation()
+    }
+
+
 }
 
 

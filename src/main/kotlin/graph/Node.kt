@@ -1,10 +1,13 @@
 package rain.language
 
+import graph.DataManager
+import graph.DataSlot
 import graph.Item
 import graph.quieries.Query
 import graph.quieries.Queryable
 import graph.quieries.RelatedNode
 import graph.quieries.RelatedQuery
+import org.openrndr.animatable.Animatable
 import rain.graph.interfacing.*
 import rain.language.fields.Field
 import rain.language.fields.FieldConnected
@@ -12,6 +15,8 @@ import rain.language.patterns.Pattern
 import rain.rndr.nodes.Circle
 import rain.utils.autoKey
 import kotlin.reflect.KMutableProperty0
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KProperty
 
 // ===========================================================================================================
 
@@ -81,6 +86,148 @@ open class Node protected constructor(
             label.create(target, this, key)
 
     // =================================================================================
+    // =================================================================================
+
+    private val dataSlots = mutableMapOf<String, DataSlot<*>>()
+
+    fun <T:Any?> dataSlot(name:String): DataSlot<T>? =
+        dataSlots[name] as DataSlot<T>?
+
+    // TODO: would this be used?
+//    fun slotsFromProperties(vararg properties:KMutableProperty0<Double>) {
+//        properties.forEach { PropertySlot(it) }
+//    }
+
+    fun slotsToMap(): Map<String, Any?> {
+        return dataSlots.mapValues { it.value }
+    }
+
+    fun updateSlotsFrom(map: Map<String, Any?>) {
+        map.forEach { (n, v) -> dataSlots[n]?.updateLocalValue(v) }
+    }
+
+    private fun registerSlot(dataSlot:DataSlot<*>) {
+        dataSlots[dataSlot.name] = dataSlot
+    }
+
+    // ==================================================
+
+    open inner class DataSlot<T:Any?>(
+        val name:String, // TODO: needed?
+        default: T
+    ) {
+        protected open var localValue: T = default
+
+        fun updateLocalValue(fromAny: Any?) {
+            localValue = fromAny as T
+        }
+
+        open var value: T
+            get() = localValue
+            set(value) { localValue = value }
+
+        open fun wireUp() { } // purely for interoperability
+
+        operator fun getValue(thisRef: Any?, property: KProperty<*>): T =
+            value
+
+        operator fun setValue(thisRef: Any?, property: KProperty<*>, value:T) {
+            this.value = value
+        }
+
+        private fun registerMe() { this@Node.registerSlot(this) }
+
+        init { registerMe() }
+
+    }
+
+    // ==================================================
+
+    open inner class LinkableSlot<T:Any?>(
+        name:String, // TODO: needed?
+        val linkQuery: Query<Node, Node>,
+        default: T
+    ): DataSlot<T>(name, default) {
+
+        override var value: T
+            get() = applicableSlot.value ?: localValue
+            set(value) { applicableSlot.value = value }
+
+        private var linkedSlot: DataSlot<T>? = null
+
+        private val applicableSlot: DataSlot<T>
+            get() = linkedSlot ?: this
+
+        override fun wireUp() {
+            // TODO: set linkedSlot based on query
+        }
+
+    }
+
+    // ==================================================
+
+    inner class PropertySlot<T:Any?>(
+        val property: KMutableProperty0<T>,
+    ): DataSlot<T>(property.name, property.get()) {
+
+        override var localValue: T
+            get() = property.get()
+            set(value) { property.set(value) }
+    }
+
+    // ==================================================
+
+    inner class LinkablePropertySlot<T:Any?>(
+        private val property: KMutableProperty0<T>,
+        linkQuery: Query<Node, Node>,
+    ): LinkableSlot<T>(property.name, linkQuery, property.get()) {
+
+        override var localValue
+            get() = property.get()
+            set(value) { property.set(value) }
+    }
+
+    // ==================================================
+
+    open inner class CascadingPatternSlot<T:Any?>(
+        name:String,
+        val pattern: Pattern<*>,
+        default: T
+    ): DataSlot<T>(name, default) {
+
+        override var value: T
+            get() = applicableSlot.value ?: localValue
+            set(value) { applicableSlot.value = value }
+
+        private var linkedSlot: DataSlot<T>? = null
+
+        private val applicableSlot: DataSlot<T>
+            get() = linkedSlot ?: this
+
+        override fun wireUp() {
+            // TODO: set linkedSlot based on pattern history
+        }
+    }
+
+    // ==================================================
+
+    inner class CascadingPatternPropertySlot<T:Any?>(
+        private val property: KMutableProperty0<T>,
+        pattern: Pattern<*>,
+    ): CascadingPatternSlot<T>(property.name, pattern, property.get()) {
+
+        override var localValue
+            get() = property.get()
+            set(value) { property.set(value) }
+    }
+
+//    fun <T:Any?>makeDataSlot(name:String, default: T, relatedQuery: RelatedQuery?=null) =
+//        DataSlot(default).also { dataSlots[name] = it }
+//
+//    object dataManager: DataManager {
+//        var myDouble: Double = 1.0
+//    }
+
     // =================================================================================
 
     // TODO: bring fields back:

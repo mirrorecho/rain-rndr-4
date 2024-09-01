@@ -2,22 +2,36 @@ package language.fields
 
 import graph.quieries.RelatedQuery
 import org.openrndr.animatable.Animatable
-
-/*
-Purpose of Slots is 4-fold:
- - (1) link  to either local value OR value from another node
- - (2) implement Animatable (for local Double values only)
- - (3) interface for specifying values to send to another node (i.e. values an Event sends to a Machine)
- - (4) implement asProperties (for eventually saving/retrieving to/from db)
-   - - (3/4) may be related
-*/
+import rain.language.Node
+import rain.rndr.relationships.H
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KProperty
 
 
-abstract class Slots {
-    val intSlots = listOf<Slot<Int?>>()
-    val doubleSlots = listOf<Slot<Double?>>()
-    val stringSlots = listOf<Slot<String?>>()
-    val boolSlots = listOf<Slot<Boolean?>>()
+
+
+List<KMutableProperty1<out Node, out Any?>>
+
+
+
+
+class Slots<T:Any?> {
+    val registry = mutableMapOf<String, Slot<T>>()
+
+
+
+}
+
+class MyNode {
+    val intData: Double? by Slot(0.0, +H)
+
+    var myInt by intData
+
+    fun yo () {
+        ::myInt.slotMe()
+    }
+
 }
 
 
@@ -27,14 +41,7 @@ interface SlotInterface<T:Any?> {
 }
 
 
-abstract class Slot<T:Any?>(
-    val default:T,
-    val relatedQuery: RelatedQuery? = null
-) {
 
-    var localValue = default
-
-}
 
 interface DataManagerInterface {
 
