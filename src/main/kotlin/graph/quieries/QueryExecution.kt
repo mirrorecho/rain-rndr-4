@@ -3,6 +3,7 @@ package graph.quieries
 import graph.Item
 import rain.language.Label
 import rain.language.Node
+import rain.language.NodeLabel
 import kotlin.reflect.KProperty
 
 open class QueryExecution<FT: Item, T: Item>(
@@ -63,4 +64,28 @@ class RelatedNode<T: Node>(
         query.clear(source.asSequence())
         query.extend(source.asSequence(), value)
     }
+}
+
+// ========================================================================
+
+// TODO: naming?
+open class Pattern<FT:Node>(
+    val source: FT,
+    override val query: UpdatingQuery<Node, Node>,
+    val previous: Pattern<*>? = null
+): UpdatingQueryExecution<Node, Node>(source, query) {
+
+    open fun asPatterns(query: UpdatingQuery<Node, Node>): Sequence<Pattern<*>> =
+        asSequence().map { Pattern(it, query, this) }
+
+    open fun <T:Node> asPatterns(
+        label: NodeLabel<*, out T>,
+        query: UpdatingQuery<Node, Node>,
+    ): Sequence<Pattern<T>> =
+        asSequence().map { Pattern(label.from(it)!!, query, this) }
+
+    fun <T:Any?> cascadingDataSlot(name:String): Node.DataSlot<T>? =
+        source.dataSlot(name) ?: previous?.source?.dataSlot(name)
+
+
 }

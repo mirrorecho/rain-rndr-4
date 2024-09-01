@@ -1,12 +1,13 @@
 package rain.language.patterns.nodes
 
 
+import graph.quieries.Pattern
 import language.patterns.ExtendHelper
+import org.openrndr.animatable.easing.Easing
 import rain.language.*
-import rain.language.fields.field
-import rain.language.fields.fieldOfNode
 import rain.language.patterns.*
 import rain.language.patterns.relationships.*
+import rain.rndr.relationships.STROKE_COLOR
 import rain.utils.*
 
 enum class Gate(val startGate: Boolean?, val endGate:Boolean?) {
@@ -28,25 +29,37 @@ open class Event protected constructor(
     )
     override val label: Label<out Node, out Event> = Event
 
-//    abstract class EventLabel<T:Event>: Label<T>() {
-//        val dur = field("dur", 0.0, false)
-//        val simultaneous = field("simultaneous", false, false)
-//        val gate = field("gate", Gate.NONE, false)
-//        val bumps = fieldOfNode("bumps", BUMPS, Machine, null)
-//        val bumping = field("bumping", true, false)
-//    }
-//    var dur by attach(Event.dur)
-//    var simultaneous by attach(Event.simultaneous)
-//    var gate by attach(Event.gate)
-//    var bumps by attach(Event.bumps)
-//    var bumping by attach(Event.bumping)
+    var dur by DataSlot<Double?>("dur", null)
+    var simultaneous by DataSlot("simultaneous", false)
+    var gate by DataSlot("gate", Gate.NONE)
 
-    // TODO: is this by lazy effective enough for "caching"?
-    val treePattern: CuedChildrenPattern<Event> by lazy { CuedChildrenPattern(this) }
+    var bumping by DataSlot("bumping", false)
 
-    // TODO maybe: implement caching? Done?
-    // or TODO: even better, consider children a field on Event? (would need a new type of field)
-    open val children get() = treePattern.asPatterns { s,p -> CuedChildrenPattern(s as Event, p) }
+    // TODO: implement by history....
+    val bumps by related(+STROKE_COLOR, Machine)
+
+    val treePattern: Pattern<Event> by lazy { Pattern(this, CUED_CHILDREN_QUERY ) }
+
+    open val children get() = treePattern.asPatterns(Event, CUED_CHILDREN_QUERY)
+
+    // TODO: should this be a node?
+    inner class AnimateEventValue(
+        val name:String,
+        val target: Double,
+        val easing: Easing = Easing.None,
+        dur: Double? = null,
+        offsetDur: Double = 0.0,
+        val initValue: Double? = null,
+    ) {
+
+        val event = this@Event
+
+        val durMs: Long = ((dur ?: event.dur ?: 0.0) * 1000).toLong()
+        val offsetDurMs: Long =
+            if (offsetDur >= 0.0) (offsetDur * 1000).toLong()
+            else (((event.dur ?: 0.0) - offsetDur) * 1000).toLong()
+
+    }
 
 //    fun <R:Node, RL:NodeLabel<R>>bumps(
 //        receiverLabel:RL,

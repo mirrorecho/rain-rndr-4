@@ -5,12 +5,10 @@ import rain.utils.*
 
 import org.openrndr.Program
 import org.openrndr.animatable.Animatable
-import org.openrndr.math.Vector2
 import rain.language.Label
 import rain.language.NodeLabel
-import rain.language.fields.field
-import rain.language.patterns.nodes.Event
 import rain.language.patterns.nodes.Machine
+import rain.language.patterns.nodes.MachineAnimation
 import rain.language.patterns.nodes.Positionable
 
 
@@ -23,7 +21,7 @@ open class Position protected constructor(
 
     override val label: Label<out Machine, out Position> = Position
 
-    class PositionAnimation: Animatable() {
+    class PositionAnimation: MachineAnimation() {
         var x = 0.5
         var y = 0.5
     }

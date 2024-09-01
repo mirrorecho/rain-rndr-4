@@ -1,6 +1,8 @@
 package rain.language.patterns.nodes
 
 import org.openrndr.Program
+import org.openrndr.animatable.Animatable
+import org.openrndr.animatable.easing.Easing
 import org.openrndr.color.ColorHSVa
 import org.openrndr.color.ColorRGBa
 import org.openrndr.math.Vector2
@@ -9,6 +11,11 @@ import rain.language.Label
 import rain.language.NodeLabel
 import rain.language.patterns.Pattern
 import rain.utils.autoKey
+import kotlin.math.absoluteValue
+import kotlin.reflect.KMutableProperty0
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty0
 
 
 interface Colorable {
@@ -34,6 +41,40 @@ interface Positionable {
 
 }
 
+
+abstract class MachineAnimation: Animatable() {
+
+    fun updateAnimation(
+        property: KMutableProperty0<Double>,
+        animateEventValue: Event.AnimateEventValue,
+        // preDelay: Long, // TODO: implement this?
+    ) {
+
+        // NEED TO CALL THIS IN ORDER FOR ANIMATION TO WORK CORRECTLY
+        // TODO: WHY?????
+        updateAnimation()
+
+        animateEventValue.apply {
+
+            initValue?.let { property.set(it) }
+
+            if (durMs > 0 || offsetDurMs > 0) {
+                if (offsetDurMs > 0) {
+                    // TODO, a better way to keep current value for the duration instead of "animating" it?
+                    property.animate(property.get(), offsetDurMs)
+                    property.complete()
+                }
+                property.animate(target, durMs, easing)
+                property.complete()
+            } else {
+                property.set(target)
+            }
+        }
+
+    }
+
+}
+
 open class Machine protected constructor(
     key:String = autoKey(),
 ): Node(key) {
@@ -55,6 +96,7 @@ open class Machine protected constructor(
 
     // TODO: make this universal?
     open fun bump(pattern:Pattern<Event>) {
+        val ae = pattern.source.AnimateEventValue("yo", 2.0)
         // TODO: implement?
         println("Bumping $key: $properties - WARNING: no bump defined")
     }

@@ -4,10 +4,7 @@ import org.openrndr.Program
 import org.openrndr.animatable.Animatable
 import rain.utils.*
 
-import org.openrndr.color.ColorHSVa
-import org.openrndr.color.ColorRGBa
 import rain.language.*
-import rain.language.fields.field
 import rain.language.patterns.nodes.Colorable
 import rain.language.patterns.nodes.Machine
 import rain.rndr.relationships.*

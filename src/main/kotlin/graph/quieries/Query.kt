@@ -35,7 +35,7 @@ interface UpdatingQuery<FT: Item, T: Item>: Query<FT, T> {
     }
 
     fun clear(queryFrom: Sequence<FT>) {
-        println("unExtend not implemented on $this")
+        println("clear not implemented on $this")
     }
 
     fun deleteAll(queryFrom: Sequence<FT>) {

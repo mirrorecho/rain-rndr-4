@@ -1,19 +1,20 @@
 package language.patterns
 
+import rain.language.NodeLabel
 import rain.language.fields.*
 import rain.language.patterns.nodes.*
 import rain.utils.cycleOf
 
 
-class ExtendHelper<NT:Event, LT:Event.EventLabel<NT>>(
+class ExtendHelper<T:Event>(
     val parentEvent:Event,
-    val label:LT,
+    val label:NodeLabel<*, out T>,
 ) {
     var extendLength: Int = 0
 
     // a list of manipulations to an extended event for a given index
     // (generally, each field to be updated will get an item in the list)
-    val lambdaList = mutableListOf<(NT, Int)->Unit?>()
+    val lambdaList = mutableListOf<(T, Int)->Unit?>()
 
     operator fun <T:Any?, F:Field<T>> F.invoke(vararg values:T?) {
         if (values.size>extendLength) extendLength = values.size

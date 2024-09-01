@@ -1,7 +1,5 @@
 package rain.rndr.nodes
 
-import graph.quieries.Query
-import language.nodes.Printer
 import rain.language.patterns.nodes.*
 import rain.rndr.relationships.*
 import rain.utils.*
@@ -9,14 +7,9 @@ import rain.utils.*
 import org.openrndr.Program
 import org.openrndr.animatable.Animatable
 import org.openrndr.color.ColorHSVa
-import org.openrndr.math.Vector2
 import rain.language.Label
-import rain.language.Node
 import rain.language.NodeLabel
-import rain.language.fields.field
-import rain.language.fields.fieldOfNode
 import rain.language.patterns.Pattern
-import kotlin.reflect.KMutableProperty1
 
 class Slots {
 
@@ -72,7 +65,7 @@ open class Circle protected constructor(
 //        println("circle with x position " + position.x().toString())
         program.apply {
             drawer.fill = ColorHSVa(h, s, v, a).toRGBa()
-            drawer.stroke = colorRGBa()
+            drawer.stroke = strokeColor?.colorRGBa()
             drawer.strokeWeight = strokeWeight
             drawer.circle(
                 position = vector(this),

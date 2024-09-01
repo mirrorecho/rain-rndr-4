@@ -1,28 +1,32 @@
 package rain.rndr.nodes
 
+import org.openrndr.Program
 import rain.language.*
-import rain.language.fields.field
 import rain.language.patterns.nodes.Machine
+import rain.language.patterns.nodes.MachineAnimation
 import rain.utils.*
 
 
 open class Value(
     key:String = autoKey(),
-    ): Machine(key) {
-    abstract class ValueLabel<T:Value>: MachineLabel<T>() {
-        val value = field("value", 0.0)
+    ) : Machine(key) {
+    companion object : NodeLabel<Machine, Value>(
+        Machine, Value::class, { k -> Value(k) }
+    )
+
+    override val label: Label<out Machine, out Value> = Value
+
+    class ValueAnimation: MachineAnimation() {
+        var value = 0.0
     }
 
-    companion object : ValueLabel<Value>() {
-        override val parent = Machine
-        override val labelName:String = "Value"
-        override fun factory(key:String) = Value(key)
-        init { registerMe() }
+    val valueAnimation = ValueAnimation()
+
+    var value by PropertySlot(valueAnimation::value)
+
+    override fun render(program: Program) {
+        valueAnimation.updateAnimation()
     }
-
-    override val label: Label<out Value> = Value
-
-    var value by attach(Value.value)
 
 
 }

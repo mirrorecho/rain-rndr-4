@@ -187,45 +187,39 @@ open class Node protected constructor(
             set(value) { property.set(value) }
     }
 
-    // ==================================================
-
-    open inner class CascadingPatternSlot<T:Any?>(
-        name:String,
-        val pattern: Pattern<*>,
-        default: T
-    ): DataSlot<T>(name, default) {
-
-        override var value: T
-            get() = applicableSlot.value ?: localValue
-            set(value) { applicableSlot.value = value }
-
-        private var linkedSlot: DataSlot<T>? = null
-
-        private val applicableSlot: DataSlot<T>
-            get() = linkedSlot ?: this
-
-        override fun wireUp() {
-            // TODO: set linkedSlot based on pattern history
-        }
-    }
-
-    // ==================================================
-
-    inner class CascadingPatternPropertySlot<T:Any?>(
-        private val property: KMutableProperty0<T>,
-        pattern: Pattern<*>,
-    ): CascadingPatternSlot<T>(property.name, pattern, property.get()) {
-
-        override var localValue
-            get() = property.get()
-            set(value) { property.set(value) }
-    }
-
-//    fun <T:Any?>makeDataSlot(name:String, default: T, relatedQuery: RelatedQuery?=null) =
-//        DataSlot(default).also { dataSlots[name] = it }
+    // TODO: review and re-implement or remove
+//    // ==================================================
 //
-//    object dataManager: DataManager {
-//        var myDouble: Double = 1.0
+//    open inner class CascadingPatternSlot<T:Any?>(
+//        name:String,
+//        val pattern: Pattern<*>,
+//        default: T
+//    ): DataSlot<T>(name, default) {
+//
+//        override var value: T
+//            get() = applicableSlot.value ?: localValue
+//            set(value) { applicableSlot.value = value }
+//
+//        private var linkedSlot: DataSlot<T>? = null
+//
+//        private val applicableSlot: DataSlot<T>
+//            get() = linkedSlot ?: this
+//
+//        override fun wireUp() {
+//            // TODO: set linkedSlot based on pattern history
+//        }
+//    }
+//
+//    // ==================================================
+//
+//    inner class CascadingPatternPropertySlot<T:Any?>(
+//        private val property: KMutableProperty0<T>,
+//        pattern: Pattern<*>,
+//    ): CascadingPatternSlot<T>(property.name, pattern, property.get()) {
+//
+//        override var localValue
+//            get() = property.get()
+//            set(value) { property.set(value) }
 //    }
 
     // =================================================================================
