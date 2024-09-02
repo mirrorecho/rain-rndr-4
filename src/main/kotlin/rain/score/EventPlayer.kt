@@ -7,7 +7,7 @@ import kotlin.time.toDuration
 import org.openrndr.Program
 import org.openrndr.application
 import org.openrndr.launch
-import rain.language.patterns.nodes.*
+import rain.graph.quieries.Pattern
 import rain.score.nodes.Event
 import rain.score.nodes.Machine
 
@@ -36,7 +36,10 @@ open class EventPlayer(
         val event = pattern.source
         val gate = event.gate
         // access the bumps machine only if necessary:
-        val machine = if (event.bumping || gate.hasGate) pattern[Event.bumps] else null
+        val machine =
+            if (event.bumping || gate.hasGate)
+                pattern.cascadingDataSlot<Machine>("bumps")?.value
+            else null
 
         println("PLAYING: ${pattern.source} with machine $machine")
 
@@ -46,7 +49,7 @@ open class EventPlayer(
         }
 
 //        println("adding delay: $addDelay")
-        event.dur.let { dur -> if (dur > 0.0) delay(dur.toDuration(DurationUnit.SECONDS))  }
+        event.dur?.let { dur -> if (dur > 0.0) delay(dur.toDuration(DurationUnit.SECONDS))  }
         // TODO: adjust for delta in time delay
 
 

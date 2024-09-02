@@ -27,6 +27,7 @@ open class Position protected constructor(
     }
 
     val positionAnimation = PositionAnimation()
+    override val machineAnimation = positionAnimation
 
     override var x by LinkablePropertySlot(positionAnimation::x, +X)
     override var y by LinkablePropertySlot(positionAnimation::y, +Y)

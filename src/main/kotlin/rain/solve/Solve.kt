@@ -1,5 +1,6 @@
-package rain.sandbox.solve
+package rain.solve
 
+import rain.graph.Node
 import rain.score.nodes.Event
 
 fun main()  {
@@ -26,23 +27,25 @@ fun main()  {
 
 // -------------------------------------------------------------------------------------
 
-fun yo() {
-
-    Event.create {
-        dur = 1.0
-        putSlot("radius", 90.0)
-        animate("radius") {
-            toValue = 90.0
-        }
-    }
-
-}
+//fun yo() {
+//
+//    Event.create {
+//        dur = 1.0
+//        putSlot("radius", 90.0)
+//        animate("radius") {
+//            toValue = 90.0
+//        }
+//    }
+//
+//}
 
 
 fun solve0() {
     // TODO: util function to easily create Event children with field values
     //  for a particular receiver
 
+    val n = Node.create {  }
+    println(n)
 
 
 //    val n1 = Node.create("N1")

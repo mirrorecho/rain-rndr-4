@@ -9,14 +9,7 @@ import org.openrndr.color.ColorHSVa
 import rain.graph.Label
 import rain.graph.NodeLabel
 import rain.graph.quieries.Pattern
-import rain.score.nodes.Colorable
-import rain.score.nodes.Event
-import rain.score.nodes.Machine
-import rain.score.nodes.Positionable
-
-class Slots {
-
-}
+import rain.score.nodes.*
 
 open class Circle protected constructor(
     key:String = autoKey(),
@@ -27,7 +20,7 @@ open class Circle protected constructor(
 
     override val label: Label<out Machine, out Circle> = Circle
 
-    class CircleAnimation: Animatable() {
+    class CircleAnimation: MachineAnimation() {
         var radius = 90.0
 
         var strokeWeight = 0.9
@@ -43,6 +36,7 @@ open class Circle protected constructor(
     }
 
     val circleAnimation = CircleAnimation()
+    override val machineAnimation = circleAnimation
 
     var radius by LinkablePropertySlot(circleAnimation::radius, +RADIUS)
 
@@ -56,7 +50,7 @@ open class Circle protected constructor(
     override var v by LinkablePropertySlot(circleAnimation::v, +V)
     override var a by LinkablePropertySlot(circleAnimation::a, +A)
 
-    val strokeColor by related(+STROKE_COLOR, Color)
+    val strokeColor by RelatedNodeSlot("strokeColor", +STROKE_COLOR, Color, null)
 
 
     //    // TODO: implement if needed (or remove)

@@ -1,4 +1,4 @@
-package rain.sandbox.solve
+package rain.solve
 
 //
 //

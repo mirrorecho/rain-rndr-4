@@ -2,8 +2,8 @@ package rain.graph
 
 
 import rain.graph.quieries.Queryable
-import rain.graph.quieries.RelatedNode
 import rain.graph.quieries.RelatedQuery
+import rain.graph.quieries.UpdatingQueryExecution
 
 import rain.utils.autoKey
 import kotlin.reflect.KMutableProperty0
@@ -12,7 +12,6 @@ import kotlin.reflect.KProperty
 // ===========================================================================================================
 
 typealias RelationshipRegistry =  MutableMap<String, MutableSet<Relationship>>
-
 
 
 open class Node protected constructor(
@@ -54,8 +53,9 @@ open class Node protected constructor(
         } }
     }
 
-    fun <T: Node> related(relatedQuery: RelatedQuery, label: NodeLabel<*, T>): RelatedNode<T> =
-        RelatedNode(this, relatedQuery, label)
+//    // TODO maybe: bring back if needed (related notes outside of slots)
+//    fun <T: Node> related(relatedQuery: RelatedQuery, label: NodeLabel<*, T>): RelatedNode<T> =
+//        RelatedNode(this, relatedQuery, label)
 
     fun relate(
         label: RelationshipLabel,
@@ -88,7 +88,7 @@ open class Node protected constructor(
         dataSlots.putIfAbsent(name, DataSlot(name, value))?.updateLocalValue(value)
     }
 
-    fun <T:Any?> dataSlot(name:String): DataSlot<T>? =
+    fun <T:Any?> slot(name:String): DataSlot<T>? =
         dataSlots[name] as DataSlot<T>?
 
     // TODO: would this be used?
@@ -113,13 +113,13 @@ open class Node protected constructor(
     }
 
     open fun <T:Any?>updateSlotFrom(name:String, fromSlot: DataSlot<T>) {
-        dataSlot<T>(name)?.let { slot->
+        slot<T>(name)?.let { slot->
             slot.value = fromSlot.value
         }
     }
 
     fun <T:Any?>updateSlotFrom(name:String, node:Node) {
-        node.dataSlot<T>(name)?.let {fromSlot->
+        node.slot<T>(name)?.let { fromSlot->
             updateSlotFrom(name, fromSlot)
         }
     }
@@ -145,7 +145,7 @@ open class Node protected constructor(
 
         protected open var localValue: T = default
 
-        open val property: KMutableProperty0<T>?
+        open val property: KMutableProperty0<T>? = null // included here for interoperability
 
         fun updateLocalValue(fromAny: Any?) {
             localValue = fromAny as T
@@ -155,7 +155,7 @@ open class Node protected constructor(
             get() = localValue
             set(value) { localValue = value }
 
-        open fun wireUp() { } // purely for interoperability
+        open fun wireUp() { } // included here for interoperability
 
         operator fun getValue(thisRef: Any?, property: KProperty<*>): T =
             value
@@ -167,6 +167,28 @@ open class Node protected constructor(
         private fun registerMe() { node.registerSlot(this) }
 
         init { registerMe() }
+
+    }
+
+    // ==================================================
+
+    open inner class RelatedNodeSlot<T:Node?>(
+        name:String, // TODO: needed?
+        val query: RelatedQuery,
+        val label: NodeLabel<*, T & Any>,
+        default: T
+    ): DataSlot<T>(name, default) {
+
+        private val myQueryExecution = UpdatingQueryExecution(node, query)
+
+        override var value: T
+            get() = myQueryExecution.first(label) ?: localValue
+            set(value) {
+                myQueryExecution.clear()
+                value?.let {
+                    myQueryExecution.extend(it)
+                }
+            }
 
     }
 
@@ -190,7 +212,7 @@ open class Node protected constructor(
         override fun wireUp() {
             this@Node[linkQuery]().firstOrNull()?.let {relatedNode->
                 val slotName: String = linkQuery.firstRelationshipProperty(this@Node.asSequence(), "slot") ?: name
-                linkedSlot = relatedNode.dataSlot(slotName)
+                linkedSlot = relatedNode.slot(slotName)
             }
         }
 
@@ -199,7 +221,7 @@ open class Node protected constructor(
     // ==================================================
 
     inner class PropertySlot<T:Any?>(
-        val property: KMutableProperty0<T>,
+        override val property: KMutableProperty0<T>,
     ): DataSlot<T>(property.name, property.get()) {
 
         override var localValue: T
@@ -210,7 +232,7 @@ open class Node protected constructor(
     // ==================================================
 
     inner class LinkablePropertySlot<T:Any?>(
-        private val property: KMutableProperty0<T>,
+        override val property: KMutableProperty0<T>,
         linkQuery: RelatedQuery,
     ): LinkableSlot<T>(property.name, linkQuery, property.get()) {
 

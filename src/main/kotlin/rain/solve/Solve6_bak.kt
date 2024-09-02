@@ -1,4 +1,4 @@
-package rain.sandbox.solve
+package rain.solve
 
 //
 //fun seq(key:String = autoKey(), machine:NodeLabel<out Machine>?=null, gate: Gate?=null, properties:Map<String,Any?>?=null, vararg children:Tree): Event {

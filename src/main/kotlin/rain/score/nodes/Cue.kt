@@ -18,8 +18,9 @@ open class Cue(
     )
     override val label: Label<out Node, out Cue> = Cue
 
-    val cues by related(+CUES, Node)
-    val cuesNext by related(+CUES_NEXT, Cue)
+    // TODO: used?
+    val cues by RelatedNodeSlot("cues", +CUES, Node, null)
+    val cuesNext by RelatedNodeSlot("cuesNext", +CUES_NEXT, Cue, null)
 
 }
 

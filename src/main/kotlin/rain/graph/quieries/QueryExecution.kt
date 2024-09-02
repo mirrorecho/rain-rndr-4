@@ -4,7 +4,6 @@ import rain.graph.Item
 import rain.graph.Label
 import rain.graph.Node
 import rain.graph.NodeLabel
-import kotlin.reflect.KProperty
 
 open class QueryExecution<FT: Item, T: Item>(
     val queryable: Queryable<FT>,
@@ -36,35 +35,49 @@ open class UpdatingQueryExecution<FT: Item, T: Item>(
     override val query: UpdatingQuery<FT, T>,
 ): QueryExecution<FT, T>(queryable, query) {
 
-}
-
-// ========================================================================
-// NOTE: complements (doesn't inherit from) QueryExecution
-// due to generics inheritance problems with query val,
-open class QueriedNode<T: Node>(
-    source: Node,
-    query: Query<Node, Node>,
-    val label: Label<*, T>,
-) {
-
-    private val myQueryExecution = source[ query ]
-
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): T? =
-        myQueryExecution(label).firstOrNull()
-}
-
-// ========================================================================
-class RelatedNode<T: Node>(
-    val source: Node,
-    val query: RelatedQuery,
-    label: Label<*, T>,
-): QueriedNode<T>(source, query, label) {
-
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value:T) {
-        query.clear(source.asSequence())
-        query.extend(source.asSequence(), value)
+    fun extend(vararg items:T) {
+        query.extend(queryable.asSequence(), *items)
     }
+
+    fun clear() {
+        query.clear(queryable.asSequence())
+    }
+
+    fun deleteAll() {
+        query.deleteAll(queryable.asSequence())
+    }
+
 }
+
+// TODO: bring back only if needed
+
+//// ========================================================================
+//// NOTE: complements (doesn't inherit from) QueryExecution
+//// due to generics inheritance problems with query val,
+//open class QueriedNode<T: Node>(
+//    source: Node,
+//    query: Query<Node, Node>,
+//    val label: Label<*, T>,
+//) {
+//
+//    private val myQueryExecution = source[ query ]
+//
+//    operator fun getValue(thisRef: Any?, property: KProperty<*>): T? =
+//        myQueryExecution(label).firstOrNull()
+//}
+//
+//// ========================================================================
+//class RelatedNode<T: Node>(
+//    val source: Node,
+//    val query: RelatedQuery,
+//    label: Label<*, T>,
+//): QueriedNode<T>(source, query, label) {
+//
+//    operator fun setValue(thisRef: Any?, property: KProperty<*>, value:T) {
+//        query.clear(source.asSequence())
+//        query.extend(source.asSequence(), value)
+//    }
+//}
 
 // ========================================================================
 
@@ -85,7 +98,7 @@ open class Pattern<FT: Node>(
         asSequence().map { Pattern(label.from(it)!!, query, this) }
 
     fun <T:Any?> cascadingDataSlot(name:String): Node.DataSlot<T>? =
-        source.dataSlot(name) ?: previous?.source?.dataSlot(name)
+        source.slot(name) ?: previous?.source?.slot(name)
 
 
 }

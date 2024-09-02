@@ -3,7 +3,7 @@ package rain.score.nodes
 import org.openrndr.Program
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.language.patterns.Pattern
+import rain.graph.quieries.Pattern
 
 
 // a simple machine for demo/testing purposes..
@@ -16,15 +16,16 @@ open class Printer(
 
     override val label: Label<out Machine, out Printer> = Printer
 
+    var msg by DataSlot("msg", "Default Message")
+    var renderMe by DataSlot("renderMe", false)
 
-//    var msg by attach(Printer.msg)
-//    var renderMe by attach(Printer.renderMe)
+
 
     override fun bump(pattern: Pattern<Event>) {
 //        println("bumping: $this with $pattern")
 
         // updates all fields:
-        // updateAllFieldsFrom(pattern)
+        updateAllSlotsFrom(pattern.source)
 
         // or, this is how to update field by field (if not updating all):
 //        updateFieldsFrom(pattern, ::msg, ::renderMe)
@@ -32,10 +33,10 @@ open class Printer(
 
     override fun render(program: Program) {
 //        println(msg)
-//        if (renderMe) {
-//            println(msg)
-//            renderMe = false // set back to false to prevent endless messages
-//        }
+        if (renderMe) {
+            println(msg)
+            renderMe = false // set back to false to prevent endless messages
+        }
     }
 
 }

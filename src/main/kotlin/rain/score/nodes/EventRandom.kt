@@ -1,38 +1,26 @@
 package rain.score.nodes
 
 import rain.graph.Label
-import rain.language.*
-import rain.language.fields.*
-import rain.language.patterns.nodes.*
+import rain.graph.NodeLabel
 import rain.utils.autoKey
 
 
 open class EventRandom protected constructor(
     key:String = autoKey(),
-): Event(key) {
+): Event(key)  {
+    companion object : NodeLabel<Event, EventRandom>(
+        Event, EventRandom::class, { k -> EventRandom(k) }
+    )
 
-    abstract class EventRandomLabel<T : EventRandom> : EventLabel<T>() {
-        val times = field("times", 1, false)
-    }
+    override val label: Label<out Event, out EventRandom> = EventRandom
 
-    companion object : EventRandomLabel<EventRandom>() {
-        override val labelName: String = "EventRandom"
-        override fun factory(key: String) = EventRandom(key)
-
-        init {
-            registerMe()
-        }
-    }
-
-    override val label: Label<out EventRandom> = EventRandom
-
-    var times by attach(EventRandom.times)
+    var times by DataSlot("times", 2)
 
     val childrenToRandomize by lazy { super.children.toList() }
 
     override val children get() = sequence {
         yieldAll((0..<times).map { _ ->
-            println("Getting a random child of an event with dur: ${this@EventRandom[Event.dur]}")
+            println("Getting a random child of an event with dur: ${this@EventRandom.dur}")
             childrenToRandomize.random()
         }.asSequence())
     }

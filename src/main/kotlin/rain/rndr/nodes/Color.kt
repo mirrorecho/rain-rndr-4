@@ -12,6 +12,7 @@ import rain.rndr.relationships.S
 import rain.rndr.relationships.V
 import rain.score.nodes.Colorable
 import rain.score.nodes.Machine
+import rain.score.nodes.MachineAnimation
 
 open class Color(
     key:String = autoKey(),
@@ -22,7 +23,7 @@ open class Color(
 
     override val label: Label<out Machine, out Color> = Color
 
-    class ColorAnimation: Animatable() {
+    class ColorAnimation: MachineAnimation() {
         var h = 0.0
         var s = 0.0
         var v = 0.0
@@ -30,6 +31,7 @@ open class Color(
     }
 
     val colorAnimation = ColorAnimation()
+    override val machineAnimation = colorAnimation
 
     override var h by LinkablePropertySlot(colorAnimation::h, +H)
     override var s by LinkablePropertySlot(colorAnimation::s, +S)

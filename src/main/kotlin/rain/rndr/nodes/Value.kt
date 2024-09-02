@@ -22,6 +22,7 @@ open class Value(
     }
 
     val valueAnimation = ValueAnimation()
+    override val machineAnimation = valueAnimation
 
     var value by PropertySlot(valueAnimation::value)
 

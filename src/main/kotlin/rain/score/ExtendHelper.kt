@@ -1,39 +1,38 @@
 package rain.score
 
 import rain.graph.NodeLabel
-import rain.language.fields.*
-import rain.language.patterns.nodes.*
 import rain.utils.cycleOf
 import rain.score.nodes.Event
 
 
-class ExtendHelper<T: Event>(
+class ExtendHelper<ET: Event>(
     val parentEvent: Event,
-    val label: NodeLabel<*, out T>,
+    val label: NodeLabel<*, out ET>,
 ) {
     var extendLength: Int = 0
 
     // a list of manipulations to an extended event for a given index
     // (generally, each field to be updated will get an item in the list)
-    val lambdaList = mutableListOf<(T, Int)->Unit?>()
+    val lambdaList = mutableListOf<(ET, Int)->Unit>()
 
-    operator fun <T:Any?, F:Field<T>> F.invoke(vararg values:T?) {
+    fun <T:Any?> slots(name: String, vararg values:T?) {
         if (values.size>extendLength) extendLength = values.size
 
-        lambdaList.add { e: NT, i: Int ->
-            values.getOrNull(i) ?.let { e[this]=it }
+        lambdaList.add { e: ET, i: Int ->
+            values.getOrNull(i) ?.let { v-> e.slot<T>(name)?.let {it.value = v} }
         }
+
     }
 
-    fun <T:Any?, F:Field<T>> F.cycle(vararg values:T?) {
+    fun <T:Any?> cycle(name: String, vararg values:T?) {
         val cycle = cycleOf(*values)
-        lambdaList.add { e: NT, i: Int ->
-            cycle[i] ?.let { e[this]=it }
+        lambdaList.add { e: ET, i: Int ->
+            cycle[i] ?.let { v->  e.slot<T>(name)?.let {it.value = v} }
         }
     }
 
     fun extendEvent() {
-        parentEvent.treePattern.extend(
+        parentEvent.childrenPattern.extend(
             *(0..<extendLength).map { i->
                 label.create {
                     lambdaList.forEach { block ->

@@ -1,4 +1,4 @@
-package rain.sandbox.solve
+package rain.solve
 //
 //import org.openrndr.animatable.easing.Easing
 //import rain.language.Palette

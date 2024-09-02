@@ -37,7 +37,7 @@ interface Positionable {
 }
 
 
-abstract class MachineAnimation: Animatable() {
+open class MachineAnimation: Animatable() {
 
     fun updateAnimation(
         property: KMutableProperty0<Double>,
@@ -78,11 +78,18 @@ open class Machine protected constructor(
     )
     override val label: Label<out Node, out Machine> = Machine
 
+    open val machineAnimation = MachineAnimation()
 
     override fun <T:Any?>updateSlotFrom(name:String, fromSlot: DataSlot<T>) {
-        dataSlot<T>(name)?.let { slot->
+        slot<T>(name)?.let { slot->
             if (fromSlot.node.slotNames.contains("$name:animate")) {
-                val animateEventValue = fromSlot.node.dataSlot<Event.AnimateEventValue>("$name:animate"))
+                slot.property?.let { property ->
+                    machineAnimation.updateAnimation(
+                        property as KMutableProperty0<Double>,
+                        fromSlot.node.slot<Event.AnimateEventValue>("$name:animate")!!.value
+                    )
+
+                }
             } else
                 slot.value = fromSlot.value
         }
