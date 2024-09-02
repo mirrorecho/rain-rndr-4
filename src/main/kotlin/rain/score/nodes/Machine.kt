@@ -81,8 +81,8 @@ open class Machine protected constructor(
 
     override fun <T:Any?>updateSlotFrom(name:String, fromSlot: DataSlot<T>) {
         dataSlot<T>(name)?.let { slot->
-            if (slotNames.contains("$name:animate")) {
-
+            if (fromSlot.node.slotNames.contains("$name:animate")) {
+                val animateEventValue = fromSlot.node.dataSlot<Event.AnimateEventValue>("$name:animate"))
             } else
                 slot.value = fromSlot.value
         }

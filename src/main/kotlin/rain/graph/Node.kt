@@ -21,6 +21,7 @@ open class Node protected constructor(
     companion object : NodeLabel<Node, Node>(
         null, Node::class, { k-> Node(k) }
     )
+
     override val label: Label<*, out Node> = Node
 
     private val sourcesForRelationships: RelationshipRegistry = mutableMapOf()
@@ -139,7 +140,12 @@ open class Node protected constructor(
         val name:String, // TODO: needed?
         default: T
     ) {
+
+        val node get() = this@Node
+
         protected open var localValue: T = default
+
+        open val property: KMutableProperty0<T>?
 
         fun updateLocalValue(fromAny: Any?) {
             localValue = fromAny as T
@@ -158,7 +164,7 @@ open class Node protected constructor(
             this.value = value
         }
 
-        private fun registerMe() { this@Node.registerSlot(this) }
+        private fun registerMe() { node.registerSlot(this) }
 
         init { registerMe() }
 
