@@ -16,7 +16,7 @@ val orxFeatures = setOf<String>(
     "orx-color",
     "orx-compositor",
 //  "orx-compute-graph",
-//  "orx-compute-graph-nodes",
+//  "orx-compute-graph-rain.score.nodes",
     "orx-delegate-magic",
 //  "orx-dnk3",
 //  "orx-easing",

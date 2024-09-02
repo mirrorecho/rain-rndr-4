@@ -1,10 +1,10 @@
 package rain.graph
 //
 //import rain._bak.graph.interfacing.*
-//import rain.language.Node
+//import graph.Node
 //import rain.language.Query
 //import rain.language.QueryMethod
-//import rain.language.Relationship
+//import rain.graph.Relationship
 //import kotlin.Exception
 //
 //class Graph {

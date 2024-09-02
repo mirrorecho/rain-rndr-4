@@ -33,7 +33,7 @@ package rain.graph
 //    fun getRelationships(relationshipLabel: String, directionIsRight: Boolean): Set<GraphRelationship> =
 //        getLabelsToRelationships(directionIsRight)[relationshipLabel].orEmpty()
 //
-//    //maps for faster indexing ... keys are relationships, values are the target nodes
+//    //maps for faster indexing ... keys are rain.score.relationships, values are the target rain.score.nodes
 ////    internal val sourcesFor = mutableMapOf<GraphRelationship, GraphNode>()
 ////    internal val targetsFor = mutableMapOf<GraphRelationship, GraphNode>()
 //

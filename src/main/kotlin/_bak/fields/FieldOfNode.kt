@@ -1,10 +1,10 @@
 package rain.language.fields
 
-//import rain.language.Node
-//import rain.language.Label
-//import rain.language.RelationshipLabel
-//import rain.language.patterns.Pattern
-//import rain.language.patterns.RelatesPattern
+//import graph.Node
+//import rain.graph.Label
+//import rain.graph.RelationshipLabel
+//import rain._bak.patterns.Pattern
+//import rain._bak.patterns.RelatesPattern
 //
 //
 //open class FieldOfNode<T:Node?>(

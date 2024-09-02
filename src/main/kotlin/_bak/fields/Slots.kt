@@ -2,8 +2,8 @@ package _bak.fields
 
 //import graph.quieries.RelatedQuery
 //import org.openrndr.animatable.Animatable
-//import rain.language.Node
-//import rain.rndr.relationships.H
+//import graph.Node
+//import rain.rndr.rain.score.relationships.H
 //import kotlin.reflect.KMutableProperty
 //import kotlin.reflect.KMutableProperty1
 //import kotlin.reflect.KProperty

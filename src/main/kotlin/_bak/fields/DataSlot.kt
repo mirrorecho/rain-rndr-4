@@ -16,7 +16,7 @@ package _bak.fields
 //
 //OPTIONS:
 // - every single slot is just a node, with one relevant data point
-//     (simplest conceptually, but A LOT of nodes created!)
+//     (simplest conceptually, but A LOT of rain.score.nodes created!)
 // - slot can relate to a node, but if no relationship found, then fall back on local value
 //     (as in current / field implementation)
 // - slot represents a group of related properties, along with logic (e.g. a ColorManager)
