@@ -1,6 +1,6 @@
 package rain.graph
 
-import rain.graph.quieries.*
+import rain.graph.queries.*
 import rain.utils.autoKey
 import kotlin.reflect.KClass
 

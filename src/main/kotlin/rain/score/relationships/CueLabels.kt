@@ -9,3 +9,5 @@ val CONTAINS = RelationshipLabel("CONTAINS")
 val CUES = RelationshipLabel("CUES")
 
 val BUMPS = RelationshipLabel("BUMPS")
+
+val PLAYS = RelationshipLabel("PLAYS")

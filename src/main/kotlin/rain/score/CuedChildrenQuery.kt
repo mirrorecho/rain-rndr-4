@@ -1,7 +1,7 @@
 package rain.language.patterns
 
 import rain.graph.Node
-import rain.graph.quieries.UpdatingQuery
+import rain.graph.queries.UpdatingQuery
 import rain.score.nodes.Cue
 
 import rain.language.patterns.relationships.*
@@ -23,21 +23,21 @@ open class CuedChildrenQuery: UpdatingQuery<Node, Node> {
     }
 
 
-    override fun extend(queryFrom: Sequence<Node>, vararg nodes: Node) {
-        if (nodes.isNotEmpty()) {
+    override fun extend(queryFrom: Sequence<Node>, vararg items: Node) {
+        if (items.isNotEmpty()) {
             queryFrom.forEach { parentNode ->
                 // creates all Cue rain.score.nodes for the extension (inc. Contains and Cues rain.score.relationships)
-                val cues = nodes.map { childNode ->
+                val cues = items.map { childNode ->
                     Cue.create().also { cue ->
                         parentNode.relate(CONTAINS, cue)
                         cue.relate(CUES, childNode)
                     }
                 }
 
-                if (parentNode[+CONTAINS]().none())
-                // if empty, then create the CuesFirst
+                if (parentNode[+CUES_FIRST]().none())
+                // if no CUES_FIRST, then create the CuesFirst
                 // note... empty check works even after creating the Contains rain.score.relationships above
-                // because the isEmpty logic checks for CUES_FIRST
+                // because the isEmpty logic here checks for CUES_FIRST
                     CUES_FIRST.create(parentNode, cues[0])
                 else {
                     // otherwise create a CuesNext relationship from the existing CuesLast target node to the start of extension cue rain.score.nodes
@@ -55,7 +55,7 @@ open class CuedChildrenQuery: UpdatingQuery<Node, Node> {
                 }
 
                 // adds CuesLast relationship at the end
-                CUES_LAST.create(parentNode, cues.last())
+                parentNode.relate(CUES_LAST, cues.last())
             }
         }
     }

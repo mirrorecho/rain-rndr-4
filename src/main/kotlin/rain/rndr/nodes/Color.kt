@@ -10,6 +10,7 @@ import rain.rndr.relationships.A
 import rain.rndr.relationships.H
 import rain.rndr.relationships.S
 import rain.rndr.relationships.V
+import rain.score.Score
 import rain.score.nodes.Colorable
 import rain.score.nodes.Machine
 import rain.score.nodes.MachineAnimation
@@ -39,7 +40,7 @@ open class Color(
     override var a by LinkablePropertySlot(colorAnimation::a, +A)
 
 
-    override fun render(program: Program) {
+    override fun render(score: Score) {
         colorAnimation.updateAnimation()
     }
 

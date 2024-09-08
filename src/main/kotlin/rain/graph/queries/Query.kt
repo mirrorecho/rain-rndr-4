@@ -1,4 +1,4 @@
-package rain.graph.quieries
+package rain.graph.queries
 
 import rain.graph.Item
 import rain.graph.Node

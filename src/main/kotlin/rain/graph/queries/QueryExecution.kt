@@ -1,4 +1,4 @@
-package rain.graph.quieries
+package rain.graph.queries
 
 import rain.graph.Item
 import rain.graph.Label
@@ -97,8 +97,8 @@ open class Pattern<FT: Node>(
     ): Sequence<Pattern<T>> =
         asSequence().map { Pattern(label.from(it)!!, query, this) }
 
-    fun <T:Any?> cascadingDataSlot(name:String): Node.DataSlot<T>? =
-        source.slot(name) ?: previous?.source?.slot(name)
+    fun <T:Any?> cascadingSlotValue(name:String): T? =
+        source.slot<T>(name)?.value ?: previous?.cascadingSlotValue(name)
 
 
 }

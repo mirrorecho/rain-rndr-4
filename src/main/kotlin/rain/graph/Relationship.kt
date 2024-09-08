@@ -1,6 +1,6 @@
 package rain.graph
 
-import rain.graph.quieries.Queryable
+import rain.graph.queries.Queryable
 import rain.utils.*
 
 

@@ -2,15 +2,15 @@ package rain.score.nodes
 
 
 import rain.graph.Node
-import rain.graph.quieries.Pattern
-import rain.score.EventPlayer
+import rain.graph.queries.Pattern
 import rain.score.ExtendHelper
 import org.openrndr.animatable.easing.Easing
 import rain.graph.Label
 import rain.graph.NodeLabel
 import rain.language.patterns.*
 import rain.language.patterns.relationships.BUMPS
-import rain.rndr.relationships.STROKE_COLOR
+import rain.score.DEFAULT_SCORE
+import rain.score.Score
 import rain.utils.*
 
 enum class Gate(val startGate: Boolean?, val endGate:Boolean?) {
@@ -28,7 +28,7 @@ open class Event protected constructor(
     key:String = autoKey(),
 ): Node(key) {
     companion object : NodeLabel<Node, Event>(
-        null, Event::class, { k -> Event(k) }
+        Node, Event::class, { k -> Event(k) }
     )
 
     override val label: Label<out Node, out Event> = Event
@@ -37,14 +37,17 @@ open class Event protected constructor(
     var simultaneous by DataSlot("simultaneous", false)
     var gate by DataSlot("gate", Gate.NONE)
 
-    var bumping by DataSlot("bumping", false)
+    var bumping by DataSlot("bumping", true)
 
     // TODO: implement by history....
-    val bumps by RelatedNodeSlot("bumps", +BUMPS, Machine, null)
+    var bumps by RelatedNodeSlot("bumps", +BUMPS, Machine, null)
 
-    open val childrenPattern: Pattern<Event> by lazy { Pattern(this, CUED_CHILDREN_QUERY) }
+    fun childrenPattern(previous: Pattern<Event>? = null): Pattern<Event> =
+        Pattern(this, CUED_CHILDREN_QUERY, previous)
 
-    open val children get() = childrenPattern.asPatterns(Event, CUED_CHILDREN_QUERY)
+    open fun children(previous: Pattern<Event>? = null) =
+        childrenPattern(previous).asPatterns(Event, CUED_CHILDREN_QUERY)
+
 
     // TODO: implement if useful
 //    val sumDur: Double get() { throw NotImplementedError()
@@ -58,24 +61,30 @@ open class Event protected constructor(
     // TODO: should this be a node?
     inner class AnimateEventValue(
         val name:String, // TODO: needed?
-        var toValue: Double = 0.0,
-        val easing: Easing = Easing.None,
-        dur: Double? = null,
-        offsetDur: Double = 0.0,
-        val fromValue: Double? = null,
+        var easing: Easing = Easing.None,
+        var dur: Double? = null,
+        var offsetDur: Double = 0.0,
+        var fromValue: Double? = null,
     ) {
 
         val event = this@Event
 
-        val durMs: Long = ((dur ?: event.dur ?: 0.0) * 1000).toLong()
-        val offsetDurMs: Long =
-            if (offsetDur >= 0.0) (offsetDur * 1000).toLong()
-            else (((event.dur ?: 0.0) - offsetDur) * 1000).toLong()
+        var value by event.DataSlot(name, 0.0)
+
+        private val calculatedOffsetDur get() =
+            if (this.offsetDur >= 0.0) this.offsetDur
+            else (event.dur ?: 0.0) + this.offsetDur
+
+        val offsetDurMs: Long get() = (calculatedOffsetDur * 1000).toLong()
+
+        val durMs: Long get() =
+            ((this.dur ?: event.dur?.let { it - calculatedOffsetDur } ?: 0.0) * 1000).toLong()
 
     }
 
     fun animate(name:String, block: AnimateEventValue.()->Unit) {
-        putSlot("$name:animate", AnimateEventValue(name).also(block))
+
+        slot("$name:animate", AnimateEventValue(name).also(block))
     }
 
 //    fun <R:Node, RL:NodeLabel<R>>bumps(
@@ -89,7 +98,7 @@ open class Event protected constructor(
 //        receiverBlock.invoke(receiver)
 //    }
 
-    fun play() = EventPlayer(childrenPattern).play()
+    fun play(score: Score = DEFAULT_SCORE) = score.play(this.childrenPattern())
 
     fun <NT: Event>extend(label:NodeLabel<*, NT>, block: ExtendHelper<NT>.()->Unit) {
         val helper = ExtendHelper(this, label)
@@ -97,57 +106,61 @@ open class Event protected constructor(
         helper.extendEvent()
     }
 
+    fun extend(block: ExtendHelper<Event>.()->Unit) {
+        val helper = ExtendHelper(this, Event)
+        block.invoke(helper)
+        helper.extendEvent()
+    }
+
 }
 
-// ------------------------------------------
+// ----------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
 
 fun <E: Event, L: NodeLabel<*, E>>L.par(
     key:String = autoKey(),
-    properties:Map<String, Any?>?=null,
     vararg children: Event,
     block:(E.()->Unit)?=null,
 ):E = this.create(key) {
     simultaneous = true
     bumping = false
     block?.invoke(this)
-    childrenPattern.extend(*children)
+    childrenPattern().extend(*children)
 }
 
 fun <E: Event, L: NodeLabel<*, E>>L.par(
-    properties:Map<String, Any?>?=null,
     vararg children: Event,
     block:(E.()->Unit)?=null,
 ):E =
-    this.par(autoKey(), properties, *children) { block?.invoke(this) }
+    this.par(autoKey(), *children) { block?.invoke(this) }
 
-fun <E: Event, L: NodeLabel<*, E>>L.par(
-    vararg children: Event,
-    block:(E.()->Unit)?=null,
-):E =
-    this.par(autoKey(), null, *children) { block?.invoke(this) }
+//fun <E: Event, L: NodeLabel<*, E>>L.par(
+//    key:String = autoKey(),
+//    block:(E.()->Unit)?=null,
+//):E =
+//    this.par(key) { block?.invoke(this) }
 
 // ------------------------------------------
 
 fun par(
     key:String = autoKey(),
-    properties:Map<String, Any?>?=null,
     vararg children: Event,
     block:(Event.()->Unit)?=null,
 ): Event =
-    Event.par(key, properties, *children) { block?.invoke(this) }
+    Event.par(key, *children) { block?.invoke(this) }
 
-fun par(
-    properties:Map<String, Any?>?=null,
-    vararg children: Event,
-    block:(Event.()->Unit)?=null,
-): Event =
-    par(autoKey(), properties, *children) { block?.invoke(this) }
+//fun par(
+//    properties:Map<String, Any?>?=null,
+//    vararg children: Event,
+//    block:(Event.()->Unit)?=null,
+//): Event =
+//    par(autoKey(), properties, *children) { block?.invoke(this) }
 
 fun par(
     vararg children: Event,
     block:(Event.()->Unit)?=null
 ): Event =
-    par(autoKey(), null, *children) { block?.invoke(this) }
+    par(autoKey(),  *children) { block?.invoke(this) }
 
 
 // ------------------------------------------
@@ -155,50 +168,50 @@ fun par(
 
 fun <E: Event, L: NodeLabel<*, E>>L.seq(
     key:String = autoKey(),
-    properties:Map<String, Any?>?=null,
+//    properties:Map<String, Any?>?=null,
     vararg children: Event,
     block:(E.()->Unit)?=null,
 ):E = this.create(key) {
     simultaneous = false
     bumping = false
     block?.invoke(this)
-    childrenPattern.extend(*children)
+    childrenPattern().extend(*children)
 }
 
-fun <E: Event, L: NodeLabel<*, E>>L.seq(
-    properties:Map<String, Any?>?=null,
-    vararg children: Event,
-    block:(E.()->Unit)?=null,
-):E =
-    this.seq(autoKey(), properties, *children) { block?.invoke(this) }
+//fun <E: Event, L: NodeLabel<*, E>>L.seq(
+//    properties:Map<String, Any?>?=null,
+//    vararg children: Event,
+//    block:(E.()->Unit)?=null,
+//):E =
+//    this.seq(autoKey(), properties, *children) { block?.invoke(this) }
 
 fun <E: Event, L: NodeLabel<*, E>>L.seq(
     vararg children: Event,
     block:(E.()->Unit)?=null,
 ):E =
-    this.seq(autoKey(), null, *children) { block?.invoke(this) }
+    this.seq(autoKey(), *children) { block?.invoke(this) }
 
 // ------------------------------------------
 
 fun seq(
     key:String = autoKey(),
-    properties:Map<String, Any?>?=null,
+//    properties:Map<String, Any?>?=null,
     vararg children: Event,
     block:(Event.()->Unit)?=null,
 ): Event =
-    Event.seq(key, properties, *children) { block?.invoke(this) }
+    Event.seq(key, *children) { block?.invoke(this) }
 
-fun seq(
-    properties:Map<String, Any?>?=null,
-    vararg children: Event,
-    block:(Event.()->Unit)?=null,
-): Event =
-    seq(autoKey(), properties, *children) { block?.invoke(this) }
+//fun seq(
+//    properties:Map<String, Any?>?=null,
+//    vararg children: Event,
+//    block:(Event.()->Unit)?=null,
+//): Event =
+//    seq(autoKey(), properties, *children) { block?.invoke(this) }
 
 fun seq(
     vararg children: Event,
     block:(Event.()->Unit)?=null
 ): Event =
-    seq(autoKey(), null, *children) { block?.invoke(this) }
+    seq(autoKey(), *children) { block?.invoke(this) }
 
-
+fun pause(dur:Double=1.0) = Event.create { this.dur=dur }

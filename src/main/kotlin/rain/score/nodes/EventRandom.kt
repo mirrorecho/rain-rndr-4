@@ -2,6 +2,8 @@ package rain.score.nodes
 
 import rain.graph.Label
 import rain.graph.NodeLabel
+import rain.graph.queries.Pattern
+import rain.language.patterns.CUED_CHILDREN_QUERY
 import rain.utils.autoKey
 
 
@@ -16,12 +18,14 @@ open class EventRandom protected constructor(
 
     var times by DataSlot("times", 2)
 
-    val childrenToRandomize by lazy { super.children.toList() }
+    fun childrenToRandomize(previous: Pattern<Event>?) =
+        childrenPattern(previous).asPatterns(Event, CUED_CHILDREN_QUERY).toList()
 
-    override val children get() = sequence {
+    override fun children(previous: Pattern<Event>?) = sequence {
+        val myChildrenToRandomize = childrenToRandomize(previous)
         yieldAll((0..<times).map { _ ->
-            println("Getting a random child of an event with dur: ${this@EventRandom.dur}")
-            childrenToRandomize.random()
+//            println("Getting a random child of an event with dur: ${this@EventRandom.dur}")
+            myChildrenToRandomize.random()
         }.asSequence())
     }
 

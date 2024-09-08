@@ -4,11 +4,11 @@ import rain.rndr.relationships.*
 import rain.utils.*
 
 import org.openrndr.Program
-import org.openrndr.animatable.Animatable
 import org.openrndr.color.ColorHSVa
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.graph.quieries.Pattern
+import rain.graph.queries.Pattern
+import rain.score.Score
 import rain.score.nodes.*
 
 open class Circle protected constructor(
@@ -21,7 +21,7 @@ open class Circle protected constructor(
     override val label: Label<out Machine, out Circle> = Circle
 
     class CircleAnimation: MachineAnimation() {
-        var radius = 90.0
+        var radius = 4.0
 
         var strokeWeight = 0.9
 
@@ -30,9 +30,9 @@ open class Circle protected constructor(
 
         // for fillColor
         var h = 0.0
-        var s = 0.0
-        var v = 0.0
-        var a = 1.0
+        var s = 0.9
+        var v = 0.9
+        var a = 0.0 // set to 0.0 to avoid "flashes" // TODO: more elegant way to solve this?
     }
 
     val circleAnimation = CircleAnimation()
@@ -41,6 +41,8 @@ open class Circle protected constructor(
     var radius by LinkablePropertySlot(circleAnimation::radius, +RADIUS)
 
     var strokeWeight by LinkablePropertySlot(circleAnimation::strokeWeight, +STROKE_WEIGHT)
+
+    override var fromPosition by RelatedNodeSlot("fromPosition", +FROM_POSITION, Position, null)
 
     override var x by LinkablePropertySlot(circleAnimation::x, +X)
     override var y by LinkablePropertySlot(circleAnimation::y, +Y)
@@ -55,18 +57,19 @@ open class Circle protected constructor(
 
     //    // TODO: implement if needed (or remove)
     override fun bump(pattern: Pattern<Event>) {
-//        updateAllFieldsFrom(pattern)
+        updateAllSlotsFrom(pattern.source)
     }
 
-    override fun render(program: Program) {
+    override fun render(score: Score) {
 //        println("circle with x position " + position.x().toString())
-        program.apply {
+        circleAnimation.updateAnimation()
+        score.applyProgram {
             drawer.fill = ColorHSVa(h, s, v, a).toRGBa()
             drawer.stroke = strokeColor?.colorRGBa()
             drawer.strokeWeight = strokeWeight
             drawer.circle(
-                position = vector(this),
-                radius
+                position = vector(score),
+                radius * score.unitLength
             )
         }
     }

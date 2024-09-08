@@ -21,3 +21,5 @@ val Y = RelationshipLabel("Y")
 
 val RADIUS = RelationshipLabel("RADIUS")
 
+val FROM_POSITION = RelationshipLabel("FROM_POSITION")
+

@@ -14,7 +14,7 @@ open class Cue(
     key:String = autoKey(),
 ): Node(key) {
     companion object : NodeLabel<Node, Cue>(
-        null, Cue::class, { k-> Cue(k) }
+        Node, Cue::class, { k-> Cue(k) }
     )
     override val label: Label<out Node, out Cue> = Cue
 

@@ -1,9 +1,9 @@
 package rain.graph
 
 
-import rain.graph.quieries.Queryable
-import rain.graph.quieries.RelatedQuery
-import rain.graph.quieries.UpdatingQueryExecution
+import rain.graph.queries.Queryable
+import rain.graph.queries.RelatedQuery
+import rain.graph.queries.UpdatingQueryExecution
 
 import rain.utils.autoKey
 import kotlin.reflect.KMutableProperty0
@@ -84,10 +84,15 @@ open class Node protected constructor(
 
     val slotNames: Set<String> get() = dataSlots.keys
 
-    fun putSlot(name: String, value: Any?) {
-        dataSlots.putIfAbsent(name, DataSlot(name, value))?.updateLocalValue(value)
+    // updates or creates slot with the given value, and returns the slot
+    fun  <T:Any?> slot(name: String, value: T): DataSlot<T> {
+        dataSlots[name]?.let { existingSlot ->
+            return (existingSlot as DataSlot<T>).also { it.value = value }
+        }
+        return DataSlot(name, value)
     }
 
+    // gets slot by name (if it exists, otherwise null)
     fun <T:Any?> slot(name:String): DataSlot<T>? =
         dataSlots[name] as DataSlot<T>?
 
@@ -97,7 +102,7 @@ open class Node protected constructor(
 //    }
 
     fun slotsToMap(): Map<String, Any?> {
-        return dataSlots.mapValues { it.value }
+        return dataSlots.mapValues { (_, s)-> s.value }
     }
 
     fun updateSlotsFrom(map: Map<String, Any?>) {
@@ -114,6 +119,7 @@ open class Node protected constructor(
 
     open fun <T:Any?>updateSlotFrom(name:String, fromSlot: DataSlot<T>) {
         slot<T>(name)?.let { slot->
+            println("setting slot value to ${fromSlot.value}")
             slot.value = fromSlot.value
         }
     }
@@ -201,13 +207,15 @@ open class Node protected constructor(
     ): DataSlot<T>(name, default) {
 
         override var value: T
-            get() = applicableSlot.value ?: localValue
-            set(value) { applicableSlot.value = value }
+            get() = linkedSlot?.value ?: localValue
+            // TODO, if linked, consider whether setting should update linked value only,
+            //  local value only, or both (currently updates both)
+            set(value) {
+                linkedSlot?.let { it.value = value }
+                localValue = value
+            }
 
         private var linkedSlot: DataSlot<T>? = null
-
-        private val applicableSlot: DataSlot<T>
-            get() = linkedSlot ?: this
 
         override fun wireUp() {
             this@Node[linkQuery]().firstOrNull()?.let {relatedNode->

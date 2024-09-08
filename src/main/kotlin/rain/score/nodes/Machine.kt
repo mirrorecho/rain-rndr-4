@@ -8,7 +8,8 @@ import org.openrndr.math.Vector2
 import rain.graph.Node
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.graph.quieries.Pattern
+import rain.graph.queries.Pattern
+import rain.score.Score
 import rain.utils.autoKey
 import kotlin.reflect.KMutableProperty0
 
@@ -25,18 +26,6 @@ interface Colorable {
 
 }
 
-interface Positionable {
-    var x: Double
-    var y: Double
-
-    fun vector(program: Program): Vector2 = Vector2(
-        x * program.width,
-        y * program.height,
-    )
-
-}
-
-
 open class MachineAnimation: Animatable() {
 
     fun updateAnimation(
@@ -51,7 +40,11 @@ open class MachineAnimation: Animatable() {
 
         animateEventValue.apply {
 
+            // TODO/NOTE: fromValue does not work on the SECOND animation unless there is a pause before the first
+            //  ... why?
             fromValue?.let { property.set(it) }
+
+//            println("ANIMATING: ${animateEventValue.name} over $durMs MS, with $offsetDurMs MS offset")
 
             if (durMs > 0 || offsetDurMs > 0) {
                 if (offsetDurMs > 0) {
@@ -59,10 +52,10 @@ open class MachineAnimation: Animatable() {
                     property.animate(property.get(), offsetDurMs)
                     property.complete()
                 }
-                property.animate(toValue, durMs, easing)
+                property.animate(value, durMs, easing)
                 property.complete()
             } else {
-                property.set(toValue)
+                property.set(value)
             }
         }
 
@@ -74,7 +67,7 @@ open class Machine protected constructor(
     key:String = autoKey(),
 ): Node(key) {
     companion object : NodeLabel<Node, Machine>(
-        null, Machine::class, { k-> Machine(k) }
+        Node, Machine::class, { k-> Machine(k) }
     )
     override val label: Label<out Node, out Machine> = Machine
 
@@ -100,7 +93,7 @@ open class Machine protected constructor(
         isRunning = onOff;
     }
 
-    open fun render(program: Program) { println("render not implemented for $this") }
+    open fun render(score: Score) { println("render not implemented for $this") }
 
     // TODO: is this even used?
     protected var isRunning = false

@@ -19,7 +19,9 @@ class ExtendHelper<ET: Event>(
         if (values.size>extendLength) extendLength = values.size
 
         lambdaList.add { e: ET, i: Int ->
-            values.getOrNull(i) ?.let { v-> e.slot<T>(name)?.let {it.value = v} }
+            values.getOrNull(i) ?.let { v->
+                e.slot(name, v)
+            }
         }
 
     }
@@ -27,12 +29,14 @@ class ExtendHelper<ET: Event>(
     fun <T:Any?> cycle(name: String, vararg values:T?) {
         val cycle = cycleOf(*values)
         lambdaList.add { e: ET, i: Int ->
-            cycle[i] ?.let { v->  e.slot<T>(name)?.let {it.value = v} }
+            cycle[i] ?.let { v->
+                e.slot(name, v)
+            }
         }
     }
 
     fun extendEvent() {
-        parentEvent.childrenPattern.extend(
+        parentEvent.childrenPattern().extend(
             *(0..<extendLength).map { i->
                 label.create {
                     lambdaList.forEach { block ->
