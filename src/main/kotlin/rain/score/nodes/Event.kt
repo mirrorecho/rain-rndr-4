@@ -106,6 +106,10 @@ open class Event protected constructor(
         helper.extendEvent()
     }
 
+    fun extend(vararg children: Event) {
+        childrenPattern().extend(*children)
+    }
+
     fun extend(block: ExtendHelper<Event>.()->Unit) {
         val helper = ExtendHelper(this, Event)
         block.invoke(helper)

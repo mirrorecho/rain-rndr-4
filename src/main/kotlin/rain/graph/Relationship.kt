@@ -30,6 +30,7 @@ fun relate(
     source: Node,
     label: RelationshipLabel,
     target: Node,
+    properties: Map<String, Any?>? = null,
     key:String = autoKey()
 ): Relationship = label.create(source, target, key)
 

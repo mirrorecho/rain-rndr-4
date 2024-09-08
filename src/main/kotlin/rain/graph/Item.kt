@@ -13,6 +13,7 @@ abstract class Item(
     abstract fun delete()
 
     // TODO: consider making this private or protected
+    // TODO: is this even worthwhile? Or only worthwhile for relationships?
     val properties: MutableMap<String, Any?>  = mutableMapOf()
 
     open operator fun get(name:String) = properties[name]

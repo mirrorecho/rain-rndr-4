@@ -32,6 +32,7 @@ class Score protected constructor(
     // represents a grid with 30x30 pixel squares at 1920x1080 resolution
     var unitLength  by DataSlot("unitLength", 30.0)
 
+    // TODO: used?
     var plays by RelatedNodeSlot("plays", +PLAYS, Event, null)
 
     val widthUnits get() = width / unitLength // default = 64

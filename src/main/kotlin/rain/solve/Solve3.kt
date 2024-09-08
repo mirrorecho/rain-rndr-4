@@ -9,6 +9,7 @@ import rain.score.*
 import rain.score.nodes.*
 import rain.rndr.*
 import rain.rndr.nodes.*
+import rain.rndr.relationships.X
 import kotlin.reflect.KMutableProperty1
 
 
@@ -21,9 +22,12 @@ fun solve3() {
         Event.create {
             dur=4.0
             slot("h", 220.0)
+            animate("x") {
+
+            }
             animate("radius") {
                 offsetDur = -3.0
-                fromValue = 2.0
+                fromValue = 0.4
                 value = 20.0
                 easing = Easing.QuadIn
             }
@@ -53,6 +57,7 @@ fun solve3() {
         pause(),
         EventRandom.seq(circleFly) {
             bumps = Circle.create {
+                this.relate(X, ValueRandom.create { maxValue = DEFAULT_SCORE.widthUnits }, true, )
                 fromPosition = startingPosition
             }
             gate = Gate.ON_OFF

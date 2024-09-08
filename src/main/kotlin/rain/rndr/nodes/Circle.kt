@@ -40,8 +40,10 @@ open class Circle protected constructor(
 
     var radius by LinkablePropertySlot(circleAnimation::radius, +RADIUS)
 
+    // TODO: relate to score unites (make a Strokable interface?)
     var strokeWeight by LinkablePropertySlot(circleAnimation::strokeWeight, +STROKE_WEIGHT)
 
+    // TODO: allow this to cascade
     override var fromPosition by RelatedNodeSlot("fromPosition", +FROM_POSITION, Position, null)
 
     override var x by LinkablePropertySlot(circleAnimation::x, +X)
