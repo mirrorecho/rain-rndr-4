@@ -2,6 +2,8 @@ package rain.rndr.nodes
 
 import org.openrndr.Program
 import org.openrndr.animatable.Animatable
+import org.openrndr.color.ColorHSVa
+import org.openrndr.color.ColorRGBa
 import rain.graph.Label
 import rain.graph.NodeLabel
 import rain.utils.*
@@ -11,9 +13,20 @@ import rain.rndr.relationships.H
 import rain.rndr.relationships.S
 import rain.rndr.relationships.V
 import rain.score.Score
-import rain.score.nodes.Colorable
 import rain.score.nodes.Machine
 import rain.score.nodes.MachineAnimation
+
+interface Colorable {
+    var h: Double
+    var s: Double
+    var v: Double
+    var a: Double
+
+    fun colorHSVa() = ColorHSVa(h, s, v, a)
+
+    fun colorRGBa(): ColorRGBa = colorHSVa().toRGBa()
+
+}
 
 open class Color(
     key:String = autoKey(),

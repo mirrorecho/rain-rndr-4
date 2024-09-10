@@ -14,18 +14,6 @@ import rain.utils.autoKey
 import kotlin.reflect.KMutableProperty0
 
 
-interface Colorable {
-    var h: Double
-    var s: Double
-    var v: Double
-    var a: Double
-
-    fun colorHSVa() = ColorHSVa(h, s, v, a)
-
-    fun colorRGBa(): ColorRGBa = colorHSVa().toRGBa()
-
-}
-
 open class MachineAnimation: Animatable() {
 
     fun updateAnimation(

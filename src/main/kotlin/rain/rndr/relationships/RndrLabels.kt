@@ -21,5 +21,8 @@ val Y = RelationshipLabel("Y")
 
 val RADIUS = RelationshipLabel("RADIUS")
 
+val WIDTH = RelationshipLabel("WIDTH")
+val HEIGHT = RelationshipLabel("HEIGHT")
+
 val FROM_POSITION = RelationshipLabel("FROM_POSITION")
 

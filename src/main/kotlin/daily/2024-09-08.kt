@@ -11,9 +11,11 @@ import rain.score.nodes.*
 /*
 
 TOOLS AVAILABLE:
+(existing)
  - draw circles
  - specify the color (hsva), radius, and position
  - animate any of the above
+
  */
 
 fun main() {

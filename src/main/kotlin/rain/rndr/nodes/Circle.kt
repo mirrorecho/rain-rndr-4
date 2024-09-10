@@ -23,10 +23,10 @@ open class Circle protected constructor(
     class CircleAnimation: MachineAnimation() {
         var radius = 4.0
 
-        var strokeWeight = 0.9
+        var strokeWeight = 0.0
 
-        var x = 0.5
-        var y = 0.5
+        var x = 0.0
+        var y = 0.0
 
         // for fillColor
         var h = 0.0
@@ -66,7 +66,7 @@ open class Circle protected constructor(
 //        println("circle with x position " + position.x().toString())
         circleAnimation.updateAnimation()
         score.applyProgram {
-            drawer.fill = ColorHSVa(h, s, v, a).toRGBa()
+            drawer.fill = colorRGBa()
             drawer.stroke = strokeColor?.colorRGBa()
             drawer.strokeWeight = strokeWeight
             drawer.circle(
