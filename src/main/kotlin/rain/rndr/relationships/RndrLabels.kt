@@ -26,3 +26,4 @@ val HEIGHT = RelationshipLabel("HEIGHT")
 
 val FROM_POSITION = RelationshipLabel("FROM_POSITION")
 
+val LINE_TO = RelationshipLabel("LINE_TO")
