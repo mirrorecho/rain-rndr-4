@@ -3,6 +3,7 @@ package rain.score
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
+import org.openrndr.Application
 import org.openrndr.Program
 import org.openrndr.application
 import org.openrndr.launch
@@ -57,7 +58,7 @@ class Score protected constructor(
 
     fun exit() {
         println("EXITING: ==========================================================")
-        rndrProgram?.let {
+        myProgram?.let {
             println("Program complete after ${it.seconds} seconds")
             it.application.exit()
             //TODO: notice the time creep here!!! How to deal with this?
@@ -65,11 +66,10 @@ class Score protected constructor(
     }
 
     fun applyProgram(block: Program.()->Unit) {
-        rndrProgram?.let{ block.invoke(it) }
+        myProgram?.let { block.invoke(it) }
     }
 
-    // TODO maybe: are these even needed externally?
-    private var rndrProgram: Program? = null
+    private var myProgram: Program? = null
 
     // TODO maybe, consider whether the running machines are actually just part of the graph
     //  (e.g. create/remove relationships)
@@ -87,73 +87,70 @@ class Score protected constructor(
 
     private suspend fun playPattern(
         pattern: Pattern<Event>,
-        program: Program,
         exitOnComplete:Boolean=false
     ) {
-        val threads: MutableList<Job> = mutableListOf()
-        val event = pattern.source
-        val gate = event.gate
-        // access the bumps machine only if necessary:
-        val machine =
-            if (event.bumping || gate.hasGate)
-                pattern.cascadingSlotValue<Machine>("bumps")
-            else null
+        myProgram?.let { program ->
+
+            val threads: MutableList<Job> = mutableListOf()
+            val event = pattern.source
+            val gate = event.gate
+            // access the bumps machine only if necessary:
+            val machine =
+                if (event.bumping || gate.hasGate)
+                    pattern.cascadingSlotValue<Machine>("bumps")
+                else null
 
 //        println("PLAYING: ${pattern.source} with machine $machine")
 
-        machine?.let { m ->
-            gate.startGate?.let { gateMachine(m, it) }
-            if (event.bumping) m.bump(pattern)
-        }
+            machine?.let { m ->
+                gate.startGate?.let { gateMachine(m, it) }
+                if (event.bumping) m.bump(pattern)
+            }
 
 //        println("adding delay: $addDelay")
-        event.dur?.let { dur -> if (dur > 0.0) delay(dur.toDuration(DurationUnit.SECONDS))  }
-        // TODO: adjust for delta in time delay
+            event.dur?.let { dur -> if (dur > 0.0) delay(dur.toDuration(DurationUnit.SECONDS)) }
+            // TODO: adjust for delta in time delay
 
 
-        event.children(pattern).forEach { childEventPattern ->
-            // TODO: this cast below is gross
-            if (pattern.source.simultaneous)
-                threads.add(program.launch { playPattern(childEventPattern, program) })
-            else
-                playPattern(childEventPattern, program)
+            event.children(pattern).forEach { childEventPattern ->
+                // TODO: this cast below is gross
+                if (pattern.source.simultaneous)
+                    threads.add(program.launch { playPattern(childEventPattern) })
+                else
+                    playPattern(childEventPattern)
+            }
+
+            threads.joinAll()
+
+            machine?.let { m -> gate.endGate?.let { gateMachine(m, it) } }
+
+            if (exitOnComplete) exit()
         }
-
-        threads.joinAll()
-
-        machine?.let { m -> gate.endGate?.let { gateMachine(m, it) } }
-
-        if (exitOnComplete) exit()
 
     }
 
-    fun play(pattern: Pattern<Event>): Score {
+    fun play(block: Score.(Program)->Event) {
         application {
-            // TODO: consider moving this layer to the EventPlayer level
             configure {
                 width = this@Score.width.toInt()
                 height = this@Score.height.toInt()
             }
             program {
-                println("==========================================================")
-                println("Playing ${pattern.source}")
-                println()
-                rndrProgram = this
-                launch { playPattern(pattern, this@program, true) }
+                myProgram = this
+                launch {
+                    playPattern(block.invoke(this@Score, this@program).childrenPattern(), true)
+                }
                 extend {
                     // TODO: consider ... machines are executed in no particular order, is that OK?
                     runningMachines.forEach { it.value.render(this@Score) }
                 }
             }
         }
-        return this
     }
 
+    fun play(event: Event) = play { event }
 
-    fun play(): Score {
-        plays?.let { play(it.childrenPattern()); }
-        return this
-    }
+    fun play() = plays?.let {p-> play { p } }
 
 }
 

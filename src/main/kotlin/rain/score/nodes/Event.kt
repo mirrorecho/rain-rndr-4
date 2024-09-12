@@ -98,7 +98,7 @@ open class Event protected constructor(
 //        receiverBlock.invoke(receiver)
 //    }
 
-    fun play(score: Score = DEFAULT_SCORE) = score.play(this.childrenPattern())
+    fun play(score: Score = DEFAULT_SCORE) = score.play { this@Event }
 
     fun <NT: Event>extend(label:NodeLabel<*, NT>, block: ExtendHelper<NT>.()->Unit) {
         val helper = ExtendHelper(this, label)

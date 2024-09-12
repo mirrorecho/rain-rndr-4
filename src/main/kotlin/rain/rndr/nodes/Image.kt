@@ -58,7 +58,7 @@ open class Image protected constructor(
     override fun render(score: Score) {
         imageAnimation.updateAnimation()
         score.applyProgram {
-            myBuffer?.let { drawer.image(it) }
+            myBuffer?.let { drawer.image(it, x*score.unitLength, y*score.unitLength) }
         }
     }
 
