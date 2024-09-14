@@ -81,24 +81,24 @@ open class UpdatingQueryExecution<FT: Item, T: Item>(
 
 // ========================================================================
 
-// TODO: naming?
-open class Pattern<FT: Node>(
-    val source: FT,
-    override val query: UpdatingQuery<Node, Node>,
-    val previous: Pattern<*>? = null
-): UpdatingQueryExecution<Node, Node>(source, query) {
-
-    open fun asPatterns(query: UpdatingQuery<Node, Node>): Sequence<Pattern<*>> =
-        asSequence().map { Pattern(it, query, this) }
-
-    open fun <T: Node> asPatterns(
-        label: NodeLabel<*, out T>,
-        query: UpdatingQuery<Node, Node>,
-    ): Sequence<Pattern<T>> =
-        asSequence().map { Pattern(label.from(it)!!, query, this) }
-
-    fun <T:Any?> cascadingSlotValue(name:String): T? =
-        source.slot<T>(name)?.value ?: previous?.cascadingSlotValue(name)
-
-
-}
+//// TODO: review and delete if not needed!
+//open class Pattern<FT: Node>(
+//    val source: FT,
+//    override val query: UpdatingQuery<Node, Node>,
+//    val previous: Pattern<*>? = null
+//): UpdatingQueryExecution<Node, Node>(source, query) {
+//
+//    open fun asPatterns(query: UpdatingQuery<Node, Node>): Sequence<Pattern<*>> =
+//        asSequence().map { Pattern(it, query, this) }
+//
+//    open fun <T: Node> asPatterns(
+//        label: NodeLabel<*, out T>,
+//        query: UpdatingQuery<Node, Node>,
+//    ): Sequence<Pattern<T>> =
+//        asSequence().map { Pattern(label.from(it)!!, query, this) }
+//
+//    fun <T:Any?> cascadingSlotValue(name:String): T? =
+//        source.slot<T>(name)?.value ?: previous?.cascadingSlotValue(name)
+//
+//
+//}

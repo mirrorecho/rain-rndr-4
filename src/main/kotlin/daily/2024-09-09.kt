@@ -40,7 +40,6 @@ fun main() {
             value = random(0.0,90.0)
             easing = Easing.CubicIn
         }
-
         animate("width") {
             value = random(0.0,12.0)
             easing = Easing.SineIn
@@ -70,7 +69,7 @@ fun main() {
                 height = 0.0
                 x = random(0.0, 64.0)
                 y = random(0.0, 36.0)
-                a = 0.4
+//                a = 0.4
             }
             gate = Gate.ON_OFF
         }

@@ -36,7 +36,7 @@ class ExtendHelper<ET: Event>(
     }
 
     fun extendEvent() {
-        parentEvent.childrenPattern().extend(
+        parentEvent.childrenQuery.extend(
             *(0..<extendLength).map { i->
                 label.create {
                     lambdaList.forEach { block ->

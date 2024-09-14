@@ -6,10 +6,7 @@ import org.openrndr.math.Polar
 import org.openrndr.math.Vector2
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.graph.queries.Pattern
 import rain.rndr.relationships.*
-import rain.score.Score
-import rain.score.nodes.Event
 import rain.score.nodes.Machine
 import rain.score.nodes.MachineAnimation
 

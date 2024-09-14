@@ -33,8 +33,8 @@ fun main() {
         // TODO: a function to consolidate this
         val line1 = Line.create {
             center(this@play)
-            strokeWeight = 0.1
-            a = 0.4
+//            strokeWeight = 0.1
+//            a = 0.4
 
             lineTo = LinePoint.create {
                 x = 2.0

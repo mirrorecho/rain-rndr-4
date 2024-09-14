@@ -67,7 +67,7 @@ fun main() {
             radius = 64.0
             x = random(0.0, 64.0)
             y = random(0.0, 36.0)
-            a = 0.2
+//            a = 0.2
         }
         gate = Gate.ON_OFF
     }

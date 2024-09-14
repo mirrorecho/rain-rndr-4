@@ -33,7 +33,7 @@ abstract class Label<PT: Item, T:PT>(
         registry.putIfAbsent(item.key, item)?.let {
             throw Exception("Can not register item with key '${item.key} as a $labelName because it already exists.")
         }
-        registry[item.key] = item
+//        registry[item.key] = item
         parent?.register(item)
     }
 
@@ -85,11 +85,20 @@ abstract class NodeLabel<PT: Node, T:PT>(
     fun create(
         key:String = autoKey(),
         block: (T.() -> Unit)? = null
-    ):T = factory(key).also {
-        register(it)
-        it.wireUpSlots()
-        block?.invoke(it)
+    ):T = factory(key).also { node->
+        register(node)
+        block?.invoke(node)
+        node.wireUpSlots()
     }
+
+    fun merge(
+        key: String,
+        block: (T.() -> Unit)? = null,
+    ): T = registry.getOrElse(key) { factory(key).also { register(it) } }.also { node->
+        block?.invoke(node)
+        node.wireUpSlots()
+    }
+
 
     // TODO maybe: implement merge()
 
@@ -138,17 +147,7 @@ class RelationshipLabel(
 
 
 
-//    fun merge(
-//        key: String = autoKey(),
-//        properties: Map<String, Any?>? = null,
-//        block: (T.() -> Unit)? = null,
-//    ): T = nodeIndex.getOrPut(key) {
-//        factory(key).also { node ->
-//            properties?.let { node.updatePropertiesFrom(it) };
-//            node.retrieveAllFields()
-//        }
-//    }
-//
+
 //    fun create(
 //        key: String = autoKey(),
 //        properties: Map<String, Any?>? = null,

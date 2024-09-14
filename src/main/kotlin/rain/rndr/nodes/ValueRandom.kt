@@ -5,6 +5,7 @@ import org.openrndr.extra.noise.random
 import rain.graph.Label
 import rain.graph.NodeLabel
 import rain.score.Score
+import rain.score.ScoreContext
 import rain.score.nodes.Machine
 import rain.score.nodes.MachineAnimation
 import rain.utils.*
@@ -35,7 +36,7 @@ open class ValueRandom(
     var maxValue by PropertySlot(valueRandomAnimation::maxValue)
     val value by PropertySlot(valueRandomAnimation::value)
 
-    override fun render(score: Score) {
+    override fun render(context: ScoreContext) {
         valueRandomAnimation.updateAnimation()
     }
 

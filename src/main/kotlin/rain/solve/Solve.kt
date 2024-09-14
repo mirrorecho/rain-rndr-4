@@ -65,94 +65,92 @@ fun solve0() {
 
 //// -------------------------------------------------
 
+
+
 fun solve1() {
+
+    Color.create("COLOR_1") { a = 1.0; s=0.9; v=0.9; h=190.0 }
+    DrawStyle.create("STYLE_1") { fill("COLOR_1") }
+
     Event.create {
+        bumps = Circle.create {
+            x = 32.5
+            y = 18.5
+        }
         gate = Gate.ON_OFF
-        dur = 4.0
-        bumps = Circle.create { h=20.0 }
-    }.play()
+        dur = 2.0
+        style("STYLE_1")
+    }.play(DEFAULT_SCORE.asHalfRes())
 }
 
 //// -------------------------------------------------
 
 fun solve2() {
-    val e1 = Event.create {
-        dur = 2.0
-        slot("h", 40.0)
-        slot("a", 0.2)
-        animate("radius") {
-            value = 220.0
-        }
+
+    DrawStyle.create("STYLE_1") {
+        fill("COLOR_BLUE") { s=0.8 }
     }
 
-    val e2 = par(
+    seq("FADE_BLUE",
         Event.create {
-            dur=4.0
-            slot("h", 220.0)
-            animate("radius") {
-                offsetDur = -3.0
-//                fromValue = 20.0
-                value = 20.0
-                easing = Easing.QuadIn
+            dur=2.9
+            animate("a") {
+                easing = Easing.CubicInOut
+                fromValue = 0.0
+                value = 1.0
             }
         },
-        seq(
-            Event.create {
-                dur=2.9
-                animate("a") {
-                    easing = Easing.CubicInOut
-                    fromValue = 0.0
-                    value = 1.0
-                }
-            },
-            Event.create {
-                dur=1.1
-                animate("a") {
-                    easing = Easing.CubicInOut
-                    fromValue = 1.0
-                    value = 0.0
-                }
-            },
-        )
-    )
+        Event.create {
+            dur=1.1
+            animate("a") {
+                easing = Easing.CubicInOut
+                fromValue = 1.0
+                value = 0.0
+            }
+        },
+    ) {
+        bumps = Color["COLOR_BLUE"]
+    }
 
-    EventRandom.seq(e1, e2) {
-        bumps = Circle.create()
-        gate = Gate.ON_OFF
-        times = 8
-    }.play()
+    DEFAULT_SCORE.asHalfRes().play {
+
+        val e1 = par(
+            Event.create {
+                dur = 4.0
+                animate("radius") {
+                    fromValue = 1.0
+                    value = 6.0
+                }
+            },
+            Event["FADE_BLUE"]!!
+        )
+
+        val e2 = par(
+            Event.create {
+                dur = 4.0
+                animate("radius") {
+                    fromValue = 16.0
+                    value = 4.0
+                    easing = Easing.QuadIn
+                }
+            },
+            Event["FADE_BLUE"]!!
+        )
+        seq(
+            gate("STYLE_1"),
+            gate("COLOR_BLUE"),
+            EventRandom.seq(e1, e2) {
+                bumps = Circle.create {
+                    x = 32.5
+                    y = 18.5
+                }
+                style("STYLE_1")
+                gate = Gate.ON_OFF
+                times = 8
+            }
+        )
+    }
 
 }
 
 
-//fun solve2() {
-//    val radiusAnimated = ValueAnimate.create("RADIUS") {
-//        value = 200.0
-//        easing = Easing.CubicInOut
-//    }
-//
-//    // TODO: simplify this!!!
-//
-//    val eRadius = Event.create("ER") {
-//        gate = Gate.ON_OFF
-//        dur = 2.0
-//        this[ValueAnimate.initValue] = 22.0
-//        this[ValueAnimate.animateDur] = 2.0
-//        this[ValueAnimate.value] = 290.0
-//        bumps = radiusAnimated
-//    }
-//    val eCircle = Event.create("EC") {
-//        gate = Gate.ON_OFF
-//        dur = 2.0
-//        bumps = Circle.create("CIRCLE") {
-//            ::radius.connect(radiusAnimated, "value")
-//            h=240.0
-//        }
-//
-//    }
-//
-//    val anim = par(eRadius, eCircle)
-//
-//    seq(anim, anim).play()
-//
-//}

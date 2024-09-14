@@ -4,6 +4,7 @@ package rain.graph
 import rain.graph.queries.Queryable
 import rain.graph.queries.RelatedQuery
 import rain.graph.queries.UpdatingQueryExecution
+import rain.rndr.nodes.Color
 
 import rain.utils.autoKey
 import kotlin.reflect.KMutableProperty0
@@ -140,6 +141,9 @@ open class Node protected constructor(
         }
     }
 
+    fun <T:Node>mergeRelated(slotName: String, key:String? = null,  block:(T.()->Unit)?=null) =
+        (slot<T?>(slotName) as RelatedNodeSlot<T?>).merge(key, block)
+
     // ==================================================
 
     open inner class DataSlot<T:Any?>(
@@ -186,6 +190,19 @@ open class Node protected constructor(
     ): DataSlot<T>(name, default) {
 
         private val myQueryExecution = UpdatingQueryExecution(node, query)
+
+        // if related node is null, or a new key provided, then replaces related node with merged node
+        // otherwise, updates the related node
+        fun merge(
+            key:String? = null,
+            block:((T & Any).()->Unit)?=null
+        ) {
+            if (value==null || key!=null) {
+                value = label.merge(key ?: autoKey()) { block?.invoke(this) }
+            } else {
+                value?.apply { block?.invoke(this) }
+            }
+        }
 
         override var value: T
             get() = myQueryExecution.first(label) ?: localValue

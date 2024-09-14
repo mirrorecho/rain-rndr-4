@@ -3,8 +3,8 @@ package rain.score.nodes
 import org.openrndr.Program
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.graph.queries.Pattern
 import rain.score.Score
+import rain.score.ScoreContext
 
 
 // a simple machine for demo/testing purposes..
@@ -21,22 +21,11 @@ open class Printer(
     var renderMe by DataSlot("renderMe", false)
 
 
-
-    override fun bump(pattern: Pattern<Event>) {
-//        println("bumping: $this with $pattern")
-
-        // updates all fields:
-//        updateAllSlotsFrom(pattern.source)
-        updateSlotFrom<String>("msg", pattern.source)
-        updateSlotFrom<Boolean>("renderMe", pattern.source)
-
-//        println("Slot msg from event pattern: ${ pattern.source.slot<String>("msg")?.value }")
-
-        // or, this is how to update field by field (if not updating all):
-//        updateFieldsFrom(pattern, ::msg, ::renderMe)
+    override fun bump(context: ScoreContext) {
+        // can add more logic here
     }
 
-    override fun render(score: Score) {
+    override fun render(context: ScoreContext) {
 //        println(msg)
         if (renderMe) {
             println("${this.key} PRINTING: $msg")

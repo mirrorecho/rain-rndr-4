@@ -11,8 +11,7 @@ import org.openrndr.draw.loadImage
 import org.openrndr.math.Vector2
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.graph.queries.Pattern
-import rain.score.Score
+import rain.score.ScoreContext
 import rain.score.nodes.*
 
 open class Image protected constructor(
@@ -50,15 +49,11 @@ open class Image protected constructor(
         myBuffer = loadImage(imagePath)
     }
 
-    //    // TODO: implement if needed (or remove)
-    override fun bump(pattern: Pattern<Event>) {
-        updateAllSlotsFrom(pattern.source)
-    }
 
-    override fun render(score: Score) {
+    override fun render(context: ScoreContext) {
         imageAnimation.updateAnimation()
-        score.applyProgram {
-            myBuffer?.let { drawer.image(it, x*score.unitLength, y*score.unitLength) }
+        context.applyDrawing {
+            myBuffer?.let { image(it, x*context.unitLength, y*context.unitLength) }
         }
     }
 

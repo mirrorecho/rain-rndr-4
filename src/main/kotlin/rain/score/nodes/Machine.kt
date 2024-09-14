@@ -8,8 +8,8 @@ import org.openrndr.math.Vector2
 import rain.graph.Node
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.graph.queries.Pattern
 import rain.score.Score
+import rain.score.ScoreContext
 import rain.utils.autoKey
 import kotlin.reflect.KMutableProperty0
 
@@ -30,6 +30,7 @@ open class MachineAnimation: Animatable() {
 
             // TODO/NOTE: fromValue does not work on the SECOND animation unless there is a pause before the first
             //  ... why?
+//            property.complete()
             fromValue?.let { property.set(it) }
 
 //            println("ANIMATING: ${animateEventValue.name} over $durMs MS, with $offsetDurMs MS offset")
@@ -81,16 +82,37 @@ open class Machine protected constructor(
         isRunning = onOff;
     }
 
-    open fun render(score: Score) { println("render not implemented for $this") }
+
 
     // TODO: is this even used?
     protected var isRunning = false
 
-    // TODO: make this universal?
-    open fun bump(pattern: Pattern<Event>) {
-        // TODO: implement?
-        println("Bumping $key: $properties - WARNING: no bump defined")
+    private var scoreContext: ScoreContext? = null
+
+    fun setContext(context: ScoreContext) {scoreContext = context}
+
+    fun bump() {
+        scoreContext?.let {
+            updateAllSlotsFrom(it.event)
+            bump(it)
+            return
+        }
+        println("WARNING - no score context for $this, unable to render")
     }
+
+    open fun bump(context:ScoreContext) {
+        // hook that can be overridden for machine-specific implementations
+    }
+
+    fun render() {
+        scoreContext?.let {
+            render(it)
+            return
+        }
+        println("WARNING - no score context for $this, unable to render")
+    }
+
+    open fun render(context: ScoreContext) { println("render not implemented for $this") }
 
 }
 

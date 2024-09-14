@@ -2,13 +2,16 @@ package rain.score.nodes
 
 
 import rain.graph.Node
-import rain.graph.queries.Pattern
 import rain.score.ExtendHelper
 import org.openrndr.animatable.easing.Easing
 import rain.graph.Label
 import rain.graph.NodeLabel
+import rain.graph.queries.UpdatingQueryExecution
 import rain.language.patterns.*
 import rain.language.patterns.relationships.BUMPS
+import rain.language.patterns.relationships.DRAW_STYLE
+import rain.rndr.nodes.Color
+import rain.rndr.nodes.DrawStyle
 import rain.score.DEFAULT_SCORE
 import rain.score.Score
 import rain.utils.*
@@ -42,12 +45,22 @@ open class Event protected constructor(
     // TODO: implement by history....
     var bumps by RelatedNodeSlot("bumps", +BUMPS, Machine, null)
 
-    fun childrenPattern(previous: Pattern<Event>? = null): Pattern<Event> =
-        Pattern(this, CUED_CHILDREN_QUERY, previous)
+    var drawStyle by RelatedNodeSlot("drawStyle", +DRAW_STYLE, DrawStyle, null)
 
-    open fun children(previous: Pattern<Event>? = null) =
-        childrenPattern(previous).asPatterns(Event, CUED_CHILDREN_QUERY)
+    open val childrenQuery get() = UpdatingQueryExecution(this, CUED_CHILDREN_QUERY)
 
+    open val children get() = childrenQuery(Event)
+
+    fun style(key:String? = null,  block:(DrawStyle.()->Unit)?=null) =
+        mergeRelated("drawStyle", key, block)
+
+
+//    fun style(key: String= autoKey(),  block:(DrawStyle.()->Unit)?=null) {
+//        drawStyle = DrawStyle.merge(key) {
+//            block?.invoke(this)
+//            updateRndrDrawStyle()
+//        }
+//    }
 
     // TODO: implement if useful
 //    val sumDur: Double get() { throw NotImplementedError()
@@ -87,17 +100,6 @@ open class Event protected constructor(
         slot("$name:animate", AnimateEventValue(name).also(block))
     }
 
-//    fun <R:Node, RL:NodeLabel<R>>bumps(
-//        receiverLabel:RL,
-//        key:String=autoKey(),
-//        messageBlock: (RL.(Message<R, RL>)->Unit)?=null,
-//        receiverBlock: (R)->Unit
-//    ) {
-//        val receiver = receiverLabel.merge(key, messageBlock)
-//        relate(TARGETS, receiver) // TODO: replace with BUMPS
-//        receiverBlock.invoke(receiver)
-//    }
-
     fun play(score: Score = DEFAULT_SCORE) = score.play { this@Event }
 
     fun <NT: Event>extend(label:NodeLabel<*, NT>, block: ExtendHelper<NT>.()->Unit) {
@@ -107,7 +109,7 @@ open class Event protected constructor(
     }
 
     fun extend(vararg children: Event) {
-        childrenPattern().extend(*children)
+        childrenQuery.extend(*children)
     }
 
     fun extend(block: ExtendHelper<Event>.()->Unit) {
@@ -129,7 +131,7 @@ fun <E: Event, L: NodeLabel<*, E>>L.par(
     simultaneous = true
     bumping = false
     block?.invoke(this)
-    childrenPattern().extend(*children)
+    childrenQuery.extend(*children)
 }
 
 fun <E: Event, L: NodeLabel<*, E>>L.par(
@@ -137,12 +139,6 @@ fun <E: Event, L: NodeLabel<*, E>>L.par(
     block:(E.()->Unit)?=null,
 ):E =
     this.par(autoKey(), *children) { block?.invoke(this) }
-
-//fun <E: Event, L: NodeLabel<*, E>>L.par(
-//    key:String = autoKey(),
-//    block:(E.()->Unit)?=null,
-//):E =
-//    this.par(key) { block?.invoke(this) }
 
 // ------------------------------------------
 
@@ -152,13 +148,6 @@ fun par(
     block:(Event.()->Unit)?=null,
 ): Event =
     Event.par(key, *children) { block?.invoke(this) }
-
-//fun par(
-//    properties:Map<String, Any?>?=null,
-//    vararg children: Event,
-//    block:(Event.()->Unit)?=null,
-//): Event =
-//    par(autoKey(), properties, *children) { block?.invoke(this) }
 
 fun par(
     vararg children: Event,
@@ -172,22 +161,14 @@ fun par(
 
 fun <E: Event, L: NodeLabel<*, E>>L.seq(
     key:String = autoKey(),
-//    properties:Map<String, Any?>?=null,
     vararg children: Event,
     block:(E.()->Unit)?=null,
 ):E = this.create(key) {
     simultaneous = false
     bumping = false
     block?.invoke(this)
-    childrenPattern().extend(*children)
+    childrenQuery.extend(*children)
 }
-
-//fun <E: Event, L: NodeLabel<*, E>>L.seq(
-//    properties:Map<String, Any?>?=null,
-//    vararg children: Event,
-//    block:(E.()->Unit)?=null,
-//):E =
-//    this.seq(autoKey(), properties, *children) { block?.invoke(this) }
 
 fun <E: Event, L: NodeLabel<*, E>>L.seq(
     vararg children: Event,
@@ -199,18 +180,10 @@ fun <E: Event, L: NodeLabel<*, E>>L.seq(
 
 fun seq(
     key:String = autoKey(),
-//    properties:Map<String, Any?>?=null,
     vararg children: Event,
     block:(Event.()->Unit)?=null,
 ): Event =
     Event.seq(key, *children) { block?.invoke(this) }
-
-//fun seq(
-//    properties:Map<String, Any?>?=null,
-//    vararg children: Event,
-//    block:(Event.()->Unit)?=null,
-//): Event =
-//    seq(autoKey(), properties, *children) { block?.invoke(this) }
 
 fun seq(
     vararg children: Event,
@@ -219,3 +192,11 @@ fun seq(
     seq(autoKey(), *children) { block?.invoke(this) }
 
 fun pause(dur:Double=1.0) = Event.create { this.dur=dur }
+
+fun gate(machine:Machine?, gate:Gate=Gate.ON): Event = Event.create {
+    bumps = machine
+    bumping = false
+    this.gate =gate
+}
+
+fun gate(key:String, gate:Gate=Gate.ON) = gate(Machine[key])

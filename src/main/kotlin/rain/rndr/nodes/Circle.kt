@@ -3,17 +3,14 @@ package rain.rndr.nodes
 import rain.rndr.relationships.*
 import rain.utils.*
 
-import org.openrndr.Program
-import org.openrndr.color.ColorHSVa
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.graph.queries.Pattern
-import rain.score.Score
+import rain.score.ScoreContext
 import rain.score.nodes.*
 
 open class Circle protected constructor(
     key:String = autoKey(),
-) : Colorable, Positionable, Machine(key) {
+) : Positionable, Machine(key) {
     companion object : NodeLabel<Machine, Circle>(
         Machine, Circle::class, { k -> Circle(k) }
     )
@@ -23,16 +20,9 @@ open class Circle protected constructor(
     class CircleAnimation: MachineAnimation() {
         var radius = 4.0
 
-        var strokeWeight = 0.0
-
         var x = 0.0
         var y = 0.0
 
-        // for fillColor
-        var h = 0.0
-        var s = 0.9
-        var v = 0.9
-        var a = 0.0 // set to 0.0 to avoid "flashes" // TODO: more elegant way to solve this?
     }
 
     val circleAnimation = CircleAnimation()
@@ -40,39 +30,23 @@ open class Circle protected constructor(
 
     var radius by LinkablePropertySlot(circleAnimation::radius, +RADIUS)
 
-    // TODO: relate to score unites (make a Strokable interface?)
-    var strokeWeight by LinkablePropertySlot(circleAnimation::strokeWeight, +STROKE_WEIGHT)
-
     // TODO: allow this to cascade
     override var fromPosition by RelatedNodeSlot("fromPosition", +FROM_POSITION, Position, null)
 
     override var x by LinkablePropertySlot(circleAnimation::x, +X)
     override var y by LinkablePropertySlot(circleAnimation::y, +Y)
 
-    override var h by LinkablePropertySlot(circleAnimation::h, +H)
-    override var s by LinkablePropertySlot(circleAnimation::s, +S)
-    override var v by LinkablePropertySlot(circleAnimation::v, +V)
-    override var a by LinkablePropertySlot(circleAnimation::a, +A)
 
-    val strokeColor by RelatedNodeSlot("strokeColor", +STROKE_COLOR, Color, null)
-
-
-    //    // TODO: implement if needed (or remove)
-    override fun bump(pattern: Pattern<Event>) {
-        updateAllSlotsFrom(pattern.source)
-    }
-
-    override fun render(score: Score) {
+    override fun render(context: ScoreContext) {
 //        println("circle with x position " + position.x().toString())
-        circleAnimation.updateAnimation()
-        score.applyProgram {
-            drawer.fill = colorRGBa()
-            drawer.stroke = strokeColor?.colorRGBa()
-            drawer.strokeWeight = strokeWeight
-            drawer.circle(
-                position = vector(score),
-                radius * score.unitLength
-            )
+        if (circleAnimation.hasAnimations()) {
+            circleAnimation.updateAnimation()
+        }
+        context.applyDrawing {
+//            println(context.drawStyle?.rndrDrawStyle)
+            circle(
+                position = vector(context),
+                radius * context.score.unitLength)
         }
     }
 

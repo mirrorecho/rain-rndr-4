@@ -10,4 +10,6 @@ val CUES = RelationshipLabel("CUES")
 
 val BUMPS = RelationshipLabel("BUMPS")
 
+val DRAW_STYLE = RelationshipLabel("DRAW_STYLE")
+
 val PLAYS = RelationshipLabel("PLAYS")

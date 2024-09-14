@@ -6,9 +6,9 @@ import org.openrndr.math.Polar
 import org.openrndr.math.Vector2
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.graph.queries.Pattern
 import rain.rndr.relationships.*
 import rain.score.Score
+import rain.score.ScoreContext
 import rain.score.nodes.Event
 import rain.score.nodes.Machine
 import rain.score.nodes.MachineAnimation
@@ -34,8 +34,8 @@ interface Positionable {
     val fromPosition: Position? get() = null
 
     // TODO maybe: consider whether initial vector starts at center (as opposed 0,0 = top left)
-    fun vector(score: Score): Vector2 =
-        vector() * score.unitLength
+    fun vector(context: ScoreContext): Vector2 =
+        vector() * context.unitLength
 
     fun center(score: Score) = this.apply {
         x = score.widthUnits/2.0 + 0.5;
@@ -76,11 +76,11 @@ open class Position protected constructor(
 
     operator fun plusAssign(vector: Vector2) { move(vector) }
 
-    override fun bump(pattern: Pattern<Event>) {
-        updateAllSlotsFrom(pattern.source)
+    override fun bump(context: ScoreContext) {
+        updateAllSlotsFrom(context.event)
     }
 
-    override fun render(score: Score) {
+    override fun render(context: ScoreContext) {
         positionAnimation.updateAnimation()
     }
 

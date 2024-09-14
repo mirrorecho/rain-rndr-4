@@ -1,9 +1,8 @@
 package rain.rndr.nodes
 
-import org.openrndr.Program
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.score.Score
+import rain.score.ScoreContext
 import rain.score.nodes.Machine
 import rain.score.nodes.MachineAnimation
 import rain.utils.*
@@ -27,7 +26,7 @@ open class Value(
 
     var value by PropertySlot(valueAnimation::value)
 
-    override fun render(score: Score) {
+    override fun render(context: ScoreContext) {
         valueAnimation.updateAnimation()
     }
 
