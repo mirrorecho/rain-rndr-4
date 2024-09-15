@@ -41,18 +41,17 @@ fun main() {
                 val colorAnimate = Event.create {
                     dur=40.0
                     bumps = fillColor
-                    gate = Gate.ON
-                    animate("a") {
+                    animate("machine.a") {
                         fromValue = 0.3
                         value = random(0.0, 0.6)
                         easing = Easing.CubicInOut
                     }
-                    animate("h") {
+                    animate("machine.h") {
                         fromValue = 20.0
                         value = random(11.0, 49.0)
                         easing = Easing.CubicIn
                     }
-                    animate("s") {
+                    animate("machine.s") {
                         fromValue = 0.6
                         value = random(0.4, 0.8)
                     }
@@ -64,17 +63,17 @@ fun main() {
                     gate = Gate.ON
                     drawStyle = myStyle
 
-                    animate("radius") {
+                    animate("machine.radius") {
                         fromValue = 0.02
                         value = random(2.0, 9.0)
                         easing = Easing.SineIn
                     }
-                    animate("x") {
+                    animate("machine.x") {
                         fromValue = cX.toDouble() * 2
                         value = cX.toDouble() * 2 + random(-2.0, 12.0)
                         easing = Easing.QuadOut
                     }
-                    animate("y") {
+                    animate("machine.y") {
                         fromValue = cY.toDouble() * 2
                         value = cY.toDouble() * 2 + random(-2.0, 2.0)
                         easing = Easing.QuadOut
@@ -83,7 +82,6 @@ fun main() {
 
 
                 extend(
-                    gate(myStyle),
                     colorAnimate,
                     circleAnimate
                 )

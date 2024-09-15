@@ -20,40 +20,51 @@ TOOLS AVAILABLE:
 
 fun main() {
 
-
     fun eventSquareRandomMove(dur: Double = 2.0) = Event.create {
         this.dur=dur
-//        style {
-//            fill { a=0.8 }
-//        }
 
-        animate("x") {
+        // associates a new style to this Event (or updates existing)
+        style {
+            fill { a=0.8; s=0.8;}
+            stroke { a=0.8; }
+        }
+
+        // creates a slot that updates the applicable slot (this or parent), at the time of execution
+
+        animate("machine.x") {
             value = 0.0 + random(0.0, 64.0)
             easing = Easing.QuadOut
         }
 
-        animate("y") {
+        animate("machine.y") {
             value = 0.0 + random(0.0, 36.0)
             easing = Easing.QuadIn
         }
 
-        animate("width") {
+        animate("machine.width") {
             value = random(0.0,12.0)
             easing = Easing.SineIn
         }
-        animate("height") {
+        animate("machine.height") {
             value = random(0.0,12.0)
             easing = Easing.SineOut
         }
 
-//        animateStyle("fill", "h") {
-//            value = random(0.0,90.0)
-//            easing = Easing.CubicIn
-//        }
+        animate("style.stroke") {
+            value = random(0.0,2.0)
+            easing = Easing.CubicIn
+        }
+
+        animate("style.fill.h") {
+            value = random(0.0,90.0)
+            easing = Easing.CubicOut
+        }
+
 
     }
 
     fun eventSeq() = seq(
+
         eventSquareRandomMove(4.0),
         eventSquareRandomMove(1.0),
         eventSquareRandomMove(),

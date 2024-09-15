@@ -38,8 +38,8 @@ open class Image protected constructor(
     // TODO: allow this to cascade
     override var fromPosition by RelatedNodeSlot("fromPosition", +FROM_POSITION, Position, null)
 
-    override var x by LinkablePropertySlot(imageAnimation::x, +X)
-    override var y by LinkablePropertySlot(imageAnimation::y, +Y)
+    override var x by PropertySlot(imageAnimation::x)
+    override var y by PropertySlot(imageAnimation::y)
 
     var imagePath by DataSlot("imagePath", "data/images/cheeta.jpg")
 

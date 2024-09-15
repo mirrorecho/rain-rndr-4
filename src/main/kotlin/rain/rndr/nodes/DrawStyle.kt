@@ -67,25 +67,26 @@ open class DrawStyle protected constructor(
 
     val rndrDrawStyle get() = myRndrDrawStyle
 
-    //    // TODO: implement if needed (or remove)
     override fun bump(context: ScoreContext) {
         updateRndrDrawStyle()
     }
 
-    override fun render(context: ScoreContext) {
-        if (
+    override val hasAnimations: Boolean get() = (
             drawStyleAnimation.hasAnimations() ||
-            stroke?.colorAnimation?.hasAnimations() == true ||
-            fill?.colorAnimation?.hasAnimations() == true
-            ) {
-            drawStyleAnimation.updateAnimation()
-            myRndrDrawStyle = myRndrDrawStyle.copy(
-                strokeWeight=strokeWeight * context.unitLength,
-                stroke = stroke?.colorRGBa(),
-                fill = fill?.colorRGBa(),
-            )
-        }
-    }
+            stroke?.hasAnimations == true ||
+            fill?.hasAnimations == true )
+
+    override fun updateAnimation(score: Score): Boolean = if (hasAnimations) {
+        drawStyleAnimation.updateAnimation()
+        val unitLength = scoreContext?.unitLength ?: score.unitLength
+        myRndrDrawStyle = myRndrDrawStyle.copy(
+            strokeWeight = strokeWeight * unitLength,
+            stroke = stroke?.colorRGBa(),
+            fill = fill?.colorRGBa(),
+        )
+        true
+    } else false
+
 
 }
 

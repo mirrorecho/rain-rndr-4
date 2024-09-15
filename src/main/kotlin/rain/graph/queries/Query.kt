@@ -100,8 +100,8 @@ open class RelatedQuery(
     val directionIsRight: Boolean = true
 ): UpdatingQuery<Node, Node> {
 
-    fun <T:Any>firstRelationshipProperty(queryFrom: Sequence<Node>, name: String): T? =
-        queryFrom.firstOrNull()?.getRelationships(label.labelName, directionIsRight)?.firstOrNull()?.get(name) as T?
+//    fun <T:Any>firstRelationshipProperty(queryFrom: Sequence<Node>, name: String): T? =
+//        queryFrom.firstOrNull()?.getRelationships(label.labelName, directionIsRight)?.firstOrNull()?.get(name) as T?
 
     fun getRelationships(queryFrom: Sequence<Node>): Sequence<Relationship> = sequence {
         queryFrom.forEach {

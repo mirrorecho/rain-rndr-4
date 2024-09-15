@@ -53,13 +53,11 @@ open class Event protected constructor(
     fun style(key:String? = null,  block:(DrawStyle.()->Unit)?=null) =
         mergeRelated("drawStyle", key, block)
 
+    val machineSlots: Map<String, DataSlot<*>> get() =
+        slotsFilteredByName { it.startsWith("machine.") }
 
-//    fun style(key: String= autoKey(),  block:(DrawStyle.()->Unit)?=null) {
-//        drawStyle = DrawStyle.merge(key) {
-//            block?.invoke(this)
-//            updateRndrDrawStyle()
-//        }
-//    }
+    val styleSlots: Map<String, DataSlot<*>> get() =
+        slotsFilteredByName { it.startsWith("style.") }
 
     // TODO: implement if useful
 //    val sumDur: Double get() { throw NotImplementedError()
@@ -73,6 +71,7 @@ open class Event protected constructor(
     // TODO: should this be a node?
     inner class AnimateEventValue(
         val name:String, // TODO: needed?
+        var value: Double = 0.0,
         var easing: Easing = Easing.None,
         var dur: Double? = null,
         var offsetDur: Double = 0.0,
@@ -80,8 +79,6 @@ open class Event protected constructor(
     ) {
 
         val event = this@Event
-
-        var value by event.DataSlot(name, 0.0)
 
         private val calculatedOffsetDur get() =
             if (this.offsetDur >= 0.0) this.offsetDur
@@ -94,29 +91,9 @@ open class Event protected constructor(
 
     }
 
-    private fun animateMachine(
-        machine:Machine?,
-        names:Array<out String>,
-        block: AnimateEventValue.()->Unit
-    ) {
-        var myMachine: Machine? = machine
-        names.apply {
-            take(size-1).forEach {relatedName->
-                println("taking")
-                myMachine = myMachine?.slot<Machine?>(relatedName)?.value
-            }
-            last().let {name->
-                println("Animating machine '$myMachine' slot '$name'")
-                myMachine?.slot("$name:animate", AnimateEventValue(name).also(block))
-            }
-        }
+    fun animate(name:String, block: AnimateEventValue.()->Unit) {
+        slot("$name:animate", AnimateEventValue(name).also(block))
     }
-
-    fun animate(vararg names:String, block: AnimateEventValue.()->Unit) =
-        animateMachine(bumps, names, block)
-
-    fun animateStyle(vararg names:String, block: AnimateEventValue.()->Unit) =
-        animateMachine(drawStyle, names, block)
 
     fun play(score: Score = DEFAULT_SCORE) = score.play { this@Event }
 

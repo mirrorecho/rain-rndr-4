@@ -19,7 +19,7 @@ open class Relationship internal constructor(
         label.unregisterFromLabel(this.key)
     }
 
-    override fun toString():String = "(${source.key} ${Node.labelName} ${target.key} | $key) $properties"
+    override fun toString():String = "(${source.key} ${label.labelName} ${target.key} | $key)"
 
     fun directedTarget(directionIsRight:Boolean): Node =
         if (directionIsRight) target else source
@@ -30,7 +30,6 @@ fun relate(
     source: Node,
     label: RelationshipLabel,
     target: Node,
-    properties: Map<String, Any?>? = null,
     key:String = autoKey()
 ): Relationship = label.create(source, target, key)
 

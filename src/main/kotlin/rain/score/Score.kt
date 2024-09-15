@@ -1,8 +1,5 @@
 package rain.score
 
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.joinAll
 import org.openrndr.Program
 import org.openrndr.application
 import org.openrndr.launch
@@ -13,8 +10,6 @@ import rain.language.patterns.relationships.PLAYS
 import rain.score.nodes.Event
 import rain.score.nodes.Machine
 import rain.utils.autoKey
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
 
 class Score protected constructor(
     key:String = autoKey(),
@@ -60,18 +55,30 @@ class Score protected constructor(
 
     // TODO maybe, consider whether the running machines are actually just part of the graph
     //  (e.g. create/remove relationships)
-    private val runningMachines: MutableMap<String, Machine> = mutableMapOf()
+    private val renderingMachines: MutableMap<String, Machine> = mutableMapOf()
+    private val animatingMachines: MutableMap<String, Machine> = mutableMapOf()
 
     fun gateMachine(machine: Machine, gate: Boolean) {
 //        println("gating $gate - $machine")
         machine.gate(gate)
         if (gate) {
-            runningMachines[machine.key] = machine
+            renderingMachines[machine.key] = machine
         } else {
-            runningMachines.remove(machine.key)
+            renderingMachines.remove(machine.key)
         }
     }
 
+    fun gateMachineAnimation(machine: Machine, gate: Boolean) {
+        if (gate) {
+            animatingMachines[machine.key] = machine
+        } else {
+            animatingMachines.remove(machine.key)
+        }
+    }
+
+    fun gateOffMachinesAnimation(keys: List<String>) {
+        keys.forEach {k->  animatingMachines.remove(k)  }
+    }
 
     fun play(block: Score.(Program)->Event) {
         application {
@@ -89,7 +96,16 @@ class Score protected constructor(
                 }
                 extend {
                     // TODO: consider ... machines are executed in no particular order, is that OK?
-                    runningMachines.forEach { it.value.render() }
+
+                    val gateOffKeys = mutableListOf<String>()
+                    animatingMachines.forEach { (_, machine) ->
+                        if (!machine.updateAnimation(this@Score))
+                            gateOffKeys.add(machine.key)
+                    }
+                    if (gateOffKeys.isNotEmpty()) gateOffMachinesAnimation(gateOffKeys)
+
+                    renderingMachines.forEach { it.value.render() }
+
                 }
             }
         }

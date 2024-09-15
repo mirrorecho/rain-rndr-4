@@ -83,7 +83,15 @@ open class Node protected constructor(
 
     private val dataSlots = mutableMapOf<String, DataSlot<*>>()
 
+    fun slotsFilteredByName(predicate:(String)->Boolean) = dataSlots.filterKeys(predicate)
+
     val slotNames: Set<String> get() = dataSlots.keys
+
+    operator fun <T:Any?> get(name:String): T? = slot<T>(name)?.value
+
+    operator fun <T:Any?> set(name:String, value:T) {
+        slot(name, value)
+    }
 
     // updates or creates slot with the given value, and returns the slot
     fun  <T:Any?> slot(name: String, value: T): DataSlot<T> {
@@ -114,13 +122,13 @@ open class Node protected constructor(
         dataSlots[dataSlot.name] = dataSlot
     }
 
-    fun wireUpSlots() {
-        dataSlots.values.forEach{ it.wireUp() }
-    }
+//    fun wireUpSlots() {
+//        dataSlots.values.forEach{ it.wireUp() }
+//    }
 
     open fun <T:Any?>updateSlotFrom(name:String, fromSlot: DataSlot<T>) {
         slot<T>(name)?.let { slot->
-            println("setting slot value to ${fromSlot.value}")
+//            println("setting slot value to ${fromSlot.value}")
             slot.value = fromSlot.value
         }
     }
@@ -165,7 +173,7 @@ open class Node protected constructor(
             get() = localValue
             set(value) { localValue = value }
 
-        open fun wireUp() { } // included here for interoperability
+//        open fun wireUp() { } // included here for interoperability
 
         operator fun getValue(thisRef: Any?, property: KProperty<*>): T =
             value
@@ -217,31 +225,32 @@ open class Node protected constructor(
 
     // ==================================================
 
-    open inner class LinkableSlot<T:Any?>(
-        name:String, // TODO: needed?
-        val linkQuery: RelatedQuery,
-        default: T
-    ): DataSlot<T>(name, default) {
-
-        override var value: T
-            get() = linkedSlot?.value ?: localValue
-            // TODO, if linked, consider whether setting should update linked value only,
-            //  local value only, or both (currently updates both)
-            set(value) {
-                linkedSlot?.let { it.value = value }
-                localValue = value
-            }
-
-        private var linkedSlot: DataSlot<T>? = null
-
-        override fun wireUp() {
-            this@Node[linkQuery]().firstOrNull()?.let {relatedNode->
-                val slotName: String = linkQuery.firstRelationshipProperty(this@Node.asSequence(), "slot") ?: name
-                linkedSlot = relatedNode.slot(slotName)
-            }
-        }
-
-    }
+    // TODO: review and remove
+//    open inner class LinkableSlot<T:Any?>(
+//        name:String, // TODO: needed?
+//        val linkQuery: RelatedQuery,
+//        default: T
+//    ): DataSlot<T>(name, default) {
+//
+//        override var value: T
+//            get() = linkedSlot?.value ?: localValue
+//            // TODO, if linked, consider whether setting should update linked value only,
+//            //  local value only, or both (currently updates both)
+//            set(value) {
+//                linkedSlot?.let { it.value = value }
+//                localValue = value
+//            }
+//
+//        private var linkedSlot: DataSlot<T>? = null
+//
+//        override fun wireUp() {
+//            this@Node[linkQuery]().firstOrNull()?.let {relatedNode->
+//                val slotName: String = linkQuery.firstRelationshipProperty(this@Node.asSequence(), "slot") ?: name
+//                linkedSlot = relatedNode.slot(slotName)
+//            }
+//        }
+//
+//    }
 
     // ==================================================
 
@@ -256,15 +265,16 @@ open class Node protected constructor(
 
     // ==================================================
 
-    inner class LinkablePropertySlot<T:Any?>(
-        override val property: KMutableProperty0<T>,
-        linkQuery: RelatedQuery,
-    ): LinkableSlot<T>(property.name, linkQuery, property.get()) {
-
-        override var localValue
-            get() = property.get()
-            set(value) { property.set(value) }
-    }
+    // TODO: review and remove
+//    inner class LinkablePropertySlot<T:Any?>(
+//        override val property: KMutableProperty0<T>,
+//        linkQuery: RelatedQuery,
+//    ): LinkableSlot<T>(property.name, linkQuery, property.get()) {
+//
+//        override var localValue
+//            get() = property.get()
+//            set(value) { property.set(value) }
+//    }
 
     // TODO: review and re-implement or remove
 //    // ==================================================

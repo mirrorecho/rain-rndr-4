@@ -35,16 +35,13 @@ open class Rectangle protected constructor(
     // TODO: allow this to cascade
     override var fromPosition by RelatedNodeSlot("fromPosition", +FROM_POSITION, Position, null)
 
-    override var x by LinkablePropertySlot(rectangleAnimation::x, +X)
-    override var y by LinkablePropertySlot(rectangleAnimation::y, +Y)
+    override var x by PropertySlot(rectangleAnimation::x)
+    override var y by PropertySlot(rectangleAnimation::y)
 
-    var width by LinkablePropertySlot(rectangleAnimation::width, +WIDTH)
-    var height by LinkablePropertySlot(rectangleAnimation::height, +HEIGHT)
-
+    var width by PropertySlot(rectangleAnimation::width)
+    var height by PropertySlot(rectangleAnimation::height)
 
     override fun render(context: ScoreContext) {
-//        println("circle with x position " + position.x().toString())
-        rectangleAnimation.updateAnimation()
         context.applyDrawing {
             rectangle(
                 vector(context),

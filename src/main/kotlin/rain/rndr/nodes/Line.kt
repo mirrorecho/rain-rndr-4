@@ -36,8 +36,8 @@ open class Line protected constructor(
 
     var lineTo by RelatedNodeSlot("lineToPosition", +LINE_TO, LinePoint, null)
 
-    override var x by LinkablePropertySlot(lineAnimation::x, +X)
-    override var y by LinkablePropertySlot(lineAnimation::y, +Y)
+    override var x by PropertySlot(lineAnimation::x)
+    override var y by PropertySlot(lineAnimation::y)
 
     val vectors: List<Vector2> get() = listOf(this.vector()) + lineTo?.vectors.orEmpty()
 

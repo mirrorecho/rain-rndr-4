@@ -88,7 +88,7 @@ abstract class NodeLabel<PT: Node, T:PT>(
     ):T = factory(key).also { node->
         register(node)
         block?.invoke(node)
-        node.wireUpSlots()
+//        node.wireUpSlots()
     }
 
     fun merge(
@@ -96,7 +96,7 @@ abstract class NodeLabel<PT: Node, T:PT>(
         block: (T.() -> Unit)? = null,
     ): T = registry.getOrElse(key) { factory(key).also { register(it) } }.also { node->
         block?.invoke(node)
-        node.wireUpSlots()
+//        node.wireUpSlots()
     }
 
 

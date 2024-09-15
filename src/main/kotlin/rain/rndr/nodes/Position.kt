@@ -71,8 +71,8 @@ open class Position protected constructor(
     val positionAnimation = PositionAnimation()
     override val machineAnimation = positionAnimation
 
-    override var x by LinkablePropertySlot(positionAnimation::x, +X)
-    override var y by LinkablePropertySlot(positionAnimation::y, +Y)
+    override var x by PropertySlot(positionAnimation::x)
+    override var y by PropertySlot(positionAnimation::y)
 
     operator fun plusAssign(vector: Vector2) { move(vector) }
 

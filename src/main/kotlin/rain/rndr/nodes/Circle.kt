@@ -28,22 +28,17 @@ open class Circle protected constructor(
     val circleAnimation = CircleAnimation()
     override val machineAnimation = circleAnimation
 
-    var radius by LinkablePropertySlot(circleAnimation::radius, +RADIUS)
+    var radius by PropertySlot(circleAnimation::radius)
 
     // TODO: allow this to cascade
     override var fromPosition by RelatedNodeSlot("fromPosition", +FROM_POSITION, Position, null)
 
-    override var x by LinkablePropertySlot(circleAnimation::x, +X)
-    override var y by LinkablePropertySlot(circleAnimation::y, +Y)
+    override var x by PropertySlot(circleAnimation::x)
+    override var y by PropertySlot(circleAnimation::y)
 
 
     override fun render(context: ScoreContext) {
-//        println("circle with x position " + position.x().toString())
-        if (circleAnimation.hasAnimations()) {
-            circleAnimation.updateAnimation()
-        }
         context.applyDrawing {
-//            println(context.drawStyle?.rndrDrawStyle)
             circle(
                 position = vector(context),
                 radius * context.score.unitLength)

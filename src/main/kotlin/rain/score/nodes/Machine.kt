@@ -1,10 +1,6 @@
 package rain.score.nodes
 
-import org.openrndr.Program
 import org.openrndr.animatable.Animatable
-import org.openrndr.color.ColorHSVa
-import org.openrndr.color.ColorRGBa
-import org.openrndr.math.Vector2
 import rain.graph.Node
 import rain.graph.Label
 import rain.graph.NodeLabel
@@ -16,7 +12,7 @@ import kotlin.reflect.KMutableProperty0
 
 open class MachineAnimation: Animatable() {
 
-    fun updateAnimation(
+    fun bumpAnimation(
         property: KMutableProperty0<Double>,
         animateEventValue: Event.AnimateEventValue,
         // preDelay: Long, // TODO: implement this?
@@ -62,43 +58,17 @@ open class Machine protected constructor(
 
     open val machineAnimation = MachineAnimation()
 
-    override fun <T:Any?>updateSlotFrom(name:String, fromSlot: DataSlot<T>) {
-        slot<T>(name)?.let { slot->
-            if (fromSlot.node.slotNames.contains("$name:animate")) {
-                slot.property?.let { property ->
-                    machineAnimation.updateAnimation(
-                        property as KMutableProperty0<Double>,
-                        fromSlot.node.slot<Event.AnimateEventValue>("$name:animate")!!.value
-                    )
-
-                }
-            } else
-                slot.value = fromSlot.value
-        }
-    }
-
     // TODO is this used?
     open fun gate(onOff: Boolean) {
         isRunning = onOff;
     }
 
-
-
     // TODO: is this even used?
     protected var isRunning = false
 
-    private var scoreContext: ScoreContext? = null
+    protected var scoreContext: ScoreContext? = null
 
     fun setContext(context: ScoreContext) {scoreContext = context}
-
-    fun bump() {
-        scoreContext?.let {
-            updateAllSlotsFrom(it.event)
-            bump(it)
-            return
-        }
-        println("WARNING - no score context for $this, unable to render")
-    }
 
     open fun bump(context:ScoreContext) {
         // hook that can be overridden for machine-specific implementations
@@ -114,6 +84,12 @@ open class Machine protected constructor(
 
     open fun render(context: ScoreContext) { println("render not implemented for $this") }
 
+    open val hasAnimations get() = machineAnimation.hasAnimations()
+
+    open fun updateAnimation(score: Score): Boolean = if (hasAnimations) {
+            machineAnimation.updateAnimation()
+            true
+        } else false
 }
 
 // =======================================================================

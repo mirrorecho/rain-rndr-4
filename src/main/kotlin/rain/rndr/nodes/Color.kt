@@ -69,15 +69,10 @@ open class Color(
     val colorAnimation = ColorAnimation()
     override val machineAnimation = colorAnimation
 
-    override var h by LinkablePropertySlot(colorAnimation::h, +H)
-    override var s by LinkablePropertySlot(colorAnimation::s, +S)
-    override var v by LinkablePropertySlot(colorAnimation::v, +V)
-    override var a by LinkablePropertySlot(colorAnimation::a, +H)
-
-
-    override fun render(context: ScoreContext) {
-        colorAnimation.updateAnimation()
-    }
+    override var h by PropertySlot(colorAnimation::h)
+    override var s by PropertySlot(colorAnimation::s)
+    override var v by PropertySlot(colorAnimation::v)
+    override var a by PropertySlot(colorAnimation::a)
 
 }
 
