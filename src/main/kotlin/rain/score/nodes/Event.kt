@@ -10,7 +10,6 @@ import rain.graph.queries.UpdatingQueryExecution
 import rain.language.patterns.*
 import rain.language.patterns.relationships.BUMPS
 import rain.language.patterns.relationships.DRAW_STYLE
-import rain.rndr.nodes.Color
 import rain.rndr.nodes.DrawStyle
 import rain.score.DEFAULT_SCORE
 import rain.score.Score
@@ -95,10 +94,29 @@ open class Event protected constructor(
 
     }
 
-    fun animate(name:String, block: AnimateEventValue.()->Unit) {
-
-        slot("$name:animate", AnimateEventValue(name).also(block))
+    private fun animateMachine(
+        machine:Machine?,
+        names:Array<out String>,
+        block: AnimateEventValue.()->Unit
+    ) {
+        var myMachine: Machine? = machine
+        names.apply {
+            take(size-1).forEach {relatedName->
+                println("taking")
+                myMachine = myMachine?.slot<Machine?>(relatedName)?.value
+            }
+            last().let {name->
+                println("Animating machine '$myMachine' slot '$name'")
+                myMachine?.slot("$name:animate", AnimateEventValue(name).also(block))
+            }
+        }
     }
+
+    fun animate(vararg names:String, block: AnimateEventValue.()->Unit) =
+        animateMachine(bumps, names, block)
+
+    fun animateStyle(vararg names:String, block: AnimateEventValue.()->Unit) =
+        animateMachine(drawStyle, names, block)
 
     fun play(score: Score = DEFAULT_SCORE) = score.play { this@Event }
 

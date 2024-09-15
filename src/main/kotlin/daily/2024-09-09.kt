@@ -23,6 +23,9 @@ fun main() {
 
     fun eventSquareRandomMove(dur: Double = 2.0) = Event.create {
         this.dur=dur
+//        style {
+//            fill { a=0.8 }
+//        }
 
         animate("x") {
             value = 0.0 + random(0.0, 64.0)
@@ -34,12 +37,6 @@ fun main() {
             easing = Easing.QuadIn
         }
 
-        slot("a", 0.9)
-
-        animate("h") {
-            value = random(0.0,90.0)
-            easing = Easing.CubicIn
-        }
         animate("width") {
             value = random(0.0,12.0)
             easing = Easing.SineIn
@@ -48,6 +45,11 @@ fun main() {
             value = random(0.0,12.0)
             easing = Easing.SineOut
         }
+
+//        animateStyle("fill", "h") {
+//            value = random(0.0,90.0)
+//            easing = Easing.CubicIn
+//        }
 
     }
 
@@ -69,7 +71,6 @@ fun main() {
                 height = 0.0
                 x = random(0.0, 64.0)
                 y = random(0.0, 36.0)
-//                a = 0.4
             }
             gate = Gate.ON_OFF
         }

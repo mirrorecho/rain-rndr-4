@@ -35,6 +35,8 @@ class ExtendHelper<ET: Event>(
         }
     }
 
+    // TODO: implement animation helper fun here
+
     fun extendEvent() {
         parentEvent.childrenQuery.extend(
             *(0..<extendLength).map { i->

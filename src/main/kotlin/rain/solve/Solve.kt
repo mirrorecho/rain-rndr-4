@@ -11,7 +11,7 @@ import rain.rndr.nodes.*
 import kotlin.reflect.KMutableProperty1
 
 fun main()  {
-    solve3()
+//    solve3()
 }
 
 /*
