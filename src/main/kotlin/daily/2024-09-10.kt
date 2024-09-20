@@ -1,7 +1,6 @@
 package daily
 
 import org.openrndr.animatable.easing.Easing
-import org.openrndr.extra.noise.random
 import rain.rndr.nodes.*
 import rain.score.DEFAULT_SCORE
 import rain.score.nodes.*
@@ -23,8 +22,6 @@ fun main() {
 
     DEFAULT_SCORE.asHalfRes().play {
 
-        println(this.width)
-
         val fromPosition = Position.create { x = 20.0; y = 20.0 }
 
         val fromPosition2 = Position.create { x = 22.0; y = 22.0 }
@@ -33,8 +30,6 @@ fun main() {
         // TODO: a function to consolidate this
         val line1 = Line.create {
             center(this@play)
-//            strokeWeight = 0.1
-//            a = 0.4
 
             lineTo = LinePoint.create {
                 x = 2.0
@@ -60,13 +55,13 @@ fun main() {
         val makeLine = seq(
             Event.create {
                 dur = 3.0
-                bumps = fromPosition2
-                animate("x") {
+                machine = fromPosition2
+                animate("machine.x") {
                     fromValue = 22.0
                     value = 8.0
                     easing = Easing.CubicIn
                 }
-                animate("y") {
+                animate("machine.y") {
                     fromValue = 34.0
                     value = 8.0
                     easing = Easing.CubicOut
@@ -74,12 +69,12 @@ fun main() {
             },
             Event.create {
                 dur = 3.0
-                bumps = fromPosition2
-                animate("x") {
+                machine = fromPosition2
+                animate("machine.x") {
                     value = 22.0
                     easing = Easing.CubicIn
                 }
-                animate("y") {
+                animate("machine.y") {
                     value = 34.0
                     easing = Easing.CubicOut
                 }
@@ -92,23 +87,26 @@ fun main() {
         par(
             Event.create {
                 dur = 24.0
-                bumps = line1
+                machine = line1
                 gate = Gate.ON_OFF
-
+                style {
+                    strokeWeight = 2.0
+                    stroke {a = 0.6; h=120.0; s=0.8}
+                }
             },
             seq(makeLine, makeLine, makeLine, makeLine) {
-                bumps = fromPosition2
+                machine = fromPosition2
                 gate = Gate.ON_OFF
             },
             Event.create {
                 dur = 24.0
-                bumps = fromPosition
+                machine = fromPosition
                 gate = Gate.ON_OFF
-                animate("x") {
+                animate("machine.x") {
                     value = 40.0
                     easing = Easing.CubicIn
                 }
-                animate("y") {
+                animate("machine.y") {
                     value = 9.0
                     easing = Easing.CubicOut
                 }

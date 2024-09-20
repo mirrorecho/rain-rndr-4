@@ -2,16 +2,10 @@ package rain.solve
 
 
 import org.openrndr.animatable.easing.Easing
-import rain.graph.*
-import rain.graph.queries.*
-import rain.language.patterns.relationships.BUMPS
 import rain.score.*
 import rain.score.nodes.*
-import rain.rndr.*
 import rain.rndr.nodes.*
 import rain.rndr.relationships.X
-import kotlin.reflect.KMutableProperty1
-
 
 
 fun solve3() {
@@ -56,7 +50,7 @@ fun solve3() {
     seq(
         pause(),
         EventRandom.seq(circleFly) {
-            bumps = Circle.create {
+            machine = Circle.create {
                 this.relate(X, ValueRandom.create { maxValue = DEFAULT_SCORE.widthUnits }, true, )
                 fromPosition = startingPosition
             }

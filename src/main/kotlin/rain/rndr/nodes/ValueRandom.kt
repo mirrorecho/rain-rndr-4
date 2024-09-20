@@ -36,9 +36,7 @@ open class ValueRandom(
     var maxValue by PropertySlot(valueRandomAnimation::maxValue)
     val value by PropertySlot(valueRandomAnimation::value)
 
-    override fun render(context: ScoreContext) {
-        valueRandomAnimation.updateAnimation()
-    }
+
 
 
 }

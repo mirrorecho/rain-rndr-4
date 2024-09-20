@@ -4,7 +4,6 @@ package rain.graph
 import rain.graph.queries.Queryable
 import rain.graph.queries.RelatedQuery
 import rain.graph.queries.UpdatingQueryExecution
-import rain.rndr.nodes.Color
 
 import rain.utils.autoKey
 import kotlin.reflect.KMutableProperty0
@@ -44,6 +43,16 @@ open class Node protected constructor(
 
     override fun asSequence(): Sequence<Node> = sequenceOf(this)
 
+    fun clean() {
+        refresh()
+        dataSlots.values.forEach { it.clean() }
+    }
+
+    open fun refresh() {
+        // hook for executing node-type specific logic after slot data is updated
+        //  (e.g. for updating cached values that may depend on slot data)
+    }
+
     override fun delete() {
         label.unregisterFromLabel(this.key)
         sourcesForRelationships.values.forEach { rs-> rs.forEach {
@@ -80,6 +89,9 @@ open class Node protected constructor(
 
     // =================================================================================
     // =================================================================================
+
+    open val dirty: Boolean
+        get() = dataSlots.values.any { it.dirty }
 
     private val dataSlots = mutableMapOf<String, DataSlot<*>>()
 
@@ -165,13 +177,22 @@ open class Node protected constructor(
 
         open val property: KMutableProperty0<T>? = null // included here for interoperability
 
+        protected var iAmDirty = false
+
+        open val dirty = iAmDirty // included here for interoperability
+
+        fun clean() { iAmDirty = false }
+
+        // same idea as setting the value, but only updates local value
+        // (not relationships for related node slots), and does type casting
         fun updateLocalValue(fromAny: Any?) {
             localValue = fromAny as T
+            iAmDirty = true
         }
 
         open var value: T
             get() = localValue
-            set(value) { localValue = value }
+            set(value) { localValue = value; iAmDirty = true }
 
 //        open fun wireUp() { } // included here for interoperability
 
@@ -197,6 +218,9 @@ open class Node protected constructor(
         default: T
     ): DataSlot<T>(name, default) {
 
+        override val dirty
+            get() = iAmDirty || (value?.dirty ?: false)
+
         private val myQueryExecution = UpdatingQueryExecution(node, query)
 
         // if related node is null, or a new key provided, then replaces related node with merged node
@@ -213,44 +237,53 @@ open class Node protected constructor(
         }
 
         override var value: T
-            get() = myQueryExecution.first(label) ?: localValue
+            get() = myQueryExecution.first(label) ?: localValue // still using localValue here for defaults
             set(value) {
                 myQueryExecution.clear()
                 value?.let {
                     myQueryExecution.extend(it)
                 }
+                iAmDirty = true
             }
 
     }
 
     // ==================================================
 
-    // TODO: review and remove
-//    open inner class LinkableSlot<T:Any?>(
-//        name:String, // TODO: needed?
-//        val linkQuery: RelatedQuery,
-//        default: T
-//    ): DataSlot<T>(name, default) {
-//
-//        override var value: T
-//            get() = linkedSlot?.value ?: localValue
-//            // TODO, if linked, consider whether setting should update linked value only,
-//            //  local value only, or both (currently updates both)
-//            set(value) {
-//                linkedSlot?.let { it.value = value }
-//                localValue = value
-//            }
-//
-//        private var linkedSlot: DataSlot<T>? = null
-//
+    // TODO maybe: consider operations other than sum... for now KISS and keep it at summation
+    open inner class SummingValueSlot(
+        name:String, // TODO: needed?
+        val linkQuery: RelatedQuery,
+        default: Double
+    ): DataSlot<Double>(name, default) {
+
+        override val dirty
+            get() = iAmDirty || (linkedNode?.dirty ?: false)
+
+        override var value: Double
+            get() = localValue + (linkedSlot?.value ?: 0.0)
+            set(value) {
+                localValue = value
+                iAmDirty = true
+            }
+
+        private val linkedNode get() = this@Node[linkQuery]().firstOrNull()
+
+        // TODO: consider whether to cache the link slot ...
+        //  for now, KISS, and also keep flexible to be able to dynamically re-link
+        //  during playback. Consider caching if performance seems to be an issue.
+        private val linkedSlot: DataSlot<Double>? get() =
+            linkedNode?.slot(name)
+
+//        // would use something like this if caching implemented:
 //        override fun wireUp() {
 //            this@Node[linkQuery]().firstOrNull()?.let {relatedNode->
-//                val slotName: String = linkQuery.firstRelationshipProperty(this@Node.asSequence(), "slot") ?: name
-//                linkedSlot = relatedNode.slot(slotName)
+////                val slotName: String = linkQuery.firstRelationshipProperty(this@Node.asSequence(), "slot") ?: name
+//                linkedSlot = relatedNode.slot(name)
 //            }
 //        }
-//
-//    }
+
+    }
 
     // ==================================================
 
@@ -265,16 +298,15 @@ open class Node protected constructor(
 
     // ==================================================
 
-    // TODO: review and remove
-//    inner class LinkablePropertySlot<T:Any?>(
-//        override val property: KMutableProperty0<T>,
-//        linkQuery: RelatedQuery,
-//    ): LinkableSlot<T>(property.name, linkQuery, property.get()) {
-//
-//        override var localValue
-//            get() = property.get()
-//            set(value) { property.set(value) }
-//    }
+    inner class SummingPropertySlot(
+        override val property: KMutableProperty0<Double>,
+        linkQuery: RelatedQuery,
+    ): SummingValueSlot(property.name, linkQuery, property.get()) {
+
+        override var localValue
+            get() = property.get()
+            set(value) { property.set(value) }
+    }
 
     // TODO: review and re-implement or remove
 //    // ==================================================

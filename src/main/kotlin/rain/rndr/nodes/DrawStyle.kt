@@ -3,14 +3,10 @@ package rain.rndr.nodes
 import rain.rndr.relationships.*
 import rain.utils.*
 
-import org.openrndr.Program
-import org.openrndr.color.ColorHSVa
 import org.openrndr.draw.*
-import org.openrndr.math.Vector2
 import rain.graph.Label
-import rain.graph.Node
 import rain.graph.NodeLabel
-import rain.score.Score
+import rain.score.DEFAULT_SCORE
 import rain.score.ScoreContext
 import rain.score.nodes.*
 
@@ -25,7 +21,9 @@ open class DrawStyle protected constructor(
 
     class DrawStyleAnimation: MachineAnimation() {
 
-        var strokeWeight = 0.1
+        var strokeWeight = 0.02
+
+        // TODO: control font size
 
     }
 
@@ -34,7 +32,7 @@ open class DrawStyle protected constructor(
 
     var lineCap by DataSlot("lineCap", LineCap.ROUND)
     var lineJoin by DataSlot("lineJoin", LineJoin.ROUND)
-    var strokeWeight by PropertySlot(drawStyleAnimation::strokeWeight)
+    var strokeWeight by PropertySlot(drawStyleAnimation::strokeWeight) // TODO maybe: consider whether this should be SummingPropertySlot
     var fontMap by DataSlot<FontMap?>("fontMap", null)
 
     var stroke by RelatedNodeSlot("stroke", +STROKE_COLOR, Color, null)
@@ -42,51 +40,30 @@ open class DrawStyle protected constructor(
 
     fun fill(key:String? = null,  block:(Color.()->Unit)?=null) {
         mergeRelated("fill", key, block)
-        updateRndrDrawStyle()
     }
 
     fun stroke(key:String? = null,  block:(Color.()->Unit)?=null) {
         mergeRelated("stroke", key, block)
-        updateRndrDrawStyle()
     }
 
-    private var myRndrDrawStyle = newRndrDrawStyle()
+    private var myRndrDrawStyle = org.openrndr.draw.DrawStyle()
 
-    private fun newRndrDrawStyle(): org.openrndr.draw.DrawStyle = org.openrndr.draw.DrawStyle(
-        strokeWeight = strokeWeight,
-        lineCap =  lineCap,
-        lineJoin = lineJoin,
-        fontMap = fontMap,
-        stroke = stroke?.colorRGBa(),
-        fill = fill?.colorRGBa(),
-    )
-
-    fun updateRndrDrawStyle() {
-        myRndrDrawStyle = newRndrDrawStyle()
+    override fun refresh() {
+        myRndrDrawStyle.strokeWeight = strokeWeight * (scoreContext?.unitLength ?: DEFAULT_SCORE.unitLength)
+        myRndrDrawStyle.lineCap = lineCap
+        myRndrDrawStyle.lineJoin = lineJoin
+        myRndrDrawStyle.fontMap = fontMap
+        myRndrDrawStyle.stroke = stroke?.colorRGBa
+        myRndrDrawStyle.fill = fill?.colorRGBa
     }
 
     val rndrDrawStyle get() = myRndrDrawStyle
 
-    override fun bump(context: ScoreContext) {
-        updateRndrDrawStyle()
+    override fun updateAnimation(context: ScoreContext) {
+        // not calling super since we only need to update strokeWeight with animation
+        //  (because strokeWeight is the only thing that can be animated)
+        myRndrDrawStyle.strokeWeight = strokeWeight * (scoreContext?.unitLength ?: DEFAULT_SCORE.unitLength)
     }
-
-    override val hasAnimations: Boolean get() = (
-            drawStyleAnimation.hasAnimations() ||
-            stroke?.hasAnimations == true ||
-            fill?.hasAnimations == true )
-
-    override fun updateAnimation(score: Score): Boolean = if (hasAnimations) {
-        drawStyleAnimation.updateAnimation()
-        val unitLength = scoreContext?.unitLength ?: score.unitLength
-        myRndrDrawStyle = myRndrDrawStyle.copy(
-            strokeWeight = strokeWeight * unitLength,
-            stroke = stroke?.colorRGBa(),
-            fill = fill?.colorRGBa(),
-        )
-        true
-    } else false
-
 
 }
 

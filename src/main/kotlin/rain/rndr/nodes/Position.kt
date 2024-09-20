@@ -29,9 +29,7 @@ interface Positionable {
         (vector() + vector).let { x = it.x; y = it.y}
     }
 
-    fun vector(): Vector2 = fromPosition?.let { it.vector() + Vector2(x, y)} ?: Vector2(x, y)
-
-    val fromPosition: Position? get() = null
+    fun vector(): Vector2 = Vector2(x, y)
 
     // TODO maybe: consider whether initial vector starts at center (as opposed 0,0 = top left)
     fun vector(context: ScoreContext): Vector2 =
@@ -61,8 +59,6 @@ open class Position protected constructor(
 
     override val label: Label<out Machine, out Position> = Position
 
-    override var fromPosition by RelatedNodeSlot("fromPosition", +FROM_POSITION, Position, null)
-
     class PositionAnimation: MachineAnimation() {
         var x = 0.0
         var y = 0.0
@@ -71,18 +67,11 @@ open class Position protected constructor(
     val positionAnimation = PositionAnimation()
     override val machineAnimation = positionAnimation
 
-    override var x by PropertySlot(positionAnimation::x)
-    override var y by PropertySlot(positionAnimation::y)
+    override var x by SummingPropertySlot(positionAnimation::x, +X)
+    override var y by SummingPropertySlot(positionAnimation::y, +Y)
 
     operator fun plusAssign(vector: Vector2) { move(vector) }
 
-    override fun bump(context: ScoreContext) {
-        updateAllSlotsFrom(context.event)
-    }
-
-    override fun render(context: ScoreContext) {
-        positionAnimation.updateAnimation()
-    }
 
 
 }

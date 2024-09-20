@@ -32,14 +32,11 @@ open class Rectangle protected constructor(
     val rectangleAnimation = RectangleAnimation()
     override val machineAnimation = rectangleAnimation
 
-    // TODO: allow this to cascade
-    override var fromPosition by RelatedNodeSlot("fromPosition", +FROM_POSITION, Position, null)
+    override var x by SummingPropertySlot(rectangleAnimation::x, +X)
+    override var y by SummingPropertySlot(rectangleAnimation::y, +Y)
 
-    override var x by PropertySlot(rectangleAnimation::x)
-    override var y by PropertySlot(rectangleAnimation::y)
-
-    var width by PropertySlot(rectangleAnimation::width)
-    var height by PropertySlot(rectangleAnimation::height)
+    var width by SummingPropertySlot(rectangleAnimation::width, +WIDTH)
+    var height by SummingPropertySlot(rectangleAnimation::height, +WIDTH)
 
     override fun render(context: ScoreContext) {
         context.applyDrawing {

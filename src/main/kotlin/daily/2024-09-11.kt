@@ -3,7 +3,6 @@ package daily
 import org.openrndr.animatable.easing.Easing
 import org.openrndr.extra.noise.random
 import rain.rndr.nodes.*
-import rain.rndr.relationships.RADIUS
 import rain.score.DEFAULT_SCORE
 import rain.score.nodes.*
 
@@ -25,25 +24,25 @@ TOOLS AVAILABLE:
 fun main() {
 
 
-    fun eventSquareRandomMove(dur: Double = 2.0) = Event.create {
+    fun eventCircleRandomMove(dur: Double = 2.0) = Event.create {
         this.dur=dur
 
-        animate("x") {
+        animate("machine.x") {
             value = 0.0 + random(0.0, 64.0)
             easing = Easing.QuadOut
         }
 
-        animate("y") {
+        animate("machine.y") {
             value = 0.0 + random(0.0, 36.0)
             easing = Easing.QuadIn
         }
 
-        animate("h") {
+        animate("style.h") {
             value = random(220.0,290.0)
             easing = Easing.CubicIn
         }
 
-        animate("radius") {
+        animate("machine.radius") {
             value = random(0.0,12.0)
             easing = Easing.SineIn
         }
@@ -51,20 +50,19 @@ fun main() {
     }
 
     fun eventSeq() = seq(
-        eventSquareRandomMove(4.0),
-        eventSquareRandomMove(1.0),
-        eventSquareRandomMove(),
-        eventSquareRandomMove(),
-        eventSquareRandomMove(0.5),
-        eventSquareRandomMove(0.5),
-        eventSquareRandomMove(0.5),
-        eventSquareRandomMove(0.2),
-        eventSquareRandomMove(0.2),
-        eventSquareRandomMove(0.2),
+        eventCircleRandomMove(4.0),
+        eventCircleRandomMove(1.0),
+        eventCircleRandomMove(),
+        eventCircleRandomMove(),
+        eventCircleRandomMove(0.5),
+        eventCircleRandomMove(0.5),
+        eventCircleRandomMove(0.5),
+        eventCircleRandomMove(0.2),
+        eventCircleRandomMove(0.2),
+        eventCircleRandomMove(0.2),
     )
     {
-        bumps = Circle.create {
-            radius = 64.0
+        machine = Circle.create {
             x = random(0.0, 64.0)
             y = random(0.0, 36.0)
 //            a = 0.2

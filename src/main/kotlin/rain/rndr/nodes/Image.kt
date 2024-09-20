@@ -35,11 +35,8 @@ open class Image protected constructor(
     val imageAnimation = ImageAnimation()
     override val machineAnimation = imageAnimation
 
-    // TODO: allow this to cascade
-    override var fromPosition by RelatedNodeSlot("fromPosition", +FROM_POSITION, Position, null)
-
-    override var x by PropertySlot(imageAnimation::x)
-    override var y by PropertySlot(imageAnimation::y)
+    override var x by SummingPropertySlot(imageAnimation::x, +X)
+    override var y by SummingPropertySlot(imageAnimation::y, +Y)
 
     var imagePath by DataSlot("imagePath", "data/images/cheeta.jpg")
 
@@ -51,7 +48,6 @@ open class Image protected constructor(
 
 
     override fun render(context: ScoreContext) {
-        imageAnimation.updateAnimation()
         context.applyDrawing {
             myBuffer?.let { image(it, x*context.unitLength, y*context.unitLength) }
         }

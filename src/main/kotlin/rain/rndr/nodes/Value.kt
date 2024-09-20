@@ -26,10 +26,6 @@ open class Value(
 
     var value by PropertySlot(valueAnimation::value)
 
-    override fun render(context: ScoreContext) {
-        valueAnimation.updateAnimation()
-    }
-
 
 }
 

@@ -2,7 +2,6 @@ package daily
 
 import org.openrndr.animatable.easing.Easing
 import org.openrndr.extra.noise.random
-import rain.rndr.nodes.Circle
 import rain.rndr.nodes.Rectangle
 import rain.score.DEFAULT_SCORE
 import rain.score.nodes.*
@@ -77,7 +76,7 @@ fun main() {
         eventSquareRandomMove(0.2),
     )
         {
-            bumps = Rectangle.create {
+            machine = Rectangle.create {
                 width = 0.0
                 height = 0.0
                 x = random(0.0, 64.0)

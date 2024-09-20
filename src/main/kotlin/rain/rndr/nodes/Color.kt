@@ -1,37 +1,31 @@
 package rain.rndr.nodes
 
-import org.openrndr.Program
-import org.openrndr.animatable.Animatable
 import org.openrndr.color.ColorHSVa
 import org.openrndr.color.ColorRGBa
 import rain.graph.Label
 import rain.graph.NodeLabel
+import rain.rndr.relationships.*
 import rain.utils.*
 
-import rain.rndr.relationships.A
-import rain.rndr.relationships.H
-import rain.rndr.relationships.S
-import rain.rndr.relationships.V
-import rain.score.Score
-import rain.score.ScoreContext
 import rain.score.nodes.Machine
 import rain.score.nodes.MachineAnimation
 
-interface Colorable {
-    var h: Double
-    var s: Double
-    var v: Double
-    var a: Double
-
-    fun colorHSVa() = ColorHSVa(h, s, v, a)
-
-    fun colorRGBa(): ColorRGBa = colorHSVa().toRGBa()
-
-}
+// NOTE: assume interface not needed now that colors being managed by DrawStyle
+//interface Colorable {
+//    var h: Double
+//    var s: Double
+//    var v: Double
+//    var a: Double
+//
+//    fun colorHSVa() = ColorHSVa(h, s, v, a)
+//
+//    var colorRGBa: ColorRGBa = colorHSVa().toRGBa()
+//
+//}
 
 open class Color(
     key:String = autoKey(),
-) : Colorable, Machine(key) {
+) : Machine(key) {
     companion object : NodeLabel<Machine, Color>(
         Machine, Color::class, { k -> Color(k) }
     ) {
@@ -69,10 +63,28 @@ open class Color(
     val colorAnimation = ColorAnimation()
     override val machineAnimation = colorAnimation
 
-    override var h by PropertySlot(colorAnimation::h)
-    override var s by PropertySlot(colorAnimation::s)
-    override var v by PropertySlot(colorAnimation::v)
-    override var a by PropertySlot(colorAnimation::a)
+    var h by SummingPropertySlot(colorAnimation::h, +H)
+    var s by SummingPropertySlot(colorAnimation::s, +S)
+    var v by SummingPropertySlot(colorAnimation::v, +V)
+    var a by SummingPropertySlot(colorAnimation::a, +A)
+
+    fun colorHSVa() = ColorHSVa(h, s, v, a)
+
+    override fun refresh() {
+        // we need to update the cached myColorRGBa
+        // and similarly any related draw styles
+        // (if they don't already have animations)
+        myColorRGBa = colorHSVa().toRGBa()
+        this[-FILL_COLOR](DrawStyle).forEach { ds ->
+            ds.rndrDrawStyle.fill = myColorRGBa
+        }
+        this[-STROKE_COLOR](DrawStyle).forEach { ds ->
+            ds.rndrDrawStyle.stroke = myColorRGBa
+        }
+    }
+
+    private var myColorRGBa: ColorRGBa = colorHSVa().toRGBa()
+    val colorRGBa: ColorRGBa get() = myColorRGBa
 
 }
 

@@ -42,7 +42,7 @@ open class Event protected constructor(
     var bumping by DataSlot("bumping", true)
 
     // TODO: implement by history....
-    var bumps by RelatedNodeSlot("bumps", +BUMPS, Machine, null)
+    var machine by RelatedNodeSlot("bumps", +BUMPS, Machine, null)
 
     var drawStyle by RelatedNodeSlot("drawStyle", +DRAW_STYLE, DrawStyle, null)
 
@@ -189,7 +189,7 @@ fun seq(
 fun pause(dur:Double=1.0) = Event.create { this.dur=dur }
 
 fun gate(machine:Machine?, gate:Gate=Gate.ON): Event = Event.create {
-    bumps = machine
+    this.machine = machine
     bumping = false
     this.gate =gate
 }

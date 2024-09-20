@@ -1,14 +1,9 @@
 package rain.solve
 
 import org.openrndr.animatable.easing.Easing
-import rain.graph.*
-import rain.graph.queries.*
-import rain.language.patterns.relationships.BUMPS
 import rain.score.*
 import rain.score.nodes.*
-import rain.rndr.*
 import rain.rndr.nodes.*
-import kotlin.reflect.KMutableProperty1
 
 fun main()  {
 //    solve3()
@@ -49,7 +44,7 @@ fun solve0() {
     //  for a particular receiver
 
     val s1 = EventRandom.seq {
-        bumps = Printer.create("PRINTER_1") { msg = "I am a $key" }
+        machine = Printer.create("PRINTER_1") { msg = "I am a $key" }
         gate = Gate.ON_OFF
         times = 4
         extend(Event) {
@@ -73,7 +68,7 @@ fun solve1() {
     DrawStyle.create("STYLE_1") { fill("COLOR_1") }
 
     Event.create {
-        bumps = Circle.create {
+        machine = Circle.create {
             x = 32.5
             y = 18.5
         }
@@ -109,7 +104,7 @@ fun solve2() {
             }
         },
     ) {
-        bumps = Color["COLOR_BLUE"]
+        machine = Color["COLOR_BLUE"]
     }
 
     DEFAULT_SCORE.asHalfRes().play {
@@ -140,7 +135,7 @@ fun solve2() {
             gate("STYLE_1"),
             gate("COLOR_BLUE"),
             EventRandom.seq(e1, e2) {
-                bumps = Circle.create {
+                machine = Circle.create {
                     x = 32.5
                     y = 18.5
                 }

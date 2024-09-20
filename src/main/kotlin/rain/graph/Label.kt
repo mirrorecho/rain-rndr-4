@@ -88,7 +88,7 @@ abstract class NodeLabel<PT: Node, T:PT>(
     ):T = factory(key).also { node->
         register(node)
         block?.invoke(node)
-//        node.wireUpSlots()
+        node.clean()
     }
 
     fun merge(
@@ -96,7 +96,7 @@ abstract class NodeLabel<PT: Node, T:PT>(
         block: (T.() -> Unit)? = null,
     ): T = registry.getOrElse(key) { factory(key).also { register(it) } }.also { node->
         block?.invoke(node)
-//        node.wireUpSlots()
+        node.clean()
     }
 
 
@@ -121,7 +121,7 @@ class RelationshipLabel(
     private val myRightQuery = RelatedQuery(this)
     operator fun unaryPlus() = myRightQuery
 
-    private val myLeftQuery = RelatedQuery(this)
+    private val myLeftQuery = RelatedQuery(this, false)
     operator fun unaryMinus() = myLeftQuery
 
     override fun unregisterFromLabel(key:String) {

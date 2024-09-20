@@ -31,19 +31,14 @@ open class Line protected constructor(
     val lineAnimation = LineAnimation()
     override val machineAnimation = lineAnimation
 
-    // TODO: allow this to cascade
-    override var fromPosition by RelatedNodeSlot("fromPosition", +FROM_POSITION, Position, null)
-
     var lineTo by RelatedNodeSlot("lineToPosition", +LINE_TO, LinePoint, null)
 
-    override var x by PropertySlot(lineAnimation::x)
-    override var y by PropertySlot(lineAnimation::y)
+    override var x by SummingPropertySlot(lineAnimation::x, +X)
+    override var y by SummingPropertySlot(lineAnimation::y, +Y)
 
     val vectors: List<Vector2> get() = listOf(this.vector()) + lineTo?.vectors.orEmpty()
 
-
     override fun render(context: ScoreContext) {
-        lineAnimation.updateAnimation()
         context.applyDrawing {
             lineStrip(vectors.map { it * context.unitLength })
         }

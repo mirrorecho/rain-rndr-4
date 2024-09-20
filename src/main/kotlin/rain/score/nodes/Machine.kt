@@ -4,7 +4,6 @@ import org.openrndr.animatable.Animatable
 import rain.graph.Node
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.score.Score
 import rain.score.ScoreContext
 import rain.utils.autoKey
 import kotlin.reflect.KMutableProperty0
@@ -84,12 +83,25 @@ open class Machine protected constructor(
 
     open fun render(context: ScoreContext) { println("render not implemented for $this") }
 
+    override val dirty: Boolean
+        get() = super.dirty || hasAnimations
+
     open val hasAnimations get() = machineAnimation.hasAnimations()
 
-    open fun updateAnimation(score: Score): Boolean = if (hasAnimations) {
+    fun updateAnimation(): Boolean = if (hasAnimations) {
+        scoreContext?.let {
             machineAnimation.updateAnimation()
-            true
-        } else false
+            updateAnimation(it)
+            return true
+        }
+        println("WARNING - no score context for $this, unable to update animation")
+        false
+    } else false
+
+    open fun updateAnimation(context: ScoreContext) {
+        // hook to be overriden to add additional logic (or prevent updating ALL data from slots)
+        refresh()
+    }
 }
 
 // =======================================================================
