@@ -11,7 +11,6 @@ import org.openrndr.draw.loadImage
 import org.openrndr.math.Vector2
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.score.ScoreContext
 import rain.score.nodes.*
 
 open class Image protected constructor(
@@ -47,7 +46,7 @@ open class Image protected constructor(
     }
 
 
-    override fun render(context: ScoreContext) {
+    override fun render(context: Score.ScoreContext) {
         context.applyDrawing {
             myBuffer?.let { image(it, x*context.unitLength, y*context.unitLength) }
         }

@@ -4,6 +4,7 @@ package rain.graph
 import rain.graph.queries.Queryable
 import rain.graph.queries.RelatedQuery
 import rain.graph.queries.UpdatingQueryExecution
+import rain.language.patterns.relationships.DIRTIES
 
 import rain.utils.autoKey
 import kotlin.reflect.KMutableProperty0
@@ -49,8 +50,8 @@ open class Node protected constructor(
     }
 
     open fun refresh() {
-        // hook for executing node-type specific logic after slot data is updated
-        //  (e.g. for updating cached values that may depend on slot data)
+        // for nodes with caching, hook for executing node-type specific caching logic
+        // after slot data is updated (outside of playback)
     }
 
     override fun delete() {
@@ -181,7 +182,9 @@ open class Node protected constructor(
 
         open val dirty = iAmDirty // included here for interoperability
 
-        fun clean() { iAmDirty = false }
+        fun clean() {
+            iAmDirty = false
+        }
 
         // same idea as setting the value, but only updates local value
         // (not relationships for related node slots), and does type casting
@@ -215,11 +218,13 @@ open class Node protected constructor(
         name:String, // TODO: needed?
         val query: RelatedQuery,
         val label: NodeLabel<*, T & Any>,
-        default: T
+        default: T,
+        val dirties: Boolean = false, // TODO: consider whether this should default to true
+        // true if the related node becoming dirty causes this slot (and slot's Node) to become dirty
     ): DataSlot<T>(name, default) {
 
         override val dirty
-            get() = iAmDirty || (value?.dirty ?: false)
+            get() = iAmDirty || (dirties && (value?.dirty ?: false))
 
         private val myQueryExecution = UpdatingQueryExecution(node, query)
 
@@ -243,6 +248,14 @@ open class Node protected constructor(
                 value?.let {
                     myQueryExecution.extend(it)
                 }
+                if (dirties) {
+                    // clear any existing dirties relationships
+                    this@Node.getRelationships("DIRTIES", false).firstOrNull {
+                        it.target == value
+                    }?.delete()
+                    // add new dirties relationship:
+                    value?.relate(DIRTIES, this@Node)
+                }
                 iAmDirty = true
             }
 
@@ -254,18 +267,9 @@ open class Node protected constructor(
     open inner class SummingValueSlot(
         name:String, // TODO: needed?
         val linkQuery: RelatedQuery,
-        default: Double
+        default: Double,
+        val dirties: Boolean = false, // TODO: consider whether this should default to true
     ): DataSlot<Double>(name, default) {
-
-        override val dirty
-            get() = iAmDirty || (linkedNode?.dirty ?: false)
-
-        override var value: Double
-            get() = localValue + (linkedSlot?.value ?: 0.0)
-            set(value) {
-                localValue = value
-                iAmDirty = true
-            }
 
         private val linkedNode get() = this@Node[linkQuery]().firstOrNull()
 
@@ -275,7 +279,27 @@ open class Node protected constructor(
         private val linkedSlot: DataSlot<Double>? get() =
             linkedNode?.slot(name)
 
-//        // would use something like this if caching implemented:
+
+        override val dirty
+            get() = iAmDirty || (dirties && (linkedNode?.dirty ?: false))
+
+        override var value: Double
+            get() = localValue + (linkedSlot?.value ?: 0.0)
+            set(value) {
+                localValue = value
+                if (dirties) {
+                    // clear any existing dirties relationships
+                    this@Node.getRelationships("DIRTIES", false).firstOrNull {
+                        it.target == linkedNode
+                    }?.delete()
+                    // add new dirties relationship:
+                    linkedNode?.relate(DIRTIES, this@Node)
+                }
+                iAmDirty = true
+            }
+
+
+//        // would use something like this if slot caching implemented:
 //        override fun wireUp() {
 //            this@Node[linkQuery]().firstOrNull()?.let {relatedNode->
 ////                val slotName: String = linkQuery.firstRelationshipProperty(this@Node.asSequence(), "slot") ?: name
@@ -301,7 +325,8 @@ open class Node protected constructor(
     inner class SummingPropertySlot(
         override val property: KMutableProperty0<Double>,
         linkQuery: RelatedQuery,
-    ): SummingValueSlot(property.name, linkQuery, property.get()) {
+        dirties: Boolean = false,
+    ): SummingValueSlot(property.name, linkQuery, property.get(), dirties) {
 
         override var localValue
             get() = property.get()

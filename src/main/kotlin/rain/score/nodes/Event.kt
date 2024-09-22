@@ -11,8 +11,6 @@ import rain.language.patterns.*
 import rain.language.patterns.relationships.BUMPS
 import rain.language.patterns.relationships.DRAW_STYLE
 import rain.rndr.nodes.DrawStyle
-import rain.score.DEFAULT_SCORE
-import rain.score.Score
 import rain.utils.*
 
 enum class Gate(val startGate: Boolean?, val endGate:Boolean?) {

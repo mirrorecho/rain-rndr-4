@@ -9,19 +9,8 @@ import rain.utils.*
 
 import rain.score.nodes.Machine
 import rain.score.nodes.MachineAnimation
+import rain.score.nodes.Score
 
-// NOTE: assume interface not needed now that colors being managed by DrawStyle
-//interface Colorable {
-//    var h: Double
-//    var s: Double
-//    var v: Double
-//    var a: Double
-//
-//    fun colorHSVa() = ColorHSVa(h, s, v, a)
-//
-//    var colorRGBa: ColorRGBa = colorHSVa().toRGBa()
-//
-//}
 
 open class Color(
     key:String = autoKey(),
@@ -63,10 +52,10 @@ open class Color(
     val colorAnimation = ColorAnimation()
     override val machineAnimation = colorAnimation
 
-    var h by SummingPropertySlot(colorAnimation::h, +H)
-    var s by SummingPropertySlot(colorAnimation::s, +S)
-    var v by SummingPropertySlot(colorAnimation::v, +V)
-    var a by SummingPropertySlot(colorAnimation::a, +A)
+    var h by SummingPropertySlot(colorAnimation::h, +H, true)
+    var s by SummingPropertySlot(colorAnimation::s, +S, true)
+    var v by SummingPropertySlot(colorAnimation::v, +V, true)
+    var a by SummingPropertySlot(colorAnimation::a, +A, true)
 
     fun colorHSVa() = ColorHSVa(h, s, v, a)
 
@@ -75,12 +64,18 @@ open class Color(
         // and similarly any related draw styles
         // (if they don't already have animations)
         myColorRGBa = colorHSVa().toRGBa()
-        this[-FILL_COLOR](DrawStyle).forEach { ds ->
-            ds.rndrDrawStyle.fill = myColorRGBa
-        }
-        this[-STROKE_COLOR](DrawStyle).forEach { ds ->
-            ds.rndrDrawStyle.stroke = myColorRGBa
-        }
+//        this[-FILL_COLOR](DrawStyle).forEach { ds ->
+//            ds.rndrDrawStyle.fill = myColorRGBa
+//        }
+//        this[-STROKE_COLOR](DrawStyle).forEach { ds ->
+//            ds.rndrDrawStyle.stroke = myColorRGBa
+//        }
+    }
+
+    override val hasPlaybackCaching: Boolean = true
+
+    override fun refresh(context: Score.ScoreContext) {
+        refresh()
     }
 
     private var myColorRGBa: ColorRGBa = colorHSVa().toRGBa()

@@ -5,7 +5,7 @@ import org.openrndr.extra.noise.random
 import rain.rndr.nodes.Circle
 import rain.rndr.nodes.Color
 import rain.rndr.nodes.DrawStyle
-import rain.score.DEFAULT_SCORE
+import rain.score.nodes.DEFAULT_SCORE
 import rain.score.nodes.*
 
 /*
@@ -25,8 +25,8 @@ fun main() {
         val strokeColor = Color.white()
 
         // TODO/WARNING: full size causes stack overflow error... WHY?!
-        (0..DEFAULT_SCORE.widthUnits.toInt()/2).forEach {cX ->
-            (0..DEFAULT_SCORE.heightUnits.toInt()/2).forEach {cY->
+        (0..DEFAULT_SCORE.widthUnits.toInt()/2).forEach { cX ->
+            (0..DEFAULT_SCORE.heightUnits.toInt()/2).forEach { cY->
 
                 val fillColor = Color.create { v = 1.0;}
                 val myStyle = DrawStyle.create {

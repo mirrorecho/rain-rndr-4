@@ -1,10 +1,7 @@
 package rain.score.nodes
 
-import org.openrndr.Program
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.score.Score
-import rain.score.ScoreContext
 
 
 // a simple machine for demo/testing purposes..
@@ -21,11 +18,11 @@ open class Printer(
     var renderMe by DataSlot("renderMe", false)
 
 
-    override fun bump(context: ScoreContext) {
+    override fun bump(context: Score.ScoreContext) {
         // can add more logic here
     }
 
-    override fun render(context: ScoreContext) {
+    override fun render(context: Score.ScoreContext) {
 //        println(msg)
         if (renderMe) {
             println("${this.key} PRINTING: $msg")

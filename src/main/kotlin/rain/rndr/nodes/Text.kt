@@ -3,14 +3,9 @@ package rain.rndr.nodes
 import rain.rndr.relationships.*
 import rain.utils.*
 
-import org.openrndr.Program
-import org.openrndr.color.ColorHSVa
-import org.openrndr.draw.LineCap
-import org.openrndr.draw.writer
-import org.openrndr.math.Vector2
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.score.ScoreContext
+
 import rain.score.nodes.*
 
 open class Text protected constructor(
@@ -37,7 +32,7 @@ open class Text protected constructor(
 
     var text by DataSlot("text", "RAIN")
 
-    override fun render(context: ScoreContext) {
+    override fun render(context: Score.ScoreContext) {
         context.applyDrawing {
             text(this@Text.text, x*context.unitLength, y*context.unitLength)
         }

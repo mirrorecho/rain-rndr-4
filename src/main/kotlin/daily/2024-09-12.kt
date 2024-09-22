@@ -2,7 +2,7 @@ package daily
 
 import org.openrndr.animatable.easing.Easing
 import rain.rndr.nodes.*
-import rain.score.DEFAULT_SCORE
+import rain.score.nodes.DEFAULT_SCORE
 import rain.score.nodes.*
 
 /*

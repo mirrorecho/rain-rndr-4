@@ -1,4 +1,4 @@
-package rain.score
+package rain.score.nodes
 
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -10,10 +10,9 @@ import org.openrndr.launch
 import rain.graph.Label
 import rain.graph.Node
 import rain.graph.NodeLabel
+import rain.language.patterns.relationships.DIRTIES
 import rain.language.patterns.relationships.PLAYS
 import rain.rndr.nodes.DrawStyle
-import rain.score.nodes.Event
-import rain.score.nodes.Machine
 import rain.utils.autoKey
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -29,12 +28,13 @@ class Score protected constructor(
         val event: Event,
         val program: Program,
         val parent: ScoreContext? = null,
+        machine: Machine? = null,
         // TODO: add renderTarget
     ) {
 
         val score = this@Score
 
-        val machine: Machine? = event.machine ?: parent?.machine
+        val machine: Machine? = machine ?: event.machine ?: parent?.machine
 
         val drawStyle: DrawStyle? = event.drawStyle ?: parent?.drawStyle
 
@@ -42,15 +42,20 @@ class Score protected constructor(
 
         fun childContext(
             event: Event,
+            machine: Machine? = null,
         ): ScoreContext = ScoreContext(
             event,
             program,
             this,
         )
 
-        suspend fun play(
-            exitOnComplete:Boolean=false
-        ) {
+        fun addCaching(dirtyMachine:Machine) {
+            if (dirtyMachine.hasPlaybackCaching) cachingContexts.add(childContext(event, dirtyMachine))
+            dirtyMachine[+DIRTIES](Machine).forEach { addCaching(it) }
+        }
+
+        // TODO: move to Context class?
+        fun bump() {
 
             // TODO: move this to score execute loop
             fun updateMachines(
@@ -62,8 +67,6 @@ class Score protected constructor(
                 // following the path
                 // animating where animation defined in the slot name/value
 
-                val dirtyMachines = mutableMapOf(prefix to startingMachine)
-
                 eventSlots.forEach { (fullName, slot) ->
 
                     var myMachine: Machine? = startingMachine
@@ -71,15 +74,13 @@ class Score protected constructor(
                     fullName.substringAfter(prefix).split(".").apply {
                         take(size-1).forEach {relatedName->
                             myMachine = myMachine?.slot<Machine?>(relatedName)?.value
-                            // using full name so that we can sort by the reverse length order to
-                            // call updateDataFromSlots from most specific (longest) to the least specific
-                            myMachine ?.let { dirtyMachines[fullName] = it }
+                            myMachine ?.let { m-> addCaching(m) }
                         }
                         last().let {name->
                             if (name.endsWith(":animate")) {
                                 name.substringBefore(":animate").let { animateName->
                                     myMachine?.let { m ->
-                                        score.gateMachineAnimation(m, true)
+                                        animatingContexts.add(childContext(event, m))
                                         m.slot<Double>(animateName)?.property?.let { property ->
                                             m.machineAnimation.bumpAnimation(
                                                 property,
@@ -93,15 +94,12 @@ class Score protected constructor(
                         }
                     }
                 }
-                dirtyMachines.toSortedMap().toList().reversed().forEach {(_,m)->
-                    m.setContext(this)
-                    m.clean()
-                }
             }
 
+            // TODO: think about whether bumping applies to only machine updates, or also style updates
+            // or whether to remove it altogether
             machine?.let { m ->
-//            m.setContext(this)
-                event.gate.startGate?.let { score.gateMachine(m, it) }
+                event.gate.startGate?.let { m.gate(it) }
                 if (event.bumping) {
                     updateMachines(m, event.machineSlots, "machine.")
                     // TODO: is "bumping" even worth it???
@@ -112,19 +110,22 @@ class Score protected constructor(
             event.styleSlots.let {ss ->
                 if (ss.isNotEmpty()) {
                     drawStyle?.let {ds->
-//                    ds.setContext(this)
                         updateMachines(ds, ss, "style.")
-                        if (ds.fill?.hasAnimations==true || ds.stroke?.hasAnimations==true) {
-                            score.gateMachineAnimation(ds, true)
-                        }
                     }
                 }
             }
 
+        }
+
+        suspend fun play(
+            exitOnComplete:Boolean=false
+        ) {
 
 //        println("adding delay: $addDelay")
             event.dur?.let { dur -> if (dur > 0.0) delay(dur.toDuration(DurationUnit.SECONDS)) }
             // TODO: adjust for delta in time delay
+
+            // TODO: maybe add startGate here
 
             if (event.simultaneous) {
                 val threads: MutableList<Job> = mutableListOf()
@@ -132,12 +133,10 @@ class Score protected constructor(
                     threads.add(program.launch { childContext(it).play() })
                 }
                 threads.joinAll()
-                threads.
             } else
                 event.children.forEach { childContext(it).play() }
 
-
-            machine?.let { m -> event.gate.endGate?.let { score.gateMachine(m, it) } }
+            machine?.let { m -> event.gate.endGate?.let { m.gate(it) } }
 
             if (exitOnComplete) exit()
 
@@ -193,36 +192,30 @@ class Score protected constructor(
         return this
     }
 
+    private val bumpingContexts = ArrayList<ScoreContext>()
+    private val animatingContexts: MutableSet<ScoreContext> = HashSet()
 
-    // TODO: needed?
-//    private var myProgram: Program? = null
+    // using linkedHasSet for caching and rendering to keep order:
+    private val cachingContexts: MutableSet<ScoreContext> = LinkedHashSet()
+    private val renderingContexts: MutableSet<ScoreContext> = LinkedHashSet()
 
-    // TODO maybe: combine into a more sensibly managed "runningMachines" data structure?
-    private val bumpingMachines: MutableList<Machine> = mutableListOf()
-    private val renderingMachines: MutableMap<String, Machine> = mutableMapOf()
-    private val animatingMachines: MutableMap<String, Machine> = mutableMapOf()
-
-    fun gateMachine(machine: Machine, gate: Boolean) {
-//        println("gating $gate - $machine")
-        machine.gate(gate)
-        if (gate) {
-            renderingMachines[machine.key] = machine
-        } else {
-            renderingMachines.remove(machine.key)
+    fun MutableSet<ScoreContext>.executeAll(
+        keepCondition: (Machine)->Boolean,
+        block: (ScoreContext, Machine)->Unit,
+    ) {
+        this.iterator().let {
+            while (it.hasNext()) {
+                it.next().let { context->
+                    context.machine?.let {m->
+                        if (keepCondition(m)) {
+                            block(context, m)
+                        } else it.remove()
+                    }
+                }
+            }
         }
     }
 
-    fun gateMachineAnimation(machine: Machine, gate: Boolean) {
-        if (gate) {
-            animatingMachines[machine.key] = machine
-        } else {
-            animatingMachines.remove(machine.key)
-        }
-    }
-
-    fun gateOffMachinesAnimation(keys: List<String>) {
-        keys.forEach {k->  animatingMachines.remove(k)  }
-    }
 
     fun play(block: Score.(Program)->Event) {
         application {
@@ -234,7 +227,6 @@ class Score protected constructor(
                 launch {
                     ScoreContext(
                         block.invoke(this@Score, this@program),
-                        this@Score,
                         this@program,
                     ).play(true)
                 }
@@ -242,23 +234,28 @@ class Score protected constructor(
                     // TODO: consider ... machines are executed in no particular order, is that OK?
 
                     // 0 (maybe), verify that all bumps received?
+                    // ...
+
                     // 1 execute all "bumps" (first machine bumps, then style bumps)
-                    // ... (new pass)
-                    // 2 animate all machines
-                    // ... (new pass?)
-                    // 3 update any cached values
-                    // ... (new pass)
-                    // 4 render
+                    bumpingContexts.forEach { it.bump() }
+                    bumpingContexts.clear()
 
-                    val gateOffKeys = mutableListOf<String>()
-                    animatingMachines.forEach { (_, machine) ->
-                        machine.
-                        if (!machine.updateAnimation())
-                            gateOffKeys.add(machine.key)
+                    // 2 animate all context machines, remove from the animating set if
+                    // they no longer have animations
+                    animatingContexts.executeAll({it.hasAnimations}) {c, m->
+                        m.updateAnimation(c)
+                        c.addCaching(m)
                     }
-                    if (gateOffKeys.isNotEmpty()) gateOffMachinesAnimation(gateOffKeys)
 
-                    renderingMachines.forEach { it.value.render() }
+                    // 3 update any caching
+                    cachingContexts.executeAll({it.dirty}) {c, m->
+                        m.refresh(c)
+                    }
+
+                    // 4 render
+                    renderingContexts.executeAll({it.isRendering}) {c, m->
+                        m.render(c)
+                    }
 
                 }
             }

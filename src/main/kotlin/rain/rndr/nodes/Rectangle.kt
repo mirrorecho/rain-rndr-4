@@ -7,7 +7,6 @@ import org.openrndr.Program
 import org.openrndr.color.ColorHSVa
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.score.ScoreContext
 import rain.score.nodes.*
 
 open class Rectangle protected constructor(
@@ -38,7 +37,7 @@ open class Rectangle protected constructor(
     var width by SummingPropertySlot(rectangleAnimation::width, +WIDTH)
     var height by SummingPropertySlot(rectangleAnimation::height, +WIDTH)
 
-    override fun render(context: ScoreContext) {
+    override fun render(context: Score.ScoreContext) {
         context.applyDrawing {
             rectangle(
                 vector(context),

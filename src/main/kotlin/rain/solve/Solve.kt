@@ -1,12 +1,11 @@
 package rain.solve
 
 import org.openrndr.animatable.easing.Easing
-import rain.score.*
 import rain.score.nodes.*
 import rain.rndr.nodes.*
 
 fun main()  {
-//    solve3()
+    solve0()
 }
 
 /*

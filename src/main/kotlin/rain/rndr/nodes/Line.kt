@@ -9,7 +9,6 @@ import org.openrndr.draw.LineCap
 import org.openrndr.math.Vector2
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.score.ScoreContext
 import rain.score.nodes.*
 
 open class Line protected constructor(
@@ -38,7 +37,7 @@ open class Line protected constructor(
 
     val vectors: List<Vector2> get() = listOf(this.vector()) + lineTo?.vectors.orEmpty()
 
-    override fun render(context: ScoreContext) {
+    override fun render(context: Score.ScoreContext) {
         context.applyDrawing {
             lineStrip(vectors.map { it * context.unitLength })
         }

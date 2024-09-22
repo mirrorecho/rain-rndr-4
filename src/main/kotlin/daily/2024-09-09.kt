@@ -3,7 +3,7 @@ package daily
 import org.openrndr.animatable.easing.Easing
 import org.openrndr.extra.noise.random
 import rain.rndr.nodes.Rectangle
-import rain.score.DEFAULT_SCORE
+import rain.score.nodes.DEFAULT_SCORE
 import rain.score.nodes.*
 
 /*

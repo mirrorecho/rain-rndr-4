@@ -5,7 +5,6 @@ import rain.utils.*
 
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.score.ScoreContext
 import rain.score.nodes.*
 
 open class Circle protected constructor(
@@ -33,7 +32,7 @@ open class Circle protected constructor(
     override var x by SummingPropertySlot(circleAnimation::x, +X)
     override var y by SummingPropertySlot(circleAnimation::y, +Y)
 
-    override fun render(context: ScoreContext) {
+    override fun render(context: Score.ScoreContext) {
         context.applyDrawing {
             circle(
                 position = vector(context),

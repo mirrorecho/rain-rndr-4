@@ -2,7 +2,8 @@ package daily
 
 import org.openrndr.animatable.easing.Easing
 import rain.rndr.nodes.*
-import rain.score.DEFAULT_SCORE
+import rain.rndr.relationships.*
+import rain.score.nodes.DEFAULT_SCORE
 import rain.score.nodes.*
 
 /*
@@ -35,13 +36,23 @@ fun main() {
                 x = 2.0
                 y = 2.0
 
-                this.fromPosition = fromPosition
+                // TODO, easy method to relate both to position
+                relate(X, fromPosition)
+                relate(Y, fromPosition)
+
+//                this.fromPosition = fromPosition
                 lineTo = LinePoint.create {
-                    this.fromPosition = fromPosition2
+
+                    relate(X, fromPosition2)
+                    relate(Y, fromPosition2)
+
                     lineTo = LinePoint.create {
                         x = -1.0
                         y = 8.0
-                        this.fromPosition = fromPosition
+
+                        relate(X, fromPosition)
+                        relate(Y, fromPosition)
+
                         lineTo = LinePoint.create {
                             center(this@play)
                         }

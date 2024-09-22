@@ -2,7 +2,6 @@ package rain.rndr.nodes
 
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.score.ScoreContext
 import rain.score.nodes.Machine
 import rain.score.nodes.MachineAnimation
 import rain.utils.*

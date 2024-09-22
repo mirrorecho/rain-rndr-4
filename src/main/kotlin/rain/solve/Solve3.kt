@@ -52,7 +52,7 @@ fun solve3() {
         EventRandom.seq(circleFly) {
             machine = Circle.create {
                 this.relate(X, ValueRandom.create { maxValue = DEFAULT_SCORE.widthUnits }, true, )
-                fromPosition = startingPosition
+//                fromPosition = startingPosition
             }
             gate = Gate.ON_OFF
             times = 4

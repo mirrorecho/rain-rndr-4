@@ -7,11 +7,7 @@ import org.openrndr.math.Vector2
 import rain.graph.Label
 import rain.graph.NodeLabel
 import rain.rndr.relationships.*
-import rain.score.Score
-import rain.score.ScoreContext
-import rain.score.nodes.Event
-import rain.score.nodes.Machine
-import rain.score.nodes.MachineAnimation
+import rain.score.nodes.*
 
 // TODO maybe: rename to Vector?
 interface Positionable {
@@ -32,7 +28,7 @@ interface Positionable {
     fun vector(): Vector2 = Vector2(x, y)
 
     // TODO maybe: consider whether initial vector starts at center (as opposed 0,0 = top left)
-    fun vector(context: ScoreContext): Vector2 =
+    fun vector(context: Score.ScoreContext): Vector2 =
         vector() * context.unitLength
 
     fun center(score: Score) = this.apply {

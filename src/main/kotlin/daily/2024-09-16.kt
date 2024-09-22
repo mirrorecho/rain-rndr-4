@@ -3,7 +3,7 @@ package daily
 import org.openrndr.extra.noise.random
 import rain.rndr.nodes.Line
 import rain.rndr.nodes.LinePoint
-import rain.score.DEFAULT_SCORE
+import rain.score.nodes.DEFAULT_SCORE
 import rain.score.nodes.*
 
 

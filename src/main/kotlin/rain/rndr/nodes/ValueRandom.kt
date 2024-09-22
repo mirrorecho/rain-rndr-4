@@ -1,11 +1,8 @@
 package rain.rndr.nodes
 
-import org.openrndr.Program
 import org.openrndr.extra.noise.random
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.score.Score
-import rain.score.ScoreContext
 import rain.score.nodes.Machine
 import rain.score.nodes.MachineAnimation
 import rain.utils.*

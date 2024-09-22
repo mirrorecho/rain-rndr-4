@@ -4,7 +4,6 @@ import org.openrndr.animatable.Animatable
 import rain.graph.Node
 import rain.graph.Label
 import rain.graph.NodeLabel
-import rain.score.ScoreContext
 import rain.utils.autoKey
 import kotlin.reflect.KMutableProperty0
 
@@ -59,48 +58,36 @@ open class Machine protected constructor(
 
     // TODO is this used?
     open fun gate(onOff: Boolean) {
-        isRunning = onOff;
+        myIsRendering = onOff;
     }
 
     // TODO: is this even used?
-    protected var isRunning = false
+    private var myIsRendering = false
 
-    protected var scoreContext: ScoreContext? = null
-
-    fun setContext(context: ScoreContext) {scoreContext = context}
-
-    open fun bump(context:ScoreContext) {
-        // hook that can be overridden for machine-specific implementations
-    }
-
-    fun render() {
-        scoreContext?.let {
-            render(it)
-            return
-        }
-        println("WARNING - no score context for $this, unable to render")
-    }
-
-    open fun render(context: ScoreContext) { println("render not implemented for $this") }
+    val isRendering: Boolean get() = myIsRendering
 
     override val dirty: Boolean
         get() = super.dirty || hasAnimations
 
     open val hasAnimations get() = machineAnimation.hasAnimations()
 
-    fun updateAnimation(): Boolean = if (hasAnimations) {
-        scoreContext?.let {
-            machineAnimation.updateAnimation()
-            updateAnimation(it)
-            return true
-        }
-        println("WARNING - no score context for $this, unable to update animation")
-        false
-    } else false
+    // indicates whether this machine should cache data during playback
+    open val hasPlaybackCaching: Boolean = false
 
-    open fun updateAnimation(context: ScoreContext) {
-        // hook to be overriden to add additional logic (or prevent updating ALL data from slots)
-        refresh()
+    open fun bump(context: Score.ScoreContext) {
+        // hook that can be overridden for machine-specific implementations
+    }
+
+    open fun render(context: Score.ScoreContext) { println("render not implemented for $this") }
+
+
+    open fun refresh(context: Score.ScoreContext) {
+        // hook for refreshing during playback
+    }
+
+    open fun updateAnimation(context: Score.ScoreContext) {
+        //  be overriden to add additional logic (or prevent updating ALL data from slots)
+        machineAnimation.updateAnimation()
     }
 }
 
