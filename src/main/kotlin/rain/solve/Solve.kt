@@ -5,7 +5,7 @@ import rain.score.nodes.*
 import rain.rndr.nodes.*
 
 fun main()  {
-    solve0()
+    solve2()
 }
 
 /*
@@ -46,15 +46,32 @@ fun solve0() {
         machine = Printer.create("PRINTER_1") { msg = "I am a $key" }
         gate = Gate.ON_OFF
         times = 4
-        extend(Event) {
-            slots("msg", null, "I am message A!", "I am message B!", "I am message C!")
-            cycle("dur", 1.0)
-            cycle("renderMe", true)
-        }
+        extend(
+            Event.create {
+                dur = 1.0
+                this["machine.msg"] = "I am message A!"
+                this["machine.renderMe"] = true
+            },
+            Event.create {
+                dur = 1.0
+                this["machine.msg"] = "I am message B!"
+                this["machine.renderMe"] = true
+            },
+            Event.create {
+                dur = 1.0
+                this["machine.msg"] = "I am message C!"
+                this["machine.renderMe"] = true
+            }
+        )
+//        extend(Event) {
+//            slots("machine.msg", null, "I am message A!", "I am message B!", "I am message C!")
+//            cycle("dur", 1.0)
+//            cycle("machine.renderMe", true)
+//        }
     }
 
 
-    seq(s1, s1).play()
+    seq(s1, s1).play(DEFAULT_SCORE.asHalfRes())
 }
 
 //// -------------------------------------------------
@@ -82,13 +99,13 @@ fun solve1() {
 fun solve2() {
 
     DrawStyle.create("STYLE_1") {
-        fill("COLOR_BLUE") { s=0.8 }
+        fill("COLOR_BLUE") { s=0.8; a=1.0 }
     }
 
     seq("FADE_BLUE",
         Event.create {
             dur=2.9
-            animate("a") {
+            animate("machine.a") {
                 easing = Easing.CubicInOut
                 fromValue = 0.0
                 value = 1.0
@@ -96,7 +113,7 @@ fun solve2() {
         },
         Event.create {
             dur=1.1
-            animate("a") {
+            animate("machine.a") {
                 easing = Easing.CubicInOut
                 fromValue = 1.0
                 value = 0.0
@@ -111,36 +128,45 @@ fun solve2() {
         val e1 = par(
             Event.create {
                 dur = 4.0
-                animate("radius") {
+                animate("machine.radius") {
                     fromValue = 1.0
                     value = 6.0
                 }
+                animate("style.fill.a") {
+                    fromValue = 0.0
+                    value = 0.4
+                }
             },
-            Event["FADE_BLUE"]!!
+//            Event["FADE_BLUE"]!!
         )
 
         val e2 = par(
             Event.create {
                 dur = 4.0
-                animate("radius") {
+                animate("machine.radius") {
                     fromValue = 16.0
                     value = 4.0
                     easing = Easing.QuadIn
                 }
+//                animate("style.fill.a") {
+//                    fromValue = 1.0
+//                    value = 0.1
+//                }
             },
             Event["FADE_BLUE"]!!
         )
         seq(
-            gate("STYLE_1"),
-            gate("COLOR_BLUE"),
-            EventRandom.seq(e1, e2) {
+            EventRandom.seq(
+                e1,
+                e2
+            ) {
                 machine = Circle.create {
                     x = 32.5
                     y = 18.5
                 }
                 style("STYLE_1")
                 gate = Gate.ON_OFF
-                times = 8
+                times = 4
             }
         )
     }

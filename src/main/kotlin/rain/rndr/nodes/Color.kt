@@ -72,7 +72,7 @@ open class Color(
 //        }
     }
 
-    override val hasPlaybackCaching: Boolean = true
+    override val hasPlaybackRefresh: Boolean = true
 
     override fun refresh(context: Score.ScoreContext) {
         refresh()

@@ -19,11 +19,10 @@ open class Printer(
 
 
     override fun bump(context: Score.ScoreContext) {
-        // can add more logic here
+        // could add logic here
     }
 
     override fun render(context: Score.ScoreContext) {
-//        println(msg)
         if (renderMe) {
             println("${this.key} PRINTING: $msg")
             renderMe = false // set back to false to prevent endless messages

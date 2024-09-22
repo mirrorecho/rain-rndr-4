@@ -68,6 +68,8 @@ open class DrawStyle protected constructor(
 
     val rndrDrawStyle get() = myRndrDrawStyle
 
+    override val hasPlaybackRefresh: Boolean = true
+
     override fun updateAnimation(context: Score.ScoreContext) {
         // not calling super since we only need to update strokeWeight with animation
         //  (because strokeWeight is the only thing that can be animated)

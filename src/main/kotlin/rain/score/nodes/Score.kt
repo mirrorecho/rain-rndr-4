@@ -47,11 +47,15 @@ class Score protected constructor(
             event,
             program,
             this,
+            machine
         )
 
-        fun addCaching(dirtyMachine:Machine) {
-            if (dirtyMachine.hasPlaybackCaching) cachingContexts.add(childContext(event, dirtyMachine))
-            dirtyMachine[+DIRTIES](Machine).forEach { addCaching(it) }
+        fun addRefreshing(dirtyMachine:Machine) {
+            if (dirtyMachine.hasPlaybackRefresh) {
+//                println("Adding refreshing for $dirtyMachine")
+                refreshingContexts.add(childContext(event, dirtyMachine))
+            }
+            dirtyMachine[+DIRTIES](Machine).forEach { addRefreshing(it) }
         }
 
         // TODO: move to Context class?
@@ -67,16 +71,20 @@ class Score protected constructor(
                 // following the path
                 // animating where animation defined in the slot name/value
 
+//                println(eventSlots)
+
                 eventSlots.forEach { (fullName, slot) ->
 
                     var myMachine: Machine? = startingMachine
 
                     fullName.substringAfter(prefix).split(".").apply {
+//                        println(this)
                         take(size-1).forEach {relatedName->
                             myMachine = myMachine?.slot<Machine?>(relatedName)?.value
-                            myMachine ?.let { m-> addCaching(m) }
+                            myMachine ?.let { m-> addRefreshing(m) }
                         }
                         last().let {name->
+//                            println("ANIMATING $myMachine")
                             if (name.endsWith(":animate")) {
                                 name.substringBefore(":animate").let { animateName->
                                     myMachine?.let { m ->
@@ -99,7 +107,10 @@ class Score protected constructor(
             // TODO: think about whether bumping applies to only machine updates, or also style updates
             // or whether to remove it altogether
             machine?.let { m ->
-                event.gate.startGate?.let { m.gate(it) }
+                event.gate.startGate?.let {g->
+                    m.gate(g)
+                    if (g) renderingContexts.add(this)
+                }
                 if (event.bumping) {
                     updateMachines(m, event.machineSlots, "machine.")
                     // TODO: is "bumping" even worth it???
@@ -120,6 +131,8 @@ class Score protected constructor(
         suspend fun play(
             exitOnComplete:Boolean=false
         ) {
+
+            bumpingContexts.add(this)
 
 //        println("adding delay: $addDelay")
             event.dur?.let { dur -> if (dur > 0.0) delay(dur.toDuration(DurationUnit.SECONDS)) }
@@ -195,8 +208,8 @@ class Score protected constructor(
     private val bumpingContexts = ArrayList<ScoreContext>()
     private val animatingContexts: MutableSet<ScoreContext> = HashSet()
 
-    // using linkedHasSet for caching and rendering to keep order:
-    private val cachingContexts: MutableSet<ScoreContext> = LinkedHashSet()
+    // using linkedHasSet for refreshing and rendering to keep order:
+    private val refreshingContexts: MutableSet<ScoreContext> = LinkedHashSet()
     private val renderingContexts: MutableSet<ScoreContext> = LinkedHashSet()
 
     fun MutableSet<ScoreContext>.executeAll(
@@ -244,11 +257,13 @@ class Score protected constructor(
                     // they no longer have animations
                     animatingContexts.executeAll({it.hasAnimations}) {c, m->
                         m.updateAnimation(c)
-                        c.addCaching(m)
+                        c.addRefreshing(m)
                     }
 
-                    // 3 update any caching
-                    cachingContexts.executeAll({it.dirty}) {c, m->
+//                    println(refreshingContexts.size)
+                    // 3 update any refreshing
+                    refreshingContexts.executeAll({it.dirty}) { c, m->
+//                        println("refreshing $m")
                         m.refresh(c)
                     }
 

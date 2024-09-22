@@ -72,7 +72,7 @@ open class Machine protected constructor(
     open val hasAnimations get() = machineAnimation.hasAnimations()
 
     // indicates whether this machine should cache data during playback
-    open val hasPlaybackCaching: Boolean = false
+    open val hasPlaybackRefresh: Boolean = false
 
     open fun bump(context: Score.ScoreContext) {
         // hook that can be overridden for machine-specific implementations
@@ -82,7 +82,7 @@ open class Machine protected constructor(
 
 
     open fun refresh(context: Score.ScoreContext) {
-        // hook for refreshing during playback
+        // hook for refreshing during playback (if hasPlaybackRefresh=true)
     }
 
     open fun updateAnimation(context: Score.ScoreContext) {
