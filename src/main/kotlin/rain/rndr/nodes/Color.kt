@@ -52,10 +52,10 @@ open class Color(
     val colorAnimation = ColorAnimation()
     override val machineAnimation = colorAnimation
 
-    var h by SummingPropertySlot(colorAnimation::h, +H, true)
-    var s by SummingPropertySlot(colorAnimation::s, +S, true)
-    var v by SummingPropertySlot(colorAnimation::v, +V, true)
-    var a by SummingPropertySlot(colorAnimation::a, +A, true)
+    var h by RespondingPropertySlot(colorAnimation::h, +H, true)
+    var s by RespondingPropertySlot(colorAnimation::s, +S, true)
+    var v by RespondingPropertySlot(colorAnimation::v, +V, true)
+    var a by RespondingPropertySlot(colorAnimation::a, +A, true)
 
     fun colorHSVa() = ColorHSVa(h, s, v, a)
 

@@ -27,10 +27,10 @@ open class Circle protected constructor(
     val circleAnimation = CircleAnimation()
     override val machineAnimation = circleAnimation
 
-    var radius by SummingPropertySlot(circleAnimation::radius, +RADIUS)
+    var radius by RespondingPropertySlot(circleAnimation::radius, +RADIUS)
 
-    override var x by SummingPropertySlot(circleAnimation::x, +X)
-    override var y by SummingPropertySlot(circleAnimation::y, +Y)
+    override var x by RespondingPropertySlot(circleAnimation::x, +X)
+    override var y by RespondingPropertySlot(circleAnimation::y, +Y)
 
     override fun render(context: Score.ScoreContext) {
         context.applyDrawing {

@@ -63,8 +63,8 @@ open class Position protected constructor(
     val positionAnimation = PositionAnimation()
     override val machineAnimation = positionAnimation
 
-    override var x by SummingPropertySlot(positionAnimation::x, +X)
-    override var y by SummingPropertySlot(positionAnimation::y, +Y)
+    override var x by RespondingPropertySlot(positionAnimation::x, +X)
+    override var y by RespondingPropertySlot(positionAnimation::y, +Y)
 
     operator fun plusAssign(vector: Vector2) { move(vector) }
 

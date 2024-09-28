@@ -2,19 +2,20 @@ package rain.rndr.nodes
 
 import rain.graph.Label
 import rain.graph.NodeLabel
+import rain.rndr.relationships.VALUE
 import rain.score.nodes.Machine
 import rain.score.nodes.MachineAnimation
 import rain.utils.*
 
 
-open class Value(
+open class RespondingValue(
     key:String = autoKey(),
     ) : Machine(key) {
-    companion object : NodeLabel<Machine, Value>(
-        Machine, Value::class, { k -> Value(k) }
+    companion object : NodeLabel<Machine, RespondingValue>(
+        Machine, RespondingValue::class, { k -> RespondingValue(k) }
     )
 
-    override val label: Label<out Machine, out Value> = Value
+    override val label: Label<out Machine, out RespondingValue> = RespondingValue
 
     class ValueAnimation: MachineAnimation() {
         var value = 0.0
@@ -23,11 +24,11 @@ open class Value(
     val valueAnimation = ValueAnimation()
     override val machineAnimation = valueAnimation
 
-    var value by PropertySlot(valueAnimation::value)
+    var value by RespondingPropertySlot(valueAnimation::value, +VALUE)
 
     var respondsTo by DataSlot<List<String>>("respondsTo", listOf())
 
-    var respond: (requestValue:Double?)->Double = { value }
+    var respond: (sourceValue:Double)->Double = { value }
 
     // updates or creates slot with the given value, and returns the slot
     override fun  <T:Any?> slot(name: String, value: T): DataSlot<T> =

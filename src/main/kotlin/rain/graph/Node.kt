@@ -5,6 +5,7 @@ import rain.graph.queries.Queryable
 import rain.graph.queries.RelatedQuery
 import rain.graph.queries.UpdatingQueryExecution
 import rain.language.patterns.relationships.DIRTIES
+import rain.rndr.nodes.RespondingValue
 
 import rain.utils.autoKey
 import kotlin.reflect.KMutableProperty0
@@ -264,27 +265,31 @@ open class Node protected constructor(
     // ==================================================
 
     // TODO maybe: consider operations other than sum... for now KISS and keep it at summation
-    open inner class SummingValueSlot(
+    open inner class RespondingValueSlot(
         name:String, // TODO: needed?
         val linkQuery: RelatedQuery,
         default: Double,
         val dirties: Boolean = false, // TODO: consider whether this should default to true
     ): DataSlot<Double>(name, default) {
 
-        private val linkedNode get() = this@Node[linkQuery]().firstOrNull()
-
-        // TODO: consider whether to cache the link slot ...
+        // TODO: consider whether to cache the link node and/or slot ...
         //  for now, KISS, and also keep flexible to be able to dynamically re-link
         //  during playback. Consider caching if performance seems to be an issue.
+
+        private val linkedNode get() = this@Node[linkQuery](RespondingValue).firstOrNull()
+
         private val linkedSlot: DataSlot<Double>? get() =
             linkedNode?.slot(name)
-
 
         override val dirty
             get() = iAmDirty || (dirties && (linkedNode?.dirty ?: false))
 
         override var value: Double
-            get() = localValue + (linkedSlot?.value ?: 0.0)
+            // TODO maybe: also add a lambda/hook here for logic specific to this slot?
+            //  (so that multiple nodes/slots could all access the same RespondingValue
+            //  node, with different logic applied)?
+            get() = linkedNode?.respond?.invoke(localValue) ?: localValue
+
             set(value) {
                 localValue = value
                 if (dirties) {
@@ -322,11 +327,11 @@ open class Node protected constructor(
 
     // ==================================================
 
-    inner class SummingPropertySlot(
+    inner class RespondingPropertySlot(
         override val property: KMutableProperty0<Double>,
         linkQuery: RelatedQuery,
         dirties: Boolean = false,
-    ): SummingValueSlot(property.name, linkQuery, property.get(), dirties) {
+    ): RespondingValueSlot(property.name, linkQuery, property.get(), dirties) {
 
         override var localValue
             get() = property.get()

@@ -3,9 +3,6 @@ package rain.rndr.nodes
 import rain.rndr.relationships.*
 import rain.utils.*
 
-import org.openrndr.Program
-import org.openrndr.color.ColorHSVa
-import org.openrndr.draw.LineCap
 import org.openrndr.math.Vector2
 import rain.graph.Label
 import rain.graph.NodeLabel
@@ -32,8 +29,8 @@ open class Line protected constructor(
 
     var lineTo by RelatedNodeSlot("lineToPosition", +LINE_TO, LinePoint, null)
 
-    override var x by SummingPropertySlot(lineAnimation::x, +X)
-    override var y by SummingPropertySlot(lineAnimation::y, +Y)
+    override var x by RespondingPropertySlot(lineAnimation::x, +X)
+    override var y by RespondingPropertySlot(lineAnimation::y, +Y)
 
     val vectors: List<Vector2> get() = listOf(this.vector()) + lineTo?.vectors.orEmpty()
 

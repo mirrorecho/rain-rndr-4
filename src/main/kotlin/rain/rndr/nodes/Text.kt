@@ -27,8 +27,8 @@ open class Text protected constructor(
     val textAnimation = TextAnimation()
     override val machineAnimation = textAnimation
 
-    override var x by SummingPropertySlot(textAnimation::x, +X)
-    override var y by SummingPropertySlot(textAnimation::y, +Y)
+    override var x by RespondingPropertySlot(textAnimation::x, +X)
+    override var y by RespondingPropertySlot(textAnimation::y, +Y)
 
     var text by DataSlot("text", "RAIN")
 

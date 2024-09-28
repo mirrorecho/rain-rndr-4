@@ -30,7 +30,7 @@ open class DrawStyle protected constructor(
 
     var lineCap by DataSlot("lineCap", LineCap.ROUND)
     var lineJoin by DataSlot("lineJoin", LineJoin.ROUND)
-    var strokeWeight by SummingPropertySlot(drawStyleAnimation::strokeWeight, +STROKE_WEIGHT, true)
+    var strokeWeight by RespondingPropertySlot(drawStyleAnimation::strokeWeight, +STROKE_WEIGHT, true)
     var fontMap by DataSlot<FontMap?>("fontMap", null)
 
     var stroke by RelatedNodeSlot("stroke", +STROKE_COLOR, Color, null, true)

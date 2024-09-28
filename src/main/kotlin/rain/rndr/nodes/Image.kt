@@ -3,12 +3,8 @@ package rain.rndr.nodes
 import rain.rndr.relationships.*
 import rain.utils.*
 
-import org.openrndr.Program
-import org.openrndr.color.ColorHSVa
 import org.openrndr.draw.ColorBuffer
-import org.openrndr.draw.LineCap
 import org.openrndr.draw.loadImage
-import org.openrndr.math.Vector2
 import rain.graph.Label
 import rain.graph.NodeLabel
 import rain.score.nodes.*
@@ -34,8 +30,8 @@ open class Image protected constructor(
     val imageAnimation = ImageAnimation()
     override val machineAnimation = imageAnimation
 
-    override var x by SummingPropertySlot(imageAnimation::x, +X)
-    override var y by SummingPropertySlot(imageAnimation::y, +Y)
+    override var x by RespondingPropertySlot(imageAnimation::x, +X)
+    override var y by RespondingPropertySlot(imageAnimation::y, +Y)
 
     var imagePath by DataSlot("imagePath", "data/images/cheeta.jpg")
 

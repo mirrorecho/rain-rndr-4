@@ -3,8 +3,6 @@ package rain.rndr.nodes
 import rain.rndr.relationships.*
 import rain.utils.*
 
-import org.openrndr.Program
-import org.openrndr.color.ColorHSVa
 import rain.graph.Label
 import rain.graph.NodeLabel
 import rain.score.nodes.*
@@ -31,11 +29,11 @@ open class Rectangle protected constructor(
     val rectangleAnimation = RectangleAnimation()
     override val machineAnimation = rectangleAnimation
 
-    override var x by SummingPropertySlot(rectangleAnimation::x, +X)
-    override var y by SummingPropertySlot(rectangleAnimation::y, +Y)
+    override var x by RespondingPropertySlot(rectangleAnimation::x, +X)
+    override var y by RespondingPropertySlot(rectangleAnimation::y, +Y)
 
-    var width by SummingPropertySlot(rectangleAnimation::width, +WIDTH)
-    var height by SummingPropertySlot(rectangleAnimation::height, +WIDTH)
+    var width by RespondingPropertySlot(rectangleAnimation::width, +WIDTH)
+    var height by RespondingPropertySlot(rectangleAnimation::height, +WIDTH)
 
     override fun render(context: Score.ScoreContext) {
         context.applyDrawing {
