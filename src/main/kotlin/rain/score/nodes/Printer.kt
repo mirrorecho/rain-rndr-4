@@ -19,6 +19,7 @@ open class Printer(
 
 
     override fun bump(context: Score.ScoreContext) {
+        super.bump(context)
         // could add logic here
     }
 

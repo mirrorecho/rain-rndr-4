@@ -107,12 +107,10 @@ fun main() {
             },
             seq(makeLine, makeLine, makeLine, makeLine) {
                 machine = fromPosition2
-                gate = Gate.ON_OFF
             },
             Event.create {
                 dur = 24.0
                 machine = fromPosition
-                gate = Gate.ON_OFF
                 animate("machine.x") {
                     value = 40.0
                     easing = Easing.CubicIn

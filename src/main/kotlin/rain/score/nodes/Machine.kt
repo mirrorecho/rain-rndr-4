@@ -74,16 +74,32 @@ open class Machine protected constructor(
     // indicates whether this machine should cache data during playback
     open val hasPlaybackRefresh: Boolean = false
 
+    private var activeContext: Score.ScoreContext? = null
+
     open fun bump(context: Score.ScoreContext) {
         // hook that can be overridden for machine-specific implementations
+        activeContext = context
+    }
+
+    fun render() {
+        activeContext?.let { render(it) }
     }
 
     open fun render(context: Score.ScoreContext) { println("render not implemented for $this") }
 
+    // TODO: assuming activeContext only used for rendering (and not playBackRefresh... but think through this)
+//    fun playbackRefresh() {
+//        activeContext?.let { playbackRefresh(it) }
+//    }
 
-    open fun refresh(context: Score.ScoreContext) {
+    open fun playbackRefresh(context: Score.ScoreContext) {
         // hook for refreshing during playback (if hasPlaybackRefresh=true)
     }
+
+    // TODO: assuming activeContext only used for rendering (and not updateAnimation... but think through this)
+//    fun updateAnimation() {
+//        activeContext?.let { updateAnimation(it) }
+//    }
 
     open fun updateAnimation(context: Score.ScoreContext) {
         //  be overriden to add additional logic (or prevent updating ALL data from slots)

@@ -107,7 +107,7 @@ open class Node protected constructor(
     }
 
     // updates or creates slot with the given value, and returns the slot
-    fun  <T:Any?> slot(name: String, value: T): DataSlot<T> {
+    open fun  <T:Any?> slot(name: String, value: T): DataSlot<T> {
         dataSlots[name]?.let { existingSlot ->
             return (existingSlot as DataSlot<T>).also { it.value = value }
         }
@@ -115,21 +115,21 @@ open class Node protected constructor(
     }
 
     // gets slot by name (if it exists, otherwise null)
-    fun <T:Any?> slot(name:String): DataSlot<T>? =
+    open fun <T:Any?> slot(name:String): DataSlot<T>? =
         dataSlots[name] as DataSlot<T>?
 
-    // TODO: would this be used?
+    // TODO: would these be used?
 //    fun slotsFromProperties(vararg properties:KMutableProperty0<Double>) {
 //        properties.forEach { PropertySlot(it) }
 //    }
 
-    fun slotsToMap(): Map<String, Any?> {
-        return dataSlots.mapValues { (_, s)-> s.value }
-    }
-
-    fun updateSlotsFrom(map: Map<String, Any?>) {
-        map.forEach { (n, v) -> dataSlots[n]?.updateLocalValue(v) }
-    }
+//    fun slotsToMap(): Map<String, Any?> {
+//        return dataSlots.mapValues { (_, s)-> s.value }
+//    }
+//
+//    fun updateSlotsFrom(map: Map<String, Any?>) {
+//        map.forEach { (n, v) -> dataSlots[n]?.updateLocalValue(v) }
+//    }
 
     private fun registerSlot(dataSlot: DataSlot<*>) {
         dataSlots[dataSlot.name] = dataSlot

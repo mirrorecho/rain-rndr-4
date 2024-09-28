@@ -19,7 +19,7 @@ TOOLS AVAILABLE:
  - draw lines
  - show images
  (new)
-  - more sophisticated draw style animations
+ - more sophisticated draw style animations
 
  */
 

@@ -25,6 +25,21 @@ open class Value(
 
     var value by PropertySlot(valueAnimation::value)
 
+    var respondsTo by DataSlot<List<String>>("respondsTo", listOf())
+
+    var respond: (requestValue:Double?)->Double = { value }
+
+    // updates or creates slot with the given value, and returns the slot
+    override fun  <T:Any?> slot(name: String, value: T): DataSlot<T> =
+        if (name in respondsTo) slot("value", value)
+        else super.slot(name, value)
+
+    // gets slot by name (if it exists, otherwise null)
+    override fun <T:Any?> slot(name:String): DataSlot<T>? =
+        if (name in respondsTo) slot("value")
+        else super.slot(name)
+
+
 
 }
 

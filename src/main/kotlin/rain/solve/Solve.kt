@@ -5,7 +5,7 @@ import rain.score.nodes.*
 import rain.rndr.nodes.*
 
 fun main()  {
-    solve2()
+    solve0()
 }
 
 /*
@@ -46,31 +46,29 @@ fun solve0() {
         machine = Printer.create("PRINTER_1") { msg = "I am a $key" }
         gate = Gate.ON_OFF
         times = 4
-        extend(
-            Event.create {
-                dur = 1.0
-                this["machine.msg"] = "I am message A!"
-                this["machine.renderMe"] = true
-            },
-            Event.create {
-                dur = 1.0
-                this["machine.msg"] = "I am message B!"
-                this["machine.renderMe"] = true
-            },
-            Event.create {
-                dur = 1.0
-                this["machine.msg"] = "I am message C!"
-                this["machine.renderMe"] = true
-            }
-        )
-//        extend(Event) {
-//            slots("machine.msg", null, "I am message A!", "I am message B!", "I am message C!")
-//            cycle("dur", 1.0)
-//            cycle("machine.renderMe", true)
-//        }
+//        extend(
+//            Event.create {
+//                dur = 1.0
+//                this["machine.msg"] = "I am message A!"
+//                this["machine.renderMe"] = true
+//            },
+//            Event.create {
+//                dur = 1.0
+//                this["machine.msg"] = "I am message B!"
+//                this["machine.renderMe"] = true
+//            },
+//            Event.create {
+//                dur = 1.0
+//                this["machine.msg"] = "I am message C!"
+//                this["machine.renderMe"] = true
+//            }
+//        )
+        extend(Event) {
+            slots("machine.msg", null, "I am message A!", "I am message B!", "I am message C!")
+            cycle("dur", 1.0)
+            cycle("machine.renderMe", true)
+        }
     }
-
-
     seq(s1, s1).play(DEFAULT_SCORE.asHalfRes())
 }
 
@@ -99,12 +97,12 @@ fun solve1() {
 fun solve2() {
 
     DrawStyle.create("STYLE_1") {
-        fill("COLOR_BLUE") { s=0.8; a=1.0 }
+        fill("COLOR_BLUE") { s=0.8; }
     }
 
     seq("FADE_BLUE",
         Event.create {
-            dur=2.9
+            dur=0.9
             animate("machine.a") {
                 easing = Easing.CubicInOut
                 fromValue = 0.0
@@ -123,40 +121,34 @@ fun solve2() {
         machine = Color["COLOR_BLUE"]
     }
 
-    DEFAULT_SCORE.asHalfRes().play {
+    DEFAULT_SCORE.play {
 
         val e1 = par(
+            Event["FADE_BLUE"]!!,
             Event.create {
-                dur = 4.0
+                dur = 2.0
                 animate("machine.radius") {
                     fromValue = 1.0
                     value = 6.0
+                    easing = Easing.QuadIn
                 }
-                animate("style.fill.a") {
-                    fromValue = 0.0
-                    value = 0.4
-                }
-            },
-//            Event["FADE_BLUE"]!!
+            }
         )
 
         val e2 = par(
+            Event["FADE_BLUE"]!!,
             Event.create {
-                dur = 4.0
+                dur = 2.0
                 animate("machine.radius") {
                     fromValue = 16.0
                     value = 4.0
                     easing = Easing.QuadIn
                 }
-//                animate("style.fill.a") {
-//                    fromValue = 1.0
-//                    value = 0.1
-//                }
             },
-            Event["FADE_BLUE"]!!
         )
+
         seq(
-            EventRandom.seq(
+            EventRandom.seq("YOMAMA",
                 e1,
                 e2
             ) {
@@ -166,7 +158,7 @@ fun solve2() {
                 }
                 style("STYLE_1")
                 gate = Gate.ON_OFF
-                times = 4
+                times = 8
             }
         )
     }

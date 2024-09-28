@@ -2,9 +2,11 @@ package daily
 
 import org.openrndr.animatable.easing.Easing
 import org.openrndr.extra.noise.random
+import rain.rndr.nodes.DrawStyle
 import rain.rndr.nodes.Rectangle
 import rain.score.nodes.DEFAULT_SCORE
 import rain.score.nodes.*
+import rain.utils.autoKey
 
 /*
 
@@ -19,12 +21,11 @@ TOOLS AVAILABLE:
 
 fun main() {
 
-    fun eventSquareRandomMove(dur: Double = 2.0) = Event.create {
+    fun eventSquareRandomMove(dur: Double = 2.0, key:String= autoKey()) = Event.create(key) {
         this.dur=dur
 
-        // associates a new style to this Event (or updates existing)
         style {
-            fill { a=0.8; s=0.8;}
+            fill { a=0.8; s=0.8; h= random(129.0, 144.0) }
             stroke { a=0.8; }
         }
 
@@ -62,17 +63,17 @@ fun main() {
 
     }
 
-    fun eventSeq() = seq(
+    fun eventSeq(prefix:String) = seq("$prefix-SEQ",
 
-        eventSquareRandomMove(4.0),
-        eventSquareRandomMove(1.0),
-        eventSquareRandomMove(),
-        eventSquareRandomMove(),
-        eventSquareRandomMove(0.5),
-        eventSquareRandomMove(0.5),
-        eventSquareRandomMove(0.5),
-        eventSquareRandomMove(0.2),
-        eventSquareRandomMove(0.2),
+        eventSquareRandomMove(4.0, "$prefix-REC1"),
+        eventSquareRandomMove(1.0, "$prefix-REC2"),
+        eventSquareRandomMove(2.0, "$prefix-REC3"),
+        eventSquareRandomMove(2.0, "$prefix-REC4"),
+        eventSquareRandomMove(0.5, "$prefix-REC5"),
+        eventSquareRandomMove(0.5, "$prefix-REC6"),
+        eventSquareRandomMove(0.5, "$prefix-REC7"),
+        eventSquareRandomMove(0.2, "$prefix-REC8"),
+        eventSquareRandomMove(0.2, "$prefix-REC9"),
         eventSquareRandomMove(0.2),
     )
         {
@@ -85,24 +86,30 @@ fun main() {
             gate = Gate.ON_OFF
         }
 
+    val anEvent = eventSeq("Yo")
+    println(anEvent.children.first().drawStyle?.fill?.a)
+
 
     seq(
         pause(),
         par(
-            eventSeq(),
-            seq(pause(), eventSeq()),
-            seq(pause(2.0), eventSeq()),
-            seq(pause(3.0), eventSeq()),
-            seq(pause(4.0), eventSeq()),
-            seq(pause(4.5), eventSeq()),
-            seq(pause(4.8), eventSeq()),
-            seq(pause(4.9), eventSeq()),
-            seq(pause(5.0), eventSeq()),
-            seq(pause(5.0), eventSeq()),
-            seq(pause(5.0), eventSeq()),
+            eventSeq("0A"),
+            seq(pause(), eventSeq("0B")),
+            seq(pause(2.0), eventSeq("A")),
+            seq(pause(3.0), eventSeq("B")),
+            seq(pause(4.0), eventSeq("C")),
+            seq(pause(4.5), eventSeq("D")),
+            seq(pause(4.8), eventSeq("E")),
+            seq(pause(4.9), eventSeq("F")),
+            seq(pause(5.0), eventSeq("G")),
+            seq(pause(5.0), eventSeq("H")),
+            seq(pause(5.0), eventSeq("I")),
         ),
         pause(2.0),
-    ).play(DEFAULT_SCORE.asHalfRes())
+    )
+        .play(DEFAULT_SCORE.asHalfRes())
+
+
 
 
 }

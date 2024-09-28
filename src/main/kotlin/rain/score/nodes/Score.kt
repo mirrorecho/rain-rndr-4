@@ -40,15 +40,19 @@ class Score protected constructor(
 
         val unitLength get() = score.unitLength
 
+        val childContexts = mutableMapOf<Pair<String, String?>, ScoreContext>()
+
         fun childContext(
             event: Event,
             machine: Machine? = null,
-        ): ScoreContext = ScoreContext(
-            event,
-            program,
-            this,
-            machine
-        )
+        ): ScoreContext = childContexts.getOrPut(Pair(event.key, machine?.key)) {
+            ScoreContext(
+                event,
+                program,
+                this,
+                machine
+            )
+        }
 
         fun addRefreshing(dirtyMachine:Machine) {
             if (dirtyMachine.hasPlaybackRefresh) {
@@ -77,6 +81,11 @@ class Score protected constructor(
 
                     var myMachine: Machine? = startingMachine
 
+                    // TODO maybe: track all contexts here and bump related machines to
+                    //  update the activeContext on each machine?
+                    //  (assume not necessary, since only currently using activeContext
+                    //  for rendering logic, NOT animating or refreshing)
+
                     fullName.substringAfter(prefix).split(".").apply {
 //                        println(this)
                         take(size-1).forEach {relatedName->
@@ -88,6 +97,8 @@ class Score protected constructor(
                             if (name.endsWith(":animate")) {
                                 name.substringBefore(":animate").let { animateName->
                                     myMachine?.let { m ->
+
+                                        // TODO: this is added repeatedly for each slot (should avoid that)
                                         animatingContexts.add(childContext(event, m))
                                         m.slot<Double>(animateName)?.property?.let { property ->
                                             m.machineAnimation.bumpAnimation(
@@ -104,20 +115,8 @@ class Score protected constructor(
                 }
             }
 
-            // TODO: think about whether bumping applies to only machine updates, or also style updates
-            // or whether to remove it altogether
-            machine?.let { m ->
-                event.gate.startGate?.let {g->
-                    m.gate(g)
-                    if (g) renderingContexts.add(this)
-                }
-                if (event.bumping) {
-                    updateMachines(m, event.machineSlots, "machine.")
-                    // TODO: is "bumping" even worth it???
-                    m.bump(this)
-                }
-            }
-
+            // NOTE: important to update styles first for refreshing/rendering order
+            // (so that style updates applied before any related refreshing/rendering)
             event.styleSlots.let {ss ->
                 if (ss.isNotEmpty()) {
                     drawStyle?.let {ds->
@@ -125,6 +124,22 @@ class Score protected constructor(
                     }
                 }
             }
+
+            // TODO: think about whether bumping applies to only machine updates, or also style updates
+            // or whether to remove it altogether
+            machine?.let { m ->
+                if (event.bumping) {
+                    updateMachines(m, event.machineSlots, "machine.")
+                    // TODO: is "bumping" even worth it???
+                    m.bump(this)
+                }
+                event.gate.startGate?.let {g->
+                    m.gate(g)
+                    if (g) renderingContexts.add(this)
+                }
+            }
+
+
 
         }
 
@@ -244,7 +259,6 @@ class Score protected constructor(
                     ).play(true)
                 }
                 extend {
-                    // TODO: consider ... machines are executed in no particular order, is that OK?
 
                     // 0 (maybe), verify that all bumps received?
                     // ...
@@ -263,14 +277,17 @@ class Score protected constructor(
 //                    println(refreshingContexts.size)
                     // 3 update any refreshing
                     refreshingContexts.executeAll({it.dirty}) { c, m->
-//                        println("refreshing $m")
-                        m.refresh(c)
+//                        println("refreshing $m with context $c")
+                        m.playbackRefresh(c)
                     }
 
                     // 4 render
                     renderingContexts.executeAll({it.isRendering}) {c, m->
-                        m.render(c)
+//                        println("rendering $m with context event ${c.event}")
+//                        println(c.event)
+                        m.render()
                     }
+//                    println("----------------------------")
 
                 }
             }

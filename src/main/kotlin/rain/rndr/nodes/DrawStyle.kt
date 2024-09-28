@@ -60,7 +60,7 @@ open class DrawStyle protected constructor(
     }
 
 
-    override fun refresh(context: Score.ScoreContext) {
+    override fun playbackRefresh(context: Score.ScoreContext) {
         myRndrDrawStyle.strokeWeight = strokeWeight
         myRndrDrawStyle.stroke = stroke?.colorRGBa
         myRndrDrawStyle.fill = fill?.colorRGBa

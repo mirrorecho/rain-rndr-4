@@ -46,7 +46,7 @@ open class Color(
         var h = 220.0
         var s = 0.2
         var v = 0.9
-        var a = 0.0 // starting at 0 to avoid "flashes" at startup. Can that be avoided by some other means?
+        var a = 0.0 // starting at 0 to avoid "flashes" at start of container seq/par events that may contain animations underneath.
     }
 
     val colorAnimation = ColorAnimation()
@@ -74,7 +74,7 @@ open class Color(
 
     override val hasPlaybackRefresh: Boolean = true
 
-    override fun refresh(context: Score.ScoreContext) {
+    override fun playbackRefresh(context: Score.ScoreContext) {
         refresh()
     }
 

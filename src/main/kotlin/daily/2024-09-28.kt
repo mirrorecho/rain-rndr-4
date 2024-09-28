@@ -3,10 +3,7 @@ package daily
 import org.openrndr.draw.loadFont
 import rain.rndr.nodes.Color
 import rain.rndr.nodes.Text
-import rain.score.nodes.DEFAULT_SCORE
 import rain.score.nodes.*
-
-
 
 /*
 
@@ -19,8 +16,9 @@ TOOLS AVAILABLE:
  - draw lines
  - show images
  - more sophisticated draw style animations
- (new)
  - text
+ (new)
+ - summing value chains
 
  */
 
