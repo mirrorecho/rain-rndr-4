@@ -42,11 +42,12 @@ interface Positionable {
 
     fun randomize() {}
 
+    operator fun plusAssign(vector: Vector2) { move(vector) }
 
 }
 
 
-open class Position protected constructor(
+class Position private constructor(
     key:String = autoKey(),
 ) : Positionable, Machine(key) {
     companion object : NodeLabel<Machine, Position>(
@@ -60,13 +61,11 @@ open class Position protected constructor(
         var y = 0.0
     }
 
-    val positionAnimation = PositionAnimation()
-    override val machineAnimation = positionAnimation
+    override val animation: PositionAnimation = PositionAnimation()
 
-    override var x by RespondingPropertySlot(positionAnimation::x, +X)
-    override var y by RespondingPropertySlot(positionAnimation::y, +Y)
+    override var x by RespondingPropertySlot(animation::x, +X)
+    override var y by RespondingPropertySlot(animation::y, +Y)
 
-    operator fun plusAssign(vector: Vector2) { move(vector) }
 
 
 

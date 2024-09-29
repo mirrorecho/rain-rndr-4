@@ -42,9 +42,16 @@ fun main() {
                         dur = 18.0
                         machine = Circle.create {
                             radius = random(0.0, 9.0)
-                            x = random(0.0, 65.0)
+//                            x = random(0.0, 65.0)
                             y = random(0.0, 37.0)
                             this.relate(RADIUS, scaling)
+                            val xRandom = ValueRandom.create {
+                                walkValue = 0.01
+                                randomize()
+                            }
+                            // TODO: helper fun for relate + relate DIRTIES with direction left
+                            this.relate(X, xRandom)
+//                            this.relate(DIRTIES, xRandom, false)
                         }
                         style {
                             fill {

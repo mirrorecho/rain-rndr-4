@@ -101,7 +101,7 @@ class Score protected constructor(
                                         // TODO: this is added repeatedly for each slot (should avoid that)
                                         animatingContexts.add(childContext(event, m))
                                         m.slot<Double>(animateName)?.property?.let { property ->
-                                            m.machineAnimation.bumpAnimation(
+                                            m.animation.bumpAnimation(
                                                 property,
                                                 slot.value as Event.AnimateEventValue
                                             )

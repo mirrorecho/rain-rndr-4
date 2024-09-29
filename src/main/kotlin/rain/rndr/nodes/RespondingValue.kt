@@ -8,7 +8,7 @@ import rain.score.nodes.MachineAnimation
 import rain.utils.*
 
 
-open class RespondingValue(
+class RespondingValue private constructor(
     key:String = autoKey(),
     ) : Machine(key) {
     companion object : NodeLabel<Machine, RespondingValue>(
@@ -17,14 +17,14 @@ open class RespondingValue(
 
     override val label: Label<out Machine, out RespondingValue> = RespondingValue
 
-    class ValueAnimation: MachineAnimation() {
+    open class ValueAnimation: MachineAnimation() {
         var value = 0.0
     }
 
-    val valueAnimation = ValueAnimation()
-    override val machineAnimation = valueAnimation
 
-    var value by RespondingPropertySlot(valueAnimation::value, +VALUE)
+    override val animation: ValueAnimation = ValueAnimation()
+
+    open var value by RespondingPropertySlot(animation::value, +VALUE)
 
     var respondsTo by DataSlot<List<String>>("respondsTo", listOf())
 

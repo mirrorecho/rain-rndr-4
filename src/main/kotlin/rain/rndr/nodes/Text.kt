@@ -8,7 +8,7 @@ import rain.graph.NodeLabel
 
 import rain.score.nodes.*
 
-open class Text protected constructor(
+class Text private constructor(
     key:String = autoKey(),
 ) : Positionable, Machine(key) {
     companion object : NodeLabel<Machine, Text>(
@@ -24,11 +24,10 @@ open class Text protected constructor(
 
     }
 
-    val textAnimation = TextAnimation()
-    override val machineAnimation = textAnimation
+    override val animation: TextAnimation = TextAnimation()
 
-    override var x by RespondingPropertySlot(textAnimation::x, +X)
-    override var y by RespondingPropertySlot(textAnimation::y, +Y)
+    override var x by RespondingPropertySlot(animation::x, +X)
+    override var y by RespondingPropertySlot(animation::y, +Y)
 
     var text by DataSlot("text", "RAIN")
 

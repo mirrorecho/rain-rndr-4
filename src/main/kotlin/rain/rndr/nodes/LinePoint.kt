@@ -11,14 +11,24 @@ import rain.score.nodes.Machine
 import rain.score.nodes.MachineAnimation
 
 
-open class LinePoint protected constructor(
+class LinePoint private constructor(
     key:String = autoKey(),
-) : Position(key) {
-    companion object : NodeLabel<Position, LinePoint>(
-        Position, LinePoint::class, { k -> LinePoint(k) }
+) : Positionable, Machine(key) {
+    companion object : NodeLabel<Machine, LinePoint>(
+        Machine, LinePoint::class, { k -> LinePoint(k) }
     )
 
     override val label: Label<out Machine, out LinePoint> = LinePoint
+
+    class LinePointAnimation: MachineAnimation() {
+        var x = 0.0
+        var y = 0.0
+    }
+
+    override val animation: LinePointAnimation = LinePointAnimation()
+
+    override var x by RespondingPropertySlot(animation::x, +X)
+    override var y by RespondingPropertySlot(animation::y, +Y)
 
     var lineTo by RelatedNodeSlot("lineToPosition", +LINE_TO, LinePoint, null)
 

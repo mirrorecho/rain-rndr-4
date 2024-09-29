@@ -9,7 +9,7 @@ import rain.graph.Label
 import rain.graph.NodeLabel
 import rain.score.nodes.*
 
-open class Image protected constructor(
+class Image private constructor(
     key:String = autoKey(),
 ) : Positionable, Machine(key) {
     companion object : NodeLabel<Machine, Image>(
@@ -27,11 +27,10 @@ open class Image protected constructor(
 
     }
 
-    val imageAnimation = ImageAnimation()
-    override val machineAnimation = imageAnimation
+    override val animation: ImageAnimation = ImageAnimation()
 
-    override var x by RespondingPropertySlot(imageAnimation::x, +X)
-    override var y by RespondingPropertySlot(imageAnimation::y, +Y)
+    override var x by RespondingPropertySlot(animation::x, +X)
+    override var y by RespondingPropertySlot(animation::y, +Y)
 
     var imagePath by DataSlot("imagePath", "data/images/cheeta.jpg")
 

@@ -29,3 +29,6 @@ val FROM_POSITION = RelationshipLabel("FROM_POSITION")
 val LINE_TO = RelationshipLabel("LINE_TO")
 
 val VALUE = RelationshipLabel("VALUE")
+val MIN_VALUE = RelationshipLabel("MIN_VALUE")
+val MAX_VALUE = RelationshipLabel("MAX_VALUE")
+val WALK_VALUE = RelationshipLabel("WALK_VALUE")

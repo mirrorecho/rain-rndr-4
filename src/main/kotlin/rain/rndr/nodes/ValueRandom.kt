@@ -1,14 +1,13 @@
 package rain.rndr.nodes
 
 import org.openrndr.extra.noise.random
-import rain.graph.Label
-import rain.graph.NodeLabel
-import rain.score.nodes.Machine
-import rain.score.nodes.MachineAnimation
+import rain.graph.*
+import rain.rndr.relationships.*
+import rain.score.nodes.*
 import rain.utils.*
 
 
-open class ValueRandom(
+class ValueRandom private constructor(
     key:String = autoKey(),
     ) : Machine(key) {
     companion object : NodeLabel<Machine, ValueRandom>(
@@ -18,23 +17,37 @@ open class ValueRandom(
     override val label: Label<out Machine, out ValueRandom> = ValueRandom
 
     class ValueRandomAnimation: MachineAnimation() {
+        var value = 0.0
         var minValue = 0.0
         var maxValue = 1.0
-
-        var value: Double
-            get() = random(minValue, maxValue)
-            set(value) { maxValue = value }
+        var walkValue = 0.0
     }
 
-    val valueRandomAnimation = ValueRandomAnimation()
-    override val machineAnimation = valueRandomAnimation
+    override val animation: ValueRandomAnimation = ValueRandomAnimation()
 
-    var minValue by PropertySlot(valueRandomAnimation::minValue)
-    var maxValue by PropertySlot(valueRandomAnimation::maxValue)
-    val value by PropertySlot(valueRandomAnimation::value)
+    var minValue by RespondingPropertySlot(animation::minValue, +MIN_VALUE)
+    var maxValue by RespondingPropertySlot(animation::maxValue, +MAX_VALUE)
+    var walkValue by RespondingPropertySlot(animation::maxValue, +WALK_VALUE)
+
+    var value by RespondingPropertySlot(animation::value, +VALUE)
+
+    fun randomize() {
+        value = random(minValue, maxValue)
+    }
 
 
+    override fun bump(context: Score.ScoreContext) {
 
+        super.bump(context)
+        if (eventSlotIs("randomize")) randomize()
+
+    }
+
+
+    override fun updateAnimation(context: Score.ScoreContext) {
+        super.updateAnimation(context)
+        value += walkValue
+    }
 
 }
 

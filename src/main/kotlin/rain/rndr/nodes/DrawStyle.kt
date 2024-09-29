@@ -8,7 +8,7 @@ import rain.graph.Label
 import rain.graph.NodeLabel
 import rain.score.nodes.*
 
-open class DrawStyle protected constructor(
+class DrawStyle private constructor(
     key:String = autoKey(),
 ) : Machine(key) {
     companion object : NodeLabel<Machine, DrawStyle>(
@@ -25,12 +25,11 @@ open class DrawStyle protected constructor(
 
     }
 
-    val drawStyleAnimation = DrawStyleAnimation()
-    override val machineAnimation = drawStyleAnimation
+    override val animation: DrawStyleAnimation = DrawStyleAnimation()
 
     var lineCap by DataSlot("lineCap", LineCap.ROUND)
     var lineJoin by DataSlot("lineJoin", LineJoin.ROUND)
-    var strokeWeight by RespondingPropertySlot(drawStyleAnimation::strokeWeight, +STROKE_WEIGHT, true)
+    var strokeWeight by RespondingPropertySlot(animation::strokeWeight, +STROKE_WEIGHT, true)
     var fontMap by DataSlot<FontMap?>("fontMap", null)
 
     var stroke by RelatedNodeSlot("stroke", +STROKE_COLOR, Color, null, true)

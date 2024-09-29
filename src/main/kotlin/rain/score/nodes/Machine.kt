@@ -46,6 +46,7 @@ open class MachineAnimation: Animatable() {
 
 }
 
+// TODO: maybe this should be abstract?
 open class Machine protected constructor(
     key:String = autoKey(),
 ): Node(key) {
@@ -54,7 +55,8 @@ open class Machine protected constructor(
     )
     override val label: Label<out Node, out Machine> = Machine
 
-    open val machineAnimation = MachineAnimation()
+    // TODO: this makes more sense as an abstract val
+    open val animation: MachineAnimation = MachineAnimation()
 
     // TODO is this used?
     open fun gate(onOff: Boolean) {
@@ -69,7 +71,7 @@ open class Machine protected constructor(
     override val dirty: Boolean
         get() = super.dirty || hasAnimations
 
-    open val hasAnimations get() = machineAnimation.hasAnimations()
+    open val hasAnimations get() = animation.hasAnimations()
 
     // indicates whether this machine should cache data during playback
     open val hasPlaybackRefresh: Boolean = false
@@ -80,6 +82,9 @@ open class Machine protected constructor(
         // hook that can be overridden for machine-specific implementations
         activeContext = context
     }
+
+    // helper fun since this logic is used often
+    fun eventSlotIs(name:String): Boolean = activeContext?.event?.get<Boolean>(name)==true
 
     fun render() {
         activeContext?.let { render(it) }
@@ -103,7 +108,7 @@ open class Machine protected constructor(
 
     open fun updateAnimation(context: Score.ScoreContext) {
         //  be overriden to add additional logic (or prevent updating ALL data from slots)
-        machineAnimation.updateAnimation()
+        animation.updateAnimation()
     }
 }
 

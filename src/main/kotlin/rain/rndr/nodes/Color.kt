@@ -12,7 +12,7 @@ import rain.score.nodes.MachineAnimation
 import rain.score.nodes.Score
 
 
-open class Color(
+class Color private constructor(
     key:String = autoKey(),
 ) : Machine(key) {
     companion object : NodeLabel<Machine, Color>(
@@ -49,13 +49,12 @@ open class Color(
         var a = 0.0 // starting at 0 to avoid "flashes" at start of container seq/par events that may contain animations underneath.
     }
 
-    val colorAnimation = ColorAnimation()
-    override val machineAnimation = colorAnimation
+    override val animation: ColorAnimation = ColorAnimation()
 
-    var h by RespondingPropertySlot(colorAnimation::h, +H, true)
-    var s by RespondingPropertySlot(colorAnimation::s, +S, true)
-    var v by RespondingPropertySlot(colorAnimation::v, +V, true)
-    var a by RespondingPropertySlot(colorAnimation::a, +A, true)
+    var h by RespondingPropertySlot(animation::h, +H, true)
+    var s by RespondingPropertySlot(animation::s, +S, true)
+    var v by RespondingPropertySlot(animation::v, +V, true)
+    var a by RespondingPropertySlot(animation::a, +A, true)
 
     fun colorHSVa() = ColorHSVa(h, s, v, a)
 
