@@ -51,7 +51,7 @@ fun main() {
                             }
                             // TODO: helper fun for relate + relate DIRTIES with direction left
                             this.relate(X, xRandom)
-//                            this.relate(DIRTIES, xRandom, false)
+                            this.relate(DIRTIES, xRandom, false)
                         }
                         style {
                             fill {
