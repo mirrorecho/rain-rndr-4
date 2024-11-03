@@ -27,6 +27,22 @@ fun main() {
 
         val fromPosition2 = Position.create { x = 22.0; y = 22.0 }
 
+        val fromPosition3 = Position.create {
+            x = -1.0
+            y = 8.0
+
+            relate(X, fromPosition2)
+            relate(Y, fromPosition2)
+
+            respondBlock = { n, sv ->
+                val value = when(n) {
+                    "x" ->  20.0 + this.slot<Double>(n)!!.value + sv
+                    else -> this.slot<Double>(n)!!.value + sv
+                }
+                value
+            }
+
+        }
 
         // TODO: a function to consolidate this
         val line1 = Line.create {
@@ -40,18 +56,15 @@ fun main() {
                 relate(X, fromPosition)
                 relate(Y, fromPosition)
 
-//                this.fromPosition = fromPosition
                 lineTo = LinePoint.create {
 
                     relate(X, fromPosition2)
                     relate(Y, fromPosition2)
 
                     lineTo = LinePoint.create {
-                        x = -1.0
-                        y = 8.0
 
-                        relate(X, fromPosition)
-                        relate(Y, fromPosition)
+                        relate(X, fromPosition3)
+                        relate(Y, fromPosition3)
 
                         lineTo = LinePoint.create {
                             center(this@play)

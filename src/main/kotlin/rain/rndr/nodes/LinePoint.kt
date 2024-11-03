@@ -2,16 +2,14 @@ package rain.rndr.nodes
 
 import rain.utils.*
 
-import org.openrndr.math.Polar
 import org.openrndr.math.Vector2
 import rain.graph.Label
 import rain.graph.NodeLabel
 import rain.rndr.relationships.*
 import rain.score.nodes.Machine
-import rain.score.nodes.MachineAnimation
 
 
-class LinePoint private constructor(
+open class LinePoint protected constructor(
     key:String = autoKey(),
 ) : Positionable, Machine(key) {
     companion object : NodeLabel<Machine, LinePoint>(
@@ -20,15 +18,11 @@ class LinePoint private constructor(
 
     override val label: Label<out Machine, out LinePoint> = LinePoint
 
-    class LinePointAnimation: MachineAnimation() {
-        var x = 0.0
-        var y = 0.0
-    }
+    private var localX: Double = 0.0
+    private var localY: Double = 0.0
 
-    override val animation: LinePointAnimation = LinePointAnimation()
-
-    override var x by RespondingPropertySlot(animation::x, +X)
-    override var y by RespondingPropertySlot(animation::y, +Y)
+    override var x by RespondingPropertySlot("x", ::localX, +X)
+    override var y by RespondingPropertySlot("y", ::localY, +Y)
 
     var lineTo by RelatedNodeSlot("lineToPosition", +LINE_TO, LinePoint, null)
 

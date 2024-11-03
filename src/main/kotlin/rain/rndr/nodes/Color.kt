@@ -8,11 +8,10 @@ import rain.rndr.relationships.*
 import rain.utils.*
 
 import rain.score.nodes.Machine
-import rain.score.nodes.MachineAnimation
 import rain.score.nodes.Score
 
 
-class Color private constructor(
+open class Color protected constructor(
     key:String = autoKey(),
 ) : Machine(key) {
     companion object : NodeLabel<Machine, Color>(
@@ -42,19 +41,17 @@ class Color private constructor(
 
     override val label: Label<out Machine, out Color> = Color
 
-    class ColorAnimation: MachineAnimation() {
-        var h = 220.0
-        var s = 0.2
-        var v = 0.9
-        var a = 0.0 // starting at 0 to avoid "flashes" at start of container seq/par events that may contain animations underneath.
-    }
 
-    override val animation: ColorAnimation = ColorAnimation()
+    private var localH = 220.0
+    private var localS = 0.2
+    private var localV = 0.9
+    private var localA = 0.0 // starting at 0 to avoid "flashes" at start of container seq/par events that may contain animations underneath.
 
-    var h by RespondingPropertySlot(animation::h, +H, true)
-    var s by RespondingPropertySlot(animation::s, +S, true)
-    var v by RespondingPropertySlot(animation::v, +V, true)
-    var a by RespondingPropertySlot(animation::a, +A, true)
+
+    var h by RespondingPropertySlot("h", ::localH, +H, true)
+    var s by RespondingPropertySlot("s", ::localS, +S, true)
+    var v by RespondingPropertySlot("v", ::localV, +V, true)
+    var a by RespondingPropertySlot("a", ::localA, +A, true)
 
     fun colorHSVa() = ColorHSVa(h, s, v, a)
 

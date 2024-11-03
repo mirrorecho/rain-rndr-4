@@ -1,11 +1,11 @@
 package rain.graph
 
 
+import org.openrndr.animatable.Animatable
 import rain.graph.queries.Queryable
 import rain.graph.queries.RelatedQuery
 import rain.graph.queries.UpdatingQueryExecution
 import rain.language.patterns.relationships.DIRTIES
-import rain.rndr.nodes.RespondingValue
 
 import rain.utils.autoKey
 import kotlin.reflect.KMutableProperty0
@@ -15,15 +15,18 @@ import kotlin.reflect.KProperty
 
 typealias RelationshipRegistry =  MutableMap<String, MutableSet<Relationship>>
 
-
+// TODO: consider making Node an interface (while still implementing label registry)
+//  and so NOT inheriting from Animatable (and then Machine would inherit from Animatable)
 open class Node protected constructor(
-    key:String,
-): Item(key), Queryable<Node> {
+    override val key:String,
+): Item, Queryable<Node>, Animatable() {
     companion object : NodeLabel<Node, Node>(
         null, Node::class, { k-> Node(k) }
     )
 
     override val label: Label<*, out Node> = Node
+
+    override fun toString():String = "${label.labelName}($key)"
 
     private val sourcesForRelationships: RelationshipRegistry = mutableMapOf()
     private val targetsForRelationships: RelationshipRegistry = mutableMapOf()
@@ -166,6 +169,13 @@ open class Node protected constructor(
     fun <T:Node>mergeRelated(slotName: String, key:String? = null,  block:(T.()->Unit)?=null) =
         (slot<T?>(slotName) as RelatedNodeSlot<T?>).merge(key, block)
 
+    // responds with a double value based on a slot name and source value...
+    // used for querying values across relationships;
+    // update value to add custom logic
+    open var respondBlock: (name:String, sourceValue:Double)->Double = { n, _->
+        this.slot<Double>(n)!!.value
+    }
+
     // ==================================================
 
     open inner class DataSlot<T:Any?>(
@@ -276,7 +286,7 @@ open class Node protected constructor(
         //  for now, KISS, and also keep flexible to be able to dynamically re-link
         //  during playback. Consider caching if performance seems to be an issue.
 
-        private val linkedNode get() = this@Node[linkQuery](RespondingValue).firstOrNull()
+        private val linkedNode get() = this@Node[linkQuery]().firstOrNull()
 
         private val linkedSlot: DataSlot<Double>? get() =
             linkedNode?.slot(name)
@@ -288,7 +298,7 @@ open class Node protected constructor(
             // TODO maybe: also add a lambda/hook here for logic specific to this slot?
             //  (so that multiple nodes/slots could all access the same RespondingValue
             //  node, with different logic applied)?
-            get() = linkedNode?.respond?.invoke(localValue) ?: localValue
+            get() = linkedNode?.respondBlock?.invoke(name, localValue) ?: localValue
 
             set(value) {
                 localValue = value
@@ -317,8 +327,9 @@ open class Node protected constructor(
     // ==================================================
 
     inner class PropertySlot<T:Any?>(
+        name:String, // TODO: needed?
         override val property: KMutableProperty0<T>,
-    ): DataSlot<T>(property.name, property.get()) {
+    ): DataSlot<T>(name, property.get()) {
 
         override var localValue: T
             get() = property.get()
@@ -328,10 +339,11 @@ open class Node protected constructor(
     // ==================================================
 
     inner class RespondingPropertySlot(
+        name:String, // TODO: needed?
         override val property: KMutableProperty0<Double>,
         linkQuery: RelatedQuery,
         dirties: Boolean = false,
-    ): RespondingValueSlot(property.name, linkQuery, property.get(), dirties) {
+    ): RespondingValueSlot(name, linkQuery, property.get(), dirties) {
 
         override var localValue
             get() = property.get()

@@ -7,7 +7,7 @@ import rain.graph.Label
 import rain.graph.NodeLabel
 import rain.score.nodes.*
 
-class Rectangle private constructor(
+open class Rectangle protected constructor(
     key:String = autoKey(),
 ) : Positionable, Machine(key) {
     companion object : NodeLabel<Machine, Rectangle>(
@@ -16,23 +16,16 @@ class Rectangle private constructor(
 
     override val label: Label<out Machine, out Rectangle> = Rectangle
 
-    class RectangleAnimation: MachineAnimation() {
+    private var localX: Double = 0.0
+    private var localY: Double = 0.0
+    private var localWidth: Double = 0.0
+    private var localHeight: Double = 0.0
 
-        var x = 0.0
-        var y = 0.0
+    override var x by RespondingPropertySlot("x", ::localX, +X)
+    override var y by RespondingPropertySlot("y", ::localY, +Y)
 
-        var width = 4.0
-        var height = 4.0
-
-    }
-
-    override val animation: RectangleAnimation = RectangleAnimation()
-
-    override var x by RespondingPropertySlot(animation::x, +X)
-    override var y by RespondingPropertySlot(animation::y, +Y)
-
-    var width by RespondingPropertySlot(animation::width, +WIDTH)
-    var height by RespondingPropertySlot(animation::height, +WIDTH)
+    var width by RespondingPropertySlot("width", ::localWidth, +WIDTH)
+    var height by RespondingPropertySlot("height", ::localHeight, +WIDTH)
 
     override fun render(context: Score.ScoreContext) {
         context.applyDrawing {

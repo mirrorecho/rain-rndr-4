@@ -8,7 +8,7 @@ import rain.graph.Label
 import rain.graph.NodeLabel
 import rain.score.nodes.*
 
-class Line private constructor(
+open class Line protected constructor(
     key:String = autoKey(),
 ) : Positionable, Machine(key) {
     companion object : NodeLabel<Machine, Line>(
@@ -17,19 +17,13 @@ class Line private constructor(
 
     override val label: Label<out Machine, out Line> = Line
 
-    class LineAnimation: MachineAnimation() {
+    private var localX: Double = 0.0
+    private var localY: Double = 0.0
 
-        var x = 0.0
-        var y = 0.0
-
-    }
-
-    override val animation: LineAnimation = LineAnimation()
+    override var x by RespondingPropertySlot("x", ::localX, +X)
+    override var y by RespondingPropertySlot("y", ::localY, +Y)
 
     var lineTo by RelatedNodeSlot("lineToPosition", +LINE_TO, LinePoint, null)
-
-    override var x by RespondingPropertySlot(animation::x, +X)
-    override var y by RespondingPropertySlot(animation::y, +Y)
 
     val vectors: List<Vector2> get() = listOf(this.vector()) + lineTo?.vectors.orEmpty()
 

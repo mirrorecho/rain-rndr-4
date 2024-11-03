@@ -37,7 +37,7 @@ fun main() {
             easing = Easing.QuadIn
         }
 
-        animate("style.h") {
+        animate("style.fill.h") {
             value = random(220.0,290.0)
             easing = Easing.CubicIn
         }
@@ -65,7 +65,13 @@ fun main() {
         machine = Circle.create {
             x = random(0.0, 64.0)
             y = random(0.0, 36.0)
-//            a = 0.2
+            style {
+                fill {
+                    a = 0.4
+                    v = 0.6
+                    s = 0.9
+                }
+            }
         }
         gate = Gate.ON_OFF
     }

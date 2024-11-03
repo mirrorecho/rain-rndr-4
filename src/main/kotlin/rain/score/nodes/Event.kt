@@ -35,8 +35,13 @@ open class Event protected constructor(
 
     var dur by DataSlot<Double?>("dur", null)
     var simultaneous by DataSlot("simultaneous", false)
+
+    // gate for rendering
     var gate by DataSlot("gate", Gate.NONE)
 
+    // gate for custom animations
+    var gateAnimate by DataSlot("gate", Gate.NONE)
+00.
     var bumping by DataSlot("bumping", true)
 
     // TODO: implement by history....

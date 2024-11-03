@@ -5,7 +5,7 @@ import rain.score.nodes.*
 import rain.rndr.nodes.*
 
 fun main()  {
-    solve0()
+    solve2()
 }
 
 /*
@@ -87,7 +87,7 @@ fun solve1() {
             y = 18.5
         }
         gate = Gate.ON_OFF
-        dur = 2.0
+        dur = 4.0
         style("STYLE_1")
     }.play(DEFAULT_SCORE.asHalfRes())
 }
@@ -96,8 +96,10 @@ fun solve1() {
 
 fun solve2() {
 
+    val c = Circle.create {  }
+
     DrawStyle.create("STYLE_1") {
-        fill("COLOR_BLUE") { s=0.8; }
+        fill("COLOR_BLUE") { s=0.8; v=1.0; a=0.9 }
     }
 
     seq("FADE_BLUE",
@@ -121,7 +123,7 @@ fun solve2() {
         machine = Color["COLOR_BLUE"]
     }
 
-    DEFAULT_SCORE.play {
+    DEFAULT_SCORE.asHalfRes().play {
 
         val e1 = par(
             Event["FADE_BLUE"]!!,

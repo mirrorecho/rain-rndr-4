@@ -8,18 +8,16 @@ open class Relationship internal constructor(
     override val label: RelationshipLabel,
     val source: Node,
     val target: Node,
-    key:String,
-    ): Item(key), Queryable<Relationship> {
+    override val key:String,
+    ): Item, Queryable<Relationship> {
 
     override fun asSequence(): Sequence<Relationship> = sequenceOf(this)
 
-//    override val label: RelationshipLabel<*, out Relationship> = Relationship
+    override fun toString():String = "(${source.key} ${label.labelName} ${target.key} | $key)"
 
     override fun delete() {
         label.unregisterFromLabel(this.key)
     }
-
-    override fun toString():String = "(${source.key} ${label.labelName} ${target.key} | $key)"
 
     fun directedTarget(directionIsRight:Boolean): Node =
         if (directionIsRight) target else source

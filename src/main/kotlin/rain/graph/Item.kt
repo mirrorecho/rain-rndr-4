@@ -5,16 +5,13 @@ package rain.graph
 // (because Kotlin data classes don't allow inheritance, and inheritance
 // is important for this data modeling)
 
-abstract class Item(
+interface Item {
+
     val key:String
-) {
 
-    abstract fun delete()
+    fun delete()
 
-    abstract val label: Label<*, out Item>
-
-    override fun toString():String = "${label.labelName}($key)"
-
+    val label: Label<*, out Item>
 
 
 }

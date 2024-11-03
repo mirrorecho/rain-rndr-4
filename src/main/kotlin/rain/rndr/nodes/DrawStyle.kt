@@ -8,7 +8,7 @@ import rain.graph.Label
 import rain.graph.NodeLabel
 import rain.score.nodes.*
 
-class DrawStyle private constructor(
+open class DrawStyle protected constructor(
     key:String = autoKey(),
 ) : Machine(key) {
     companion object : NodeLabel<Machine, DrawStyle>(
@@ -17,19 +17,12 @@ class DrawStyle private constructor(
 
     override val label: Label<out Machine, out DrawStyle> = DrawStyle
 
-    class DrawStyleAnimation: MachineAnimation() {
-
-        var strokeWeight = 0.02
-
-        // TODO: control font size
-
-    }
-
-    override val animation: DrawStyleAnimation = DrawStyleAnimation()
-
     var lineCap by DataSlot("lineCap", LineCap.ROUND)
     var lineJoin by DataSlot("lineJoin", LineJoin.ROUND)
-    var strokeWeight by RespondingPropertySlot(animation::strokeWeight, +STROKE_WEIGHT, true)
+
+    private var localStrokeWeight = 0.02
+    var strokeWeight by RespondingPropertySlot("strokeWeight", ::localStrokeWeight, +STROKE_WEIGHT, true)
+
     var fontMap by DataSlot<FontMap?>("fontMap", null)
 
     var stroke by RelatedNodeSlot("stroke", +STROKE_COLOR, Color, null, true)
@@ -49,6 +42,7 @@ class DrawStyle private constructor(
     // keeping hasPlaybackCaching = false to avoid resetting everything on the drawStyle
     // with every play iteration. Instead, handling specific cases for strokeWeight or color updates/animations
 
+    // TODO: implement unitLength for strokeWeight??
     override fun refresh() {
         myRndrDrawStyle.strokeWeight = strokeWeight
         myRndrDrawStyle.lineCap = lineCap
@@ -60,6 +54,7 @@ class DrawStyle private constructor(
 
 
     override fun playbackRefresh(context: Score.ScoreContext) {
+        // TODO: implement unitLength for strokeWeight??
         myRndrDrawStyle.strokeWeight = strokeWeight
         myRndrDrawStyle.stroke = stroke?.colorRGBa
         myRndrDrawStyle.fill = fill?.colorRGBa
@@ -72,6 +67,7 @@ class DrawStyle private constructor(
     override fun updateAnimation(context: Score.ScoreContext) {
         // not calling super since we only need to update strokeWeight with animation
         //  (because strokeWeight is the only thing that can be animated)
+        // TODO: implement unitLength for strokeWeight??
         myRndrDrawStyle.strokeWeight = strokeWeight
     }
 

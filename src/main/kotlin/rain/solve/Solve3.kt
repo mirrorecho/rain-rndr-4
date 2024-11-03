@@ -50,7 +50,7 @@ fun solve3() {
         pause(),
         EventRandom.seq(circleFly) {
             machine = Circle.create {
-                this.relate(X, RespondingValue.create { value=random(0.0, DEFAULT_SCORE.widthUnits)  }, true, )
+                this.relate(X, Value.create { value=random(0.0, DEFAULT_SCORE.widthUnits)  }, true, )
             //                this.relate(X, ValueRandom.create { maxValue = DEFAULT_SCORE.widthUnits }, true, )
 //                fromPosition = startingPosition
             }

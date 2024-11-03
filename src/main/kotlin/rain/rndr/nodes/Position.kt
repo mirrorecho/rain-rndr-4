@@ -47,7 +47,7 @@ interface Positionable {
 }
 
 
-class Position private constructor(
+open class Position protected constructor(
     key:String = autoKey(),
 ) : Positionable, Machine(key) {
     companion object : NodeLabel<Machine, Position>(
@@ -56,17 +56,11 @@ class Position private constructor(
 
     override val label: Label<out Machine, out Position> = Position
 
-    class PositionAnimation: MachineAnimation() {
-        var x = 0.0
-        var y = 0.0
-    }
+    private var localX: Double = 0.0
+    private var localY: Double = 0.0
 
-    override val animation: PositionAnimation = PositionAnimation()
-
-    override var x by RespondingPropertySlot(animation::x, +X)
-    override var y by RespondingPropertySlot(animation::y, +Y)
-
-
+    override var x by RespondingPropertySlot("x", ::localX, +X)
+    override var y by RespondingPropertySlot("y", ::localY, +Y)
 
 
 }

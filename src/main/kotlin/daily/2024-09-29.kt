@@ -27,11 +27,11 @@ TOOLS AVAILABLE:
 
 fun main() {
 
-    DEFAULT_SCORE.play {
+    DEFAULT_SCORE.asHalfRes().play {
 
         // TODO: make a helper function for this
-        val scaling = RespondingValue.create {
-            respond = {sv-> sv * this.value }
+        val scaling = Value.create {
+            respondBlock = { _, sv-> sv * this.value }
         }
 
         fun circleEvents(count:Int=9): Array<Event> =
@@ -42,14 +42,14 @@ fun main() {
                         dur = 18.0
                         machine = Circle.create {
                             radius = random(0.0, 9.0)
-//                            x = random(0.0, 65.0)
+                            x = random(0.0, 65.0)
                             y = random(0.0, 37.0)
-                            this.relate(RADIUS, scaling)
+//                            this.relate(RADIUS, scaling)
                             val xRandom = ValueRandom.create {
                                 walkValue = 0.01
                                 randomize()
                             }
-                            // TODO: helper fun for relate + relate DIRTIES with direction left
+//                            // TODO: helper fun for relate + relate DIRTIES with direction left
                             this.relate(X, xRandom)
                             this.relate(DIRTIES, xRandom, false)
                         }
@@ -59,9 +59,9 @@ fun main() {
                                 a = 0.9
                                 v = 0.9
                                 s = 0.9
-                                this.relate(A, scaling)
-                                this.relate(H, scaling)
-                                this.relate(DIRTIES, scaling, false)
+//                                this.relate(A, scaling)
+//                                this.relate(H, scaling)
+//                                this.relate(DIRTIES, scaling, false)
                             }
                         }
                     })

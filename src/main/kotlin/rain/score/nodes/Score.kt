@@ -62,8 +62,10 @@ class Score protected constructor(
             dirtyMachine[+DIRTIES](Machine).forEach { addRefreshing(it) }
         }
 
-        // TODO: move to Context class?
+        // TODO: maybe move to Machine class?
         fun bump() {
+
+//            println("bumping ${this.machine}")
 
             // TODO: move this to score execute loop
             fun updateMachines(
@@ -93,15 +95,23 @@ class Score protected constructor(
                             myMachine ?.let { m-> addRefreshing(m) }
                         }
                         last().let {name->
-//                            println("ANIMATING $myMachine")
+
+
+                            // TODO: package up the properties to update from the same machine
+                            //  and then bump them all together
+
                             if (name.endsWith(":animate")) {
                                 name.substringBefore(":animate").let { animateName->
                                     myMachine?.let { m ->
 
-                                        // TODO: this is added repeatedly for each slot (should avoid that)
-                                        animatingContexts.add(childContext(event, m))
                                         m.slot<Double>(animateName)?.property?.let { property ->
-                                            m.animation.bumpAnimation(
+
+                                            // TODO: this is added repeatedly for each slot (should avoid that)
+                                            animatingContexts.add(childContext(event, m))
+
+//                                            println("Adding ANIMATION for $myMachine for slot $animateName")
+
+                                            m.bumpAnimation(
                                                 property,
                                                 slot.value as Event.AnimateEventValue
                                             )
@@ -117,10 +127,13 @@ class Score protected constructor(
 
             // NOTE: important to update styles first for refreshing/rendering order
             // (so that style updates applied before any related refreshing/rendering)
-            event.styleSlots.let {ss ->
-                if (ss.isNotEmpty()) {
-                    drawStyle?.let {ds->
-                        updateMachines(ds, ss, "style.")
+            if (event.bumping) {
+                event.styleSlots.let { ss ->
+                    if (ss.isNotEmpty()) {
+                        drawStyle?.let { ds ->
+                            updateMachines(ds, ss, "style.")
+                            ds.bump(this)
+                        }
                     }
                 }
             }
@@ -260,16 +273,17 @@ class Score protected constructor(
                 }
                 extend {
 
-                    // 0 (maybe), verify that all bumps received?
+                    // 0 (maybe), verify that all bumps received? / time sync?
                     // ...
 
-                    // 1 execute all "bumps" (first machine bumps, then style bumps)
+                    // 1 execute all "bumps"
                     bumpingContexts.forEach { it.bump() }
                     bumpingContexts.clear()
 
                     // 2 animate all context machines, remove from the animating set if
                     // they no longer have animations
-                    animatingContexts.executeAll({it.hasAnimations}) {c, m->
+                    animatingContexts.executeAll({it.hasAnimations()}) {c, m->
+//                        println("animating $m with context $c")
                         m.updateAnimation(c)
                         c.addRefreshing(m)
                     }

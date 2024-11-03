@@ -7,7 +7,7 @@ import rain.graph.Label
 import rain.graph.NodeLabel
 import rain.score.nodes.*
 
-class Circle private constructor(
+open class Circle protected constructor(
     key:String = autoKey(),
 ) : Positionable, Machine(key) {
     companion object : NodeLabel<Machine, Circle>(
@@ -16,22 +16,16 @@ class Circle private constructor(
 
     override val label: Label<out Machine, out Circle> = Circle
 
-    class CircleAnimation: MachineAnimation() {
-        var radius = 4.0
+    private var localX: Double = 0.0
+    private var localY: Double = 0.0
+    private var localRadius: Double = 1.0
 
-        var x = 0.0
-        var y = 0.0
-
-    }
-
-    override val animation: CircleAnimation = CircleAnimation()
-
-    var radius by RespondingPropertySlot(animation::radius, +RADIUS)
-
-    override var x by RespondingPropertySlot(animation::x, +X)
-    override var y by RespondingPropertySlot(animation::y, +Y)
+    override var x by RespondingPropertySlot("x", ::localX, +X)
+    override var y by RespondingPropertySlot("y", ::localY, +Y)
+    var radius by RespondingPropertySlot("radius", ::localRadius, +RADIUS)
 
     override fun render(context: Score.ScoreContext) {
+
         context.applyDrawing {
             circle(
                 position = vector(context),
