@@ -41,7 +41,7 @@ open class Event protected constructor(
 
     // gate for custom animations
     var gateAnimate by DataSlot("gate", Gate.NONE)
-00.
+
     var bumping by DataSlot("bumping", true)
 
     // TODO: implement by history....
