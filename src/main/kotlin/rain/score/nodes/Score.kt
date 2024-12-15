@@ -282,7 +282,7 @@ class Score protected constructor(
 
                     // 2 animate all context machines, remove from the animating set if
                     // they no longer have animations
-                    animatingContexts.executeAll({it.hasAnimations()}) {c, m->
+                    animatingContexts.executeAll({it.isAnimating}) {c, m->
 //                        println("animating $m with context $c")
                         m.updateAnimation(c)
                         c.addRefreshing(m)

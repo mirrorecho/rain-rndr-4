@@ -36,6 +36,8 @@ open class ValueRandom protected constructor(
 
     }
 
+    override val isAnimating: Boolean
+        get() = hasAnimations() || walkValue != 0.0
 
     override fun updateAnimation(context: Score.ScoreContext) {
         super.updateAnimation(context)

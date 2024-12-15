@@ -30,9 +30,9 @@ fun main() {
     DEFAULT_SCORE.asHalfRes().play {
 
         // TODO: make a helper function for this
-        val scaling = Value.create {
-            respondBlock = { _, sv-> sv * this.value }
-        }
+//        val scaling = Value.create {
+//            respondBlock = { _, sv-> sv * this.value }
+//        }
 
         fun circleEvents(count:Int=9): Array<Event> =
             arrayListOf<Event>(). apply {
@@ -47,6 +47,8 @@ fun main() {
 //                            this.relate(RADIUS, scaling)
                             val xRandom = ValueRandom.create {
                                 walkValue = 0.01
+                                minValue = 9.0
+                                maxValue = 64.0
                                 randomize()
                             }
 //                            // TODO: helper fun for relate + relate DIRTIES with direction left
@@ -70,22 +72,22 @@ fun main() {
 
         par(
             // TODO: helper for animation sequences
-            seq(
-                Event.create {
-                    dur = 9.0
-                    animate("machine.value") {
-                        value = 0.9
-                        easing = Easing.SineInOut
-                    }
-                },
-                Event.create {
-                    dur = 9.0
-                    animate("machine.value") {
-                        value = 0.0
-                        easing = Easing.SineInOut
-                    }
-                },
-            ) { machine = scaling },
+//            seq(
+//                Event.create {
+//                    dur = 9.0
+//                    animate("machine.value") {
+//                        value = 0.9
+//                        easing = Easing.SineInOut
+//                    }
+//                },
+//                Event.create {
+//                    dur = 9.0
+//                    animate("machine.value") {
+//                        value = 0.0
+//                        easing = Easing.SineInOut
+//                    }
+//                },
+//            ) { machine = scaling },
             *circleEvents(220)
         )
 

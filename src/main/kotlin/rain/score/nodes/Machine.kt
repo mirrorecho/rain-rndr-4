@@ -71,7 +71,7 @@ open class Machine protected constructor(
     val isRendering: Boolean get() = myIsRendering
 
     override val dirty: Boolean
-        get() = super.dirty || hasAnimations()
+        get() = super.dirty || isAnimating
 
     // implementing this so that custom animations can be turned on and off (overriding this logic)
     open val isAnimating: Boolean
